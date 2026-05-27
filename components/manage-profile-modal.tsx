@@ -40,7 +40,7 @@ export function ManageProfileModal({ isOpen, onClose, onSuccess, onError }: Mana
         const token = await user.getIdToken();
 
         // 🚀 UPDATED: Fetching from the new Controller endpoint
-        const res = await fetch("http://localhost:8080/api/v1/me/profile", {
+        const res = await fetch(`/api/v1/me/profile`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -114,7 +114,7 @@ export function ManageProfileModal({ isOpen, onClose, onSuccess, onError }: Mana
       };
 
       // 🚀 UPDATED: Hitting the new PUT endpoint
-      const res = await fetch("http://localhost:8080/api/v1/me/profile", {
+      const res = await fetch(`/api/v1/me/profile`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

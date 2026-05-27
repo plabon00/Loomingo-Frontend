@@ -1,46 +1,73 @@
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+'use client';
+
 import { SignupForm } from "@/components/signup-form";
 import { useState } from 'react';
-import { AnimatedShinyText } from "@/components/ui/animated-shiny-text";
 import AnimatedButton from "./shadcn-space/radix/button/button-01";
+import { X } from "lucide-react";
+
+// Import Radix UI primitives directly to control the background and close button
+import * as DialogPrimitive from "@radix-ui/react-dialog";
 
 export default function CallToAction() {
-
   const [isSignInOpen, setIsSignInOpen] = useState(false);
   
   return (
-    <div className="text-center mb-15 px-4">
-      <AnimatedShinyText
-        shimmerDuration="10s"
-        shimmerWidth={500}
-        className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-center mx-auto md:whitespace-nowrap leading-tight"
-      >
-        Try Loomingo Today
-      </AnimatedShinyText>
+    // Wrapped in a soft, glassmorphic card to make it pop at the bottom of the page
+    <div className="relative w-full max-w-4xl mx-auto text-center px-4 py-16 md:py-24 flex flex-col items-center justify-center bg-white/60 backdrop-blur-md border border-zinc-100 rounded-[2.5rem] shadow-sm mb-8 overflow-hidden">
+      
+      {/* Subtle inner gradient to give the card depth */}
+      <div className="absolute inset-0 bg-gradient-to-b from-red-50/50 to-transparent pointer-events-none" />
 
-      <p className="mt-4 text-sm sm:text-base md:text-xl lg:text-2xl text-muted-foreground max-w-xl mx-auto">
-        Free to start . No commitments.
-      </p>
+      <div className="relative z-10 flex flex-col items-center">
+        
+        {/* Brand Badge */}
+        <div className="inline-flex items-center px-4 py-1.5 rounded-full border border-zinc-200 bg-white/80 text-red-950 text-sm font-medium mb-6 backdrop-blur-sm shadow-sm">
+          Ready to scale?
+        </div>
 
-      <div className="mt-8 flex flex-wrap justify-center gap-4">
-        {/* FIX: Added the onClick handler right here! */}
-        <AnimatedButton onClick={() => setIsSignInOpen(true)}>
-          Get Started
-        </AnimatedButton>
+        {/* Brand Consistent Heading */}
+        <h2 className="text-4xl sm:text-5xl md:text-6xl font-medium text-red-950 tracking-tight leading-[1.1] mb-6">
+          Start automating <br className="hidden sm:block" />
+          <span className="text-red-600 italic font-serif drop-shadow-sm">today</span>
+        </h2>
+
+        {/* Subtext updated with brand colors */}
+        <p className="text-base md:text-lg text-red-950/70 max-w-md mx-auto mb-10">
+          Join 60K+ creators and brands turning comments into customers. Free to start. No commitments.
+        </p>
+
+        {/* Button */}
+        <div className="flex flex-wrap justify-center gap-4">
+          <AnimatedButton onClick={() => setIsSignInOpen(true)}>
+            Get Started for Free
+          </AnimatedButton>
+        </div>
+
       </div>
       
-      <Dialog open={isSignInOpen} onOpenChange={setIsSignInOpen}>
-        <DialogContent className="sm:max-w-md w-[95vw] rounded-xl">
-          <DialogTitle className="sr-only">Sign In to Loomingo</DialogTitle>
+      {/* Auth Modal using Radix Primitives */}
+      <DialogPrimitive.Root open={isSignInOpen} onOpenChange={setIsSignInOpen}>
+        <DialogPrimitive.Portal>
           
-          {/* Notice the correct closing tag here! */}
-          <DialogDescription className="sr-only">
-            Fill out the form below to get started.
-          </DialogDescription>
+          <DialogPrimitive.Content 
+            className="fixed left-[50%] top-[50%] z-50 translate-x-[-50%] translate-y-[-50%] p-0 border-none rounded-[2rem] shadow-2xl bg-white outline-none w-full max-w-sm"
+          >
+            <DialogPrimitive.Title className="sr-only">Sign In to Loomingo</DialogPrimitive.Title>
+            <DialogPrimitive.Description className="sr-only">
+              Fill out the form below to get started.
+            </DialogPrimitive.Description>
+            
+            {/* Custom positioned Close Icon (Inside the box) */}
+            <DialogPrimitive.Close className="absolute right-4 top-4 z-50 rounded-full p-2 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-900 transition-colors focus:outline-none">
+              <X size={18} />
+              <span className="sr-only">Close</span>
+            </DialogPrimitive.Close>
+            
+            <SignupForm />
+          </DialogPrimitive.Content>
           
-          <SignupForm />
-        </DialogContent>
-      </Dialog>
+        </DialogPrimitive.Portal>
+      </DialogPrimitive.Root>
     </div>
   );
 }

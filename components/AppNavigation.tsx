@@ -5,7 +5,6 @@ import { SuggestUsModal } from "@/components/suggest-us-modal";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { ManageProfileModal } from "@/components/manage-profile-modal";
-import Loomingo from "@/assets/logo/Loomingo.png";
 
 import {
   Home,
@@ -65,16 +64,16 @@ export function AuthModal({
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-zinc-950/40 backdrop-blur-sm p-4"
       onClick={handleBackdropClick}
     >
       <div
-        className="bg-background border shadow-2xl rounded-3xl relative w-full max-w-[400px] p-6 animate-in zoom-in-95 fade-in duration-200"
+        className="bg-white border border-zinc-100 shadow-2xl rounded-[2rem] relative w-full max-w-[400px] p-6 animate-in zoom-in-95 fade-in duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 bg-muted rounded-full hover:bg-muted/80 text-muted-foreground transition-colors"
+          className="absolute top-4 right-4 p-2 bg-zinc-50 rounded-full hover:bg-zinc-100 text-zinc-400 hover:text-zinc-900 transition-colors"
         >
           <X className="size-4" />
         </button>
@@ -82,8 +81,7 @@ export function AuthModal({
         {message && (
           <div
             className={cn(
-              "p-3 border backdrop-blur-sm rounded-xl text-center text-sm font-medium",
-              "bg-slate-900/85 border-slate-700 text-white",
+              "p-3 border rounded-xl text-center text-sm font-medium bg-red-50 border-red-100 text-red-900",
               showForm ? "mb-4" : "my-4",
             )}
           >
@@ -120,21 +118,21 @@ export function TopAlert({
   if (!message) return null;
 
   return (
-    <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[200] w-[90vw] max-w-sm animate-in slide-in-from-top-8 fade-in zoom-in-95 duration-300 shadow-2xl">
-      <Alert variant={variant} className="backdrop-blur-md bg-background/95">
+    <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[200] w-[90vw] max-w-sm animate-in slide-in-from-top-8 fade-in zoom-in-95 duration-300">
+      <Alert variant={variant} className="backdrop-blur-xl bg-white/95 border-zinc-200 shadow-xl rounded-2xl">
         {variant === "destructive" ? (
-          <AlertCircle className="size-4" />
+          <AlertCircle className="size-4 text-red-500" />
         ) : (
           <CheckCircle2 className="size-4 text-green-500" />
         )}
-        <AlertTitle>
+        <AlertTitle className="text-zinc-900">
           {variant === "destructive" ? "Error" : "Success"}
         </AlertTitle>
-        <AlertDescription className="pr-4">{message}</AlertDescription>
+        <AlertDescription className="pr-4 text-zinc-500">{message}</AlertDescription>
         <AlertAction>
           <button
             onClick={onClose}
-            className="text-muted-foreground hover:text-foreground transition-colors p-1"
+            className="text-zinc-400 hover:text-zinc-900 transition-colors p-1"
           >
             <X className="size-4" />
           </button>
@@ -164,27 +162,27 @@ export function LogoutConfirmModal({
 
   return (
     <div
-      className="fixed inset-0 z-[150] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-[150] flex items-center justify-center bg-zinc-950/40 backdrop-blur-sm p-4"
       onClick={handleBackdropClick}
     >
       <div
-        className="bg-background border shadow-2xl rounded-3xl relative w-full max-w-[320px] p-6 animate-in zoom-in-95 fade-in duration-200"
+        className="bg-white border border-zinc-100 shadow-2xl rounded-[2rem] relative w-full max-w-[320px] p-8 animate-in zoom-in-95 fade-in duration-200"
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 className="text-xl font-bold text-center mb-2">Sign Out</h3>
-        <p className="text-sm text-muted-foreground text-center mb-6">
+        <h3 className="text-xl font-bold text-center mb-2 text-zinc-900">Sign Out</h3>
+        <p className="text-sm text-zinc-500 text-center mb-8">
           Are you sure you want to log out of your account?
         </p>
         <div className="flex gap-3">
           <button
             onClick={onClose}
-            className="flex-1 py-2.5 rounded-xl border border-border text-sm font-semibold hover:bg-muted transition-colors"
+            className="flex-1 py-3 rounded-xl border border-zinc-200 text-sm font-semibold text-zinc-600 hover:bg-zinc-50 transition-colors"
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
-            className="flex-1 py-2.5 rounded-xl bg-red-500 text-white text-sm font-semibold hover:bg-red-600 transition-colors shadow-md"
+            className="flex-1 py-3 rounded-xl bg-red-600 text-white text-sm font-semibold hover:bg-red-700 transition-colors shadow-md"
           >
             Sign Out
           </button>
@@ -202,7 +200,7 @@ async function verifyInstagramConnection(user: User) {
   try {
     const token = await user.getIdToken();
 
-    const response = await fetch("http://localhost:8080/api/v1/me/me", {
+    const response = await fetch(`/api/v1/me/me`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -247,7 +245,7 @@ export function MobileNavbar() {
     const fetchCustomProfile = async (currentUser: User) => {
       try {
         const token = await currentUser.getIdToken();
-        const res = await fetch("http://localhost:8080/api/v1/me/profile", {
+        const res = await fetch(`/api/v1/me/profile`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (res.ok) {
@@ -282,28 +280,26 @@ export function MobileNavbar() {
 
   let pageTitle = "Loomingo";
 
-  if (pathname === "/home-page") pageTitle = "Home-Loomingo";
-  else if (pathname === "/auto-dm") pageTitle = "Auto-DM-Loomingo";
-  else if (pathname === "/store") pageTitle = "Store-Loomingo";
+  if (pathname === "/home-page") pageTitle = "Home";
+  else if (pathname === "/autodm") pageTitle = "Auto-DM";
+  else if (pathname === "/store") pageTitle = "Store";
 
   return (
-    <div className="md:hidden fixed top-0 left-0 right-0 h-14 bg-background border-b z-50 flex items-center justify-between px-4 shadow-sm">
+    <div className="md:hidden fixed top-0 left-0 right-0 h-14 bg-white/80 backdrop-blur-md border-b border-zinc-100 z-50 flex items-center justify-between px-4">
       
-      {/* 🚀 UPDATED: Mobile Logo */}
       <div className="flex items-center">
         <img 
-          src={Loomingo.src} 
+          src="/icon.png" 
           alt="Loomingo Logo" 
           className="h-7 w-auto object-contain" 
         />
       </div>
 
-      <h1 className="font-semibold text-lg tracking-wide absolute left-1/2 -translate-x-1/2">
+      <h1 className="font-semibold text-base text-zinc-900 tracking-wide absolute left-1/2 -translate-x-1/2">
         {pageTitle}
       </h1>
 
       <div className="flex items-center justify-end min-w-[24px]">
-        {/* Profile icon removed for mobile view as per user request */}
       </div>
     </div>
   );
@@ -336,10 +332,11 @@ export function BottomDock() {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   useEffect(() => {
+    // ... logic remains exactly the same
     const fetchCustomProfile = async (currentUser: User) => {
       try {
         const token = await currentUser.getIdToken();
-        const res = await fetch("http://localhost:8080/api/v1/me/profile", {
+        const res = await fetch(`/api/v1/me/profile`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (res.ok) {
@@ -375,10 +372,8 @@ export function BottomDock() {
   const confirmLogout = async () => {
     try {
       await signOut(auth);
-
       sessionStorage.clear();
       localStorage.clear();
-
       setShowLogoutConfirm(false);
       setIsProfileOpen(false);
       router.push("/");
@@ -389,14 +384,12 @@ export function BottomDock() {
 
   const handleProtectedAction = (actionName: string) => {
     setIsProfileOpen(false);
-
     if (!user) {
       setAuthMessage(`Please sign in first to access ${actionName}.`);
       setShowForm(true);
       setShowAuthModal(true);
       return;
     }
-
     if (actionName === "Suggestions") {
       setShowSuggestModal(true);
     } else if (actionName === "Manage Account") {
@@ -408,109 +401,60 @@ export function BottomDock() {
 
   const handleAutoDMClick = async (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
-
     if (!user) {
-      setAuthMessage(
-        "First Sign-in and then connect instagram account to access this.",
-      );
+      setAuthMessage("First Sign-in and then connect instagram account to access this.");
       setShowForm(true);
       setShowAuthModal(true);
       return;
     }
-
     const result = await verifyInstagramConnection(user);
-
     if (!result.success) {
-      setAlertConfig({
-        message: "Unable to verify account status. Please try again.",
-        variant: "destructive",
-      });
+      setAlertConfig({ message: "Unable to verify account status. Please try again.", variant: "destructive" });
       return;
     }
-
     if (!result.instagramConnected) {
-      setAlertConfig({
-        message: "You have to connect your instagram first.",
-        variant: "destructive",
-      });
+      setAlertConfig({ message: "You have to connect your instagram first.", variant: "destructive" });
       return;
     }
-
-    router.push("/auto-dm");
+    router.push("/autodm");
   };
 
   const getDockItemClass = (path: string) => {
     const isActive = pathname === path;
-
     return cn(
       "flex flex-col items-center gap-1 p-2 transition-colors duration-300 relative",
       isActive
-        ? "text-blue-500 drop-shadow-[0_0_8px_rgba(59,130,246,0.8)]"
-        : "text-muted-foreground hover:text-foreground",
+        ? "text-red-600 font-semibold"
+        : "text-zinc-400 hover:text-zinc-900",
     );
   };
 
   return (
     <>
-      <AuthModal
-        isOpen={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
-        message={authMessage}
-        showForm={showForm}
-      />
-
-      <TopAlert
-        message={alertConfig.message}
-        variant={alertConfig.variant}
-        onClose={() => setAlertConfig({ message: "", variant: "default" })}
-      />
-
-      <LogoutConfirmModal
-        isOpen={showLogoutConfirm}
-        onClose={() => setShowLogoutConfirm(false)}
-        onConfirm={confirmLogout}
-      />
-
-      <SuggestUsModal
-        isOpen={showSuggestModal}
-        onClose={() => setShowSuggestModal(false)}
-        onSuccess={(message) => setAlertConfig({ message, variant: "default" })}
-      />
-
-      <ManageProfileModal
-        isOpen={showManageAccount}
-        onClose={() => setShowManageAccount(false)}
-        onSuccess={(message) => setAlertConfig({ message, variant: "default" })}
-        onError={(message) =>
-          setAlertConfig({ message, variant: "destructive" })
-        }
-      />
+      <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} message={authMessage} showForm={showForm} />
+      <TopAlert message={alertConfig.message} variant={alertConfig.variant} onClose={() => setAlertConfig({ message: "", variant: "default" })} />
+      <LogoutConfirmModal isOpen={showLogoutConfirm} onClose={() => setShowLogoutConfirm(false)} onConfirm={confirmLogout} />
+      <SuggestUsModal isOpen={showSuggestModal} onClose={() => setShowSuggestModal(false)} onSuccess={(message) => setAlertConfig({ message, variant: "default" })} />
+      <ManageProfileModal isOpen={showManageAccount} onClose={() => setShowManageAccount(false)} onSuccess={(message) => setAlertConfig({ message, variant: "default" })} onError={(message) => setAlertConfig({ message, variant: "destructive" })} />
 
       {isProfileOpen && (
-        <div
-          className="fixed inset-0 z-40"
-          onClick={() => setIsProfileOpen(false)}
-        />
+        <div className="fixed inset-0 z-40" onClick={() => setIsProfileOpen(false)} />
       )}
 
-      <div className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-background border-t shadow-[0_-5px_15px_-10px_rgba(0,0,0,0.1)] z-50 flex items-center justify-around px-2 pb-safe">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white/80 backdrop-blur-xl border-t border-zinc-100 shadow-[0_-5px_15px_-10px_rgba(0,0,0,0.05)] z-50 flex items-center justify-around px-2 pb-safe">
         <Link href="/home-page" className={getDockItemClass("/home-page")}>
           <Home className="size-5" />
-          <span className="text-[10px] font-medium">Home</span>
+          <span className="text-[10px]">Home</span>
         </Link>
 
-        <Link
-          href="/auto-dm"
-          onClick={handleAutoDMClick}
-          className={getDockItemClass("/auto-dm")}
-        >
+        <Link href="/autodm" onClick={handleAutoDMClick} className={getDockItemClass("/autodm")}>
           <MessageSquare className="size-5" />
-          <span className="text-[10px] font-medium">Auto-DM</span>
+          <span className="text-[10px]">Auto-DM</span>
         </Link>
 
         <Link href="/store" className={getDockItemClass("/store")}>
           <ShoppingBag className="size-5" />
-          <span className="text-[10px] font-medium">Store</span>
+          <span className="text-[10px]">Store</span>
         </Link>
 
         <div className="relative">
@@ -518,76 +462,53 @@ export function BottomDock() {
             onClick={() => setIsProfileOpen(!isProfileOpen)}
             className={cn(
               "flex flex-col items-center gap-1 p-2 transition-colors duration-300",
-              isProfileOpen
-                ? "text-blue-500 drop-shadow-[0_0_8px_rgba(59,130,246,0.8)]"
-                : "text-muted-foreground hover:text-foreground",
+              isProfileOpen ? "text-red-600 font-semibold" : "text-zinc-400 hover:text-zinc-900"
             )}
           >
             {customPhoto ? (
-              <img
-                src={customPhoto}
-                alt="Profile"
-                className="size-5 rounded-full object-cover border border-border"
-                referrerPolicy="no-referrer"
-              />
+              <img src={customPhoto} alt="Profile" className="size-5 rounded-full object-cover border border-zinc-200" referrerPolicy="no-referrer" />
             ) : (
               <UserCircle className="size-5" />
             )}
-
-            <span className="text-[10px] font-medium">Profile</span>
+            <span className="text-[10px]">Profile</span>
           </button>
 
           {isProfileOpen && (
-            <div className="absolute bottom-14 right-0 w-48 bg-background border border-border/50 shadow-xl rounded-2xl py-1.5 flex flex-col z-50 animate-in slide-in-from-bottom-2 fade-in zoom-in-95">
+            <div className="absolute bottom-16 right-0 w-48 bg-white border border-zinc-100 shadow-2xl rounded-[1.5rem] py-2 flex flex-col z-50 animate-in slide-in-from-bottom-2 fade-in zoom-in-95">
               <button
                 onClick={() => handleProtectedAction("Manage Account")}
-                className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium hover:bg-muted text-left transition-colors"
+                className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 text-left transition-colors"
               >
-                <Settings className="size-4 text-muted-foreground" />
-                Manage Account
+                <Settings className="size-4 text-zinc-400" /> Manage Account
               </button>
-
               <button
                 onClick={() => handleProtectedAction("Help")}
-                className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium hover:bg-muted text-left transition-colors"
+                className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 text-left transition-colors"
               >
-                <LifeBuoy className="size-4 text-muted-foreground" />
-                Help
+                <LifeBuoy className="size-4 text-zinc-400" /> Help
               </button>
-
               <button
                 onClick={() => handleProtectedAction("Suggestions")}
-                className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium hover:bg-muted text-left transition-colors"
+                className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 text-left transition-colors"
               >
-                <Lightbulb className="size-4 text-muted-foreground" /> Suggest
-                us
+                <Lightbulb className="size-4 text-zinc-400" /> Suggest us
               </button>
 
-              <div className="border-t my-1 border-border/40" />
+              <div className="border-t my-1 border-zinc-100" />
 
               {user ? (
                 <button
-                  onClick={() => {
-                    setIsProfileOpen(false);
-                    setShowLogoutConfirm(true);
-                  }}
-                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 text-left transition-colors"
+                  onClick={() => { setIsProfileOpen(false); setShowLogoutConfirm(true); }}
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 text-left transition-colors"
                 >
-                  <LogOut className="size-4" />
-                  Sign-out
+                  <LogOut className="size-4" /> Sign-out
                 </button>
               ) : (
                 <button
-                  onClick={() => {
-                    setIsProfileOpen(false);
-                    setAuthMessage("");
-                    setShowForm(true);
-                    setShowAuthModal(true);
-                  }}
-                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-primary hover:bg-primary/10 text-left transition-colors"
+                  onClick={() => { setIsProfileOpen(false); setAuthMessage(""); setShowForm(true); setShowAuthModal(true); }}
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-red-950 hover:bg-zinc-50 text-left transition-colors"
                 >
-                  <UserCircle className="size-4" />
-                  Sign-in/up
+                  <UserCircle className="size-4" /> Sign-in/up
                 </button>
               )}
             </div>
@@ -627,10 +548,11 @@ export function DesktopSidebar() {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   useEffect(() => {
+    // ... logic remains exactly the same
     const fetchCustomProfile = async (currentUser: User) => {
       try {
         const token = await currentUser.getIdToken();
-        const res = await fetch("http://localhost:8080/api/v1/me/profile", {
+        const res = await fetch(`/api/v1/me/profile`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (res.ok) {
@@ -666,10 +588,8 @@ export function DesktopSidebar() {
   const confirmLogout = async () => {
     try {
       await signOut(auth);
-
       sessionStorage.clear();
       localStorage.clear();
-
       setShowLogoutConfirm(false);
       setIsProfileOpen(false);
       router.push("/");
@@ -680,14 +600,12 @@ export function DesktopSidebar() {
 
   const handleProtectedAction = (actionName: string) => {
     setIsProfileOpen(false);
-
     if (!user) {
       setAuthMessage(`Please sign in first to access ${actionName}.`);
       setShowForm(true);
       setShowAuthModal(true);
       return;
     }
-
     if (actionName === "Suggestions") {
       setShowSuggestModal(true);
     } else if (actionName === "Manage Account") {
@@ -699,133 +617,80 @@ export function DesktopSidebar() {
 
   const handleAutoDMClick = async (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
-
     if (!user) {
-      setAuthMessage(
-        "First Sign-in and then connect instagram account to access this.",
-      );
+      setAuthMessage("First Sign-in and then connect instagram account to access this.");
       setShowForm(true);
       setShowAuthModal(true);
       return;
     }
-
     const result = await verifyInstagramConnection(user);
-
     if (!result.success) {
-      setAlertConfig({
-        message: "Unable to verify account status. Please try again.",
-        variant: "destructive",
-      });
+      setAlertConfig({ message: "Unable to verify account status. Please try again.", variant: "destructive" });
       return;
     }
-
     if (!result.instagramConnected) {
-      setAlertConfig({
-        message: "You have to connect your instagram first.",
-        variant: "destructive",
-      });
+      setAlertConfig({ message: "You have to connect your instagram first.", variant: "destructive" });
       return;
     }
-
-    router.push("/auto-dm");
+    router.push("/autodm");
   };
 
   const getSidebarItemClass = (path: string) => {
     const isActive = pathname === path;
-
     return cn(
-      "w-full flex items-center gap-3 py-3 rounded-xl text-sm transition-colors",
+      "w-full flex items-center gap-3 py-3 rounded-xl text-sm transition-all duration-200",
       isCollapsed ? "justify-center px-0" : "px-4 font-medium",
       isActive
-        ? "bg-primary/10 text-primary font-semibold shadow-sm"
-        : "text-muted-foreground hover:bg-muted hover:text-foreground",
+        ? "bg-zinc-100 text-red-950 font-semibold shadow-sm border border-zinc-200/50"
+        : "text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900",
     );
   };
 
   return (
     <>
-      <AuthModal
-        isOpen={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
-        message={authMessage}
-        showForm={showForm}
-      />
-
-      <TopAlert
-        message={alertConfig.message}
-        variant={alertConfig.variant}
-        onClose={() => setAlertConfig({ message: "", variant: "default" })}
-      />
-
-      <LogoutConfirmModal
-        isOpen={showLogoutConfirm}
-        onClose={() => setShowLogoutConfirm(false)}
-        onConfirm={confirmLogout}
-      />
-
-      <SuggestUsModal
-        isOpen={showSuggestModal}
-        onClose={() => setShowSuggestModal(false)}
-        onSuccess={(message) => setAlertConfig({ message, variant: "default" })}
-      />
-      <ManageProfileModal
-        isOpen={showManageAccount}
-        onClose={() => setShowManageAccount(false)}
-        onSuccess={(message) => setAlertConfig({ message, variant: "default" })}
-        onError={(message) =>
-          setAlertConfig({ message, variant: "destructive" })
-        }
-      />
+      <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} message={authMessage} showForm={showForm} />
+      <TopAlert message={alertConfig.message} variant={alertConfig.variant} onClose={() => setAlertConfig({ message: "", variant: "default" })} />
+      <LogoutConfirmModal isOpen={showLogoutConfirm} onClose={() => setShowLogoutConfirm(false)} onConfirm={confirmLogout} />
+      <SuggestUsModal isOpen={showSuggestModal} onClose={() => setShowSuggestModal(false)} onSuccess={(message) => setAlertConfig({ message, variant: "default" })} />
+      <ManageProfileModal isOpen={showManageAccount} onClose={() => setShowManageAccount(false)} onSuccess={(message) => setAlertConfig({ message, variant: "default" })} onError={(message) => setAlertConfig({ message, variant: "destructive" })} />
 
       {isProfileOpen && (
-        <div
-          className="fixed inset-0 z-30"
-          onClick={() => setIsProfileOpen(false)}
-        />
+        <div className="fixed inset-0 z-30" onClick={() => setIsProfileOpen(false)} />
       )}
 
       <div
         className={cn(
-          "hidden md:flex flex-col h-screen fixed left-0 top-0 border-r bg-background z-40 transition-all duration-300 ease-in-out",
+          "hidden md:flex flex-col h-screen fixed left-0 top-0 border-r border-zinc-200 bg-white z-40 transition-all duration-300 ease-in-out shadow-sm",
           isCollapsed ? "w-20" : "w-64",
         )}
       >
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="absolute -right-3 top-6 bg-background border shadow-sm rounded-full p-1 text-muted-foreground hover:text-foreground z-50 transition-transform"
+          className="absolute -right-3 top-7 bg-white border border-zinc-200 shadow-sm rounded-full p-1 text-zinc-400 hover:text-zinc-900 z-50 transition-transform"
         >
-          {isCollapsed ? (
-            <ChevronRight className="size-4" />
-          ) : (
-            <ChevronLeft className="size-4" />
-          )}
+          {isCollapsed ? <ChevronRight className="size-4" /> : <ChevronLeft className="size-4" />}
         </button>
 
-        {/* 🚀 UPDATED: Desktop Sidebar Logo */}
         <div
           className={cn(
-            "flex items-center font-light text-xl py-5 mb-4 text-primary",
-            isCollapsed ? "justify-center px-0" : "gap-3 px-6",
+            "flex items-center py-6 mb-2",
+            isCollapsed ? "justify-center px-0" : "px-6",
           )}
         >
           <img 
-            src={Loomingo.src} 
+            src="/logo/Loomingo.png" 
             alt="Loomingo Logo" 
-            className={cn("object-contain transition-all duration-300", isCollapsed ? "h-8" : "h-9")}
+            className={cn("object-contain transition-all duration-300", isCollapsed ? "h-6" : "h-7")}
           />
         </div>
 
-        <nav className="flex-1 space-y-2 px-3">
+        <nav className="flex-1 space-y-1.5 px-3">
           <Link href="/home-page" className={getSidebarItemClass("/home-page")}>
             <Home className="size-5 shrink-0" />
             {!isCollapsed && <span>Home</span>}
           </Link>
 
-          <Link
-            href="/auto-dm"
-            onClick={handleAutoDMClick}
-            className={getSidebarItemClass("/auto-dm")}
-          >
+          <Link href="/autodm" onClick={handleAutoDMClick} className={getSidebarItemClass("/autodm")}>
             <MessageSquare className="size-5 shrink-0" />
             {!isCollapsed && <span>Auto-DM</span>}
           </Link>
@@ -836,7 +701,7 @@ export function DesktopSidebar() {
           </Link>
         </nav>
 
-        <div className="mt-auto border-t pt-4 pb-4 px-3 space-y-2">
+        <div className="mt-auto border-t border-zinc-100 pt-4 pb-6 px-3 space-y-2">
           <div className="relative">
             <button
               onClick={() => setIsProfileOpen(!isProfileOpen)}
@@ -844,17 +709,12 @@ export function DesktopSidebar() {
                 "w-full flex items-center gap-3 py-2.5 rounded-xl text-sm font-medium transition-colors",
                 isCollapsed ? "justify-center px-0" : "px-3",
                 isProfileOpen
-                  ? "bg-muted text-foreground"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                  ? "bg-zinc-100 text-zinc-900"
+                  : "text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900",
               )}
             >
               {customPhoto ? (
-                <img
-                  src={customPhoto}
-                  alt="Profile"
-                  className="size-5 shrink-0 rounded-full object-cover border border-border"
-                  referrerPolicy="no-referrer"
-                />
+                <img src={customPhoto} alt="Profile" className="size-5 shrink-0 rounded-full object-cover border border-zinc-200" referrerPolicy="no-referrer" />
               ) : (
                 <UserCircle className="size-5 shrink-0" />
               )}
@@ -865,64 +725,51 @@ export function DesktopSidebar() {
             {isProfileOpen && (
               <div
                 className={cn(
-                  "absolute bottom-full mb-2 w-48 bg-background border border-border/50 shadow-xl rounded-2xl py-1.5 flex flex-col z-50 animate-in fade-in zoom-in-95",
+                  "absolute bottom-full mb-3 w-56 bg-white border border-zinc-100 shadow-2xl rounded-[1.5rem] py-2 flex flex-col z-50 animate-in fade-in zoom-in-95",
                   isCollapsed ? "left-14" : "left-4",
                 )}
               >
                 <button
                   onClick={() => handleProtectedAction("Manage Account")}
-                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium hover:bg-muted text-left transition-colors"
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 text-left transition-colors"
                 >
-                  <Settings className="size-4 text-muted-foreground" />
-                  Manage Account
+                  <Settings className="size-4 text-zinc-400" /> Manage Account
                 </button>
 
                 <button
                   onClick={() => handleProtectedAction("Help")}
-                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium hover:bg-muted text-left transition-colors"
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 text-left transition-colors"
                 >
-                  <LifeBuoy className="size-4 text-muted-foreground" />
-                  Help
+                  <LifeBuoy className="size-4 text-zinc-400" /> Help
                 </button>
 
                 <button
                   onClick={() => handleProtectedAction("Suggestions")}
-                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium hover:bg-muted text-left transition-colors"
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 text-left transition-colors"
                 >
-                  <Lightbulb className="size-4 text-muted-foreground" /> Suggest
-                  us
+                  <Lightbulb className="size-4 text-zinc-400" /> Suggest us
                 </button>
+
+                <div className="border-t my-1 border-zinc-100" />
+
+                {user ? (
+                  <button
+                    onClick={() => { setIsProfileOpen(false); setShowLogoutConfirm(true); }}
+                    className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 text-left transition-colors"
+                  >
+                    <LogOut className="size-4" /> Sign-out
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => { setIsProfileOpen(false); setAuthMessage(""); setShowForm(true); setShowAuthModal(true); }}
+                    className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-red-950 hover:bg-zinc-50 text-left transition-colors"
+                  >
+                    <UserCircle className="size-4" /> Sign-in / Up
+                  </button>
+                )}
               </div>
             )}
           </div>
-
-          {user ? (
-            <button
-              onClick={() => setShowLogoutConfirm(true)}
-              className={cn(
-                "w-full flex items-center gap-3 py-2.5 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors",
-                isCollapsed ? "justify-center px-0" : "px-3",
-              )}
-            >
-              <LogOut className="size-5 shrink-0" />
-              {!isCollapsed && <span className="truncate">Sign-out</span>}
-            </button>
-          ) : (
-            <button
-              onClick={() => {
-                setAuthMessage("");
-                setShowForm(true);
-                setShowAuthModal(true);
-              }}
-              className={cn(
-                "w-full flex items-center gap-3 py-2.5 rounded-xl text-sm font-medium text-primary hover:bg-primary/10 transition-colors",
-                isCollapsed ? "justify-center px-0" : "px-3",
-              )}
-            >
-              <UserCircle className="size-5 shrink-0" />
-              {!isCollapsed && <span className="truncate">Sign-in / Up</span>}
-            </button>
-          )}
         </div>
       </div>
     </>

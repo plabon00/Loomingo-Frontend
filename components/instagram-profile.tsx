@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { auth } from "@/lib/firebase";
-import LoomingoLogo from "@/assets/logo/Loomingo.png";
 
 export default function InstagramProfileCard() {
   const [profileData, setProfileData] = useState<any>(null);
@@ -22,7 +21,7 @@ export default function InstagramProfileCard() {
           return;
         }
 
-        const response = await fetch(`http://localhost:8080/api/v1/me/instagram/portfolio`, {
+        const response = await fetch(`/api/v1/me/instagram/portfolio`, {
           method: "GET",
           headers: {
             "Authorization": `Bearer ${token}`
@@ -42,7 +41,6 @@ export default function InstagramProfileCard() {
       }
     };
 
-    // Wait for Firebase to confirm the user is logged in before fetching
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
         fetchInstagramProfile();
@@ -54,7 +52,6 @@ export default function InstagramProfileCard() {
     return () => unsubscribe();
   }, []);
 
-  // Formatter for large numbers (e.g., 12500 -> 12.5K)
   const formatNumber = (num: number) => {
     if (!num) return "0";
     if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
@@ -62,22 +59,22 @@ export default function InstagramProfileCard() {
     return num.toString();
   };
 
-  // 1. Loading Skeleton State
+  // 1. Loading Skeleton State (Styled to match new card)
   if (isLoading) {
     return (
-      <div className="bg-card border-2 border-dotted border-white rounded-[24px] p-6 w-full max-w-sm shadow-sm animate-pulse">
-        <div className="h-4 bg-muted rounded w-1/3 mb-4" />
-        <div className="flex items-center justify-between mb-5 gap-4">
-          <div className="shrink-0 w-20 h-20 rounded-full bg-muted" />
+      <div className="bg-white border border-zinc-200 rounded-[2rem] p-6 sm:p-8 w-full max-w-sm shadow-sm animate-pulse">
+        <div className="h-4 bg-zinc-100 rounded-md w-1/3 mb-6" />
+        <div className="flex items-center justify-between mb-6 gap-4">
+          <div className="shrink-0 w-20 h-20 rounded-full bg-zinc-100" />
           <div className="flex gap-6 flex-1 justify-center">
-            <div className="h-10 w-10 bg-muted rounded" />
-            <div className="h-10 w-10 bg-muted rounded" />
-            <div className="h-10 w-10 bg-muted rounded" />
+            <div className="h-10 w-10 bg-zinc-100 rounded-md" />
+            <div className="h-10 w-10 bg-zinc-100 rounded-md" />
+            <div className="h-10 w-10 bg-zinc-100 rounded-md" />
           </div>
         </div>
-        <div className="h-3 bg-muted rounded w-1/2 mb-2" />
-        <div className="h-3 bg-muted rounded w-3/4 mb-2" />
-        <div className="h-3 bg-muted rounded w-2/3" />
+        <div className="h-3 bg-zinc-100 rounded-sm w-1/2 mb-3" />
+        <div className="h-3 bg-zinc-100 rounded-sm w-3/4 mb-3" />
+        <div className="h-3 bg-zinc-100 rounded-sm w-2/3" />
       </div>
     );
   }
@@ -85,9 +82,9 @@ export default function InstagramProfileCard() {
   // 2. Error / Not Found State
   if (!profileData) {
     return (
-      <div className="bg-card border-2 border-dotted border-white rounded-[24px] p-6 w-full max-w-sm shadow-sm text-center">
-        <p className="text-sm font-semibold mb-1">Account Connected</p>
-        <p className="text-xs text-muted-foreground">We couldn't load the profile stats right now. Please refresh the page.</p>
+      <div className="bg-white border border-zinc-200 rounded-[2rem] p-8 w-full max-w-sm shadow-sm text-center">
+        <p className="text-sm font-semibold text-red-950 mb-2">Account Connected</p>
+        <p className="text-xs text-zinc-500">We couldn't load the profile stats right now. Please refresh the page.</p>
       </div>
     );
   }
@@ -97,28 +94,26 @@ export default function InstagramProfileCard() {
   const profilePic = profileData.profilePictureUrl || "https://i.pravatar.cc/150?img=32";
   const mediaCount = profileData.mediaCount || 0;
   const followers = profileData.followersCount || 0;
-  
-  // 🚀 UPDATED: Fetching following and bio directly from profileData
   const following = profileData.followingCount || 0; 
   const bio = profileData.bio || profileData.biography || "Helping creators scale 🚀\nAutomate your DMs and grow faster.";
 
   return (
-    <div className="bg-card border-2 border-dotted border-white rounded-[24px] p-6 w-full max-w-sm shadow-sm relative text-left">
+    <div className="bg-white border border-zinc-200 rounded-[2rem] p-6 sm:p-8 w-full max-w-sm shadow-sm relative text-left">
       
       {/* Username Header */}
-      <div className="flex items-center mb-4">
-        <h3 className="font-bold text-base tracking-tight">{username}</h3>
+      <div className="flex items-center mb-6">
+        <h3 className="font-semibold text-red-950 text-base tracking-tight">{username}</h3>
       </div>
 
       {/* Top Row: Profile Picture & Stats */}
-      <div className="flex items-center justify-between mb-5 gap-4">
+      <div className="flex items-center justify-between mb-6 gap-4">
         
-        {/* 🚀 UPDATED: Profile Picture Container with Loomingo Badge */}
+        {/* Profile Picture Container with Loomingo Badge */}
         <div className="relative shrink-0">
           
           {/* Profile Picture with Instagram Story Gradient Ring */}
           <div className="w-20 h-20 rounded-full p-[3px] bg-gradient-to-tr from-yellow-400 via-red-500 to-fuchsia-600">
-            <div className="w-full h-full rounded-full border-[3px] border-card bg-muted overflow-hidden">
+            <div className="w-full h-full rounded-full border-[3px] border-white bg-zinc-50 overflow-hidden">
               <img 
                 src={profilePic} 
                 alt="Profile" 
@@ -129,9 +124,9 @@ export default function InstagramProfileCard() {
           </div>
 
           {/* Loomingo Logo Badge */}
-          <div className="absolute bottom-0 right-0 bg-card rounded-full p-[2px] shadow-sm border border-border flex items-center justify-center overflow-hidden">
+          <div className="absolute bottom-0 right-0 bg-white rounded-full p-[2px] shadow-sm border border-zinc-200 flex items-center justify-center overflow-hidden">
             <img 
-              src={LoomingoLogo.src} 
+              src="/logo/Loomingo.png" 
               alt="Loomingo" 
               className="size-5 rounded-full object-cover"
             />
@@ -140,25 +135,25 @@ export default function InstagramProfileCard() {
         </div>
 
         {/* Account Stats */}
-        <div className="flex gap-4 md:gap-6 text-center flex-1 justify-center">
+        <div className="flex gap-4 md:gap-6 text-center flex-1 justify-center text-red-950">
           <div className="flex flex-col">
-            <span className="font-bold text-lg leading-tight">{formatNumber(mediaCount)}</span>
-            <span className="text-[11px] text-muted-foreground">Posts</span>
+            <span className="font-semibold text-lg leading-tight">{formatNumber(mediaCount)}</span>
+            <span className="text-[11px] text-zinc-500 font-medium">Posts</span>
           </div>
           <div className="flex flex-col">
-            <span className="font-bold text-lg leading-tight">{formatNumber(followers)}</span>
-            <span className="text-[11px] text-muted-foreground">Followers</span>
+            <span className="font-semibold text-lg leading-tight">{formatNumber(followers)}</span>
+            <span className="text-[11px] text-zinc-500 font-medium">Followers</span>
           </div>
           <div className="flex flex-col">
-            <span className="font-bold text-lg leading-tight">{formatNumber(following)}</span>
-            <span className="text-[11px] text-muted-foreground">Following</span>
+            <span className="font-semibold text-lg leading-tight">{formatNumber(following)}</span>
+            <span className="text-[11px] text-zinc-500 font-medium">Following</span>
           </div>
         </div>
       </div>
 
       {/* Bio Section */}
       <div className="mb-2">
-        <p className="text-sm text-foreground/90 whitespace-pre-line leading-snug">
+        <p className="text-sm text-zinc-600 whitespace-pre-line leading-relaxed">
           {bio}
         </p>
       </div>

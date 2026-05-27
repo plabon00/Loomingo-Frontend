@@ -19,23 +19,16 @@ import {
   Pencil,
   Loader2,
   Lock,
-  Settings, // 👈 ADDED SETTINGS ICON
+  Settings,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import AutomationMediaCard from "@/components/ui/automation-card";
-import BgImage from "../../assets/auto-dm-background.png";
 import { auth } from "@/lib/firebase";
 import { InstagramSettingsModal } from "@/components/instagram-settings-modal";
 
-// 👈 IMPORT YOUR NEW LAYOUT COMPONENTS HERE
-import {
-  MobileNavbar,
-  BottomDock,
-  DesktopSidebar,
-} from "@/components/AppNavigation";
 type AutomationStatsDTO = {
   totalDmsSent: number;
   totalFollowersGained: number;
@@ -53,6 +46,7 @@ type AutomationCardDTO = {
   followersGained: number;
   dmsSent: number;
 };
+
 const defaultFormData = {
   mediaId: "",
   triggerKeywords: [] as string[],
@@ -76,7 +70,7 @@ const defaultFormData = {
   },
 };
 
-export default function AutoDMHeader() {
+export default function AutoDMManager() {
   const [stats, setStats] = useState({
     totalDmsSent: 0,
     totalFollowersGained: 0,
@@ -95,16 +89,14 @@ export default function AutoDMHeader() {
 
   const [isEditing, setIsEditing] = useState(false);
 
-  const [filterTab, setFilterTab] = useState<"all" | "active" | "inactive">(
-    "all",
-  );
+  const [filterTab, setFilterTab] = useState<"all" | "active" | "inactive">("all");
   const [formData, setFormData] = useState(defaultFormData);
 
   const loadAutomations = async (userToken: string, businessId: string) => {
     setIsLoadingAutomations(true);
     try {
       const response = await fetch(
-        `http://localhost:8080/api/auto-dm/automations/dashboard/${businessId}`,
+        `/api/auto-dm/automations/dashboard/${businessId}`,
         {
           headers: {
             Authorization: `Bearer ${userToken}`,
@@ -114,7 +106,6 @@ export default function AutoDMHeader() {
       );
       if (response.ok) {
         const data = await response.json();
-
         const automationList = data.automations || [];
 
         setAutomations(automationList);
@@ -165,7 +156,10 @@ export default function AutoDMHeader() {
   });
 
   const uniformButtonInputClass =
-    "w-full h-10 pl-9 pr-3 text-sm bg-primary/5 border-2 border-dotted border-primary/40 rounded-xl text-center font-semibold text-primary transition-all focus-visible:ring-1 focus-visible:ring-primary/50 shadow-sm";
+    "w-full h-11 pl-10 pr-3 text-sm bg-white border border-zinc-200 rounded-xl font-medium text-zinc-900 transition-all focus-visible:ring-1 focus-visible:ring-zinc-300 shadow-sm placeholder:text-zinc-400";
+
+  const uniformTextAreaClass = 
+    "w-full text-sm border border-zinc-200 rounded-xl p-3 bg-white focus:ring-1 focus:ring-zinc-300 outline-none min-h-[90px] text-zinc-900 placeholder:text-zinc-400 shadow-sm transition-all";
 
   // --- HANDLERS ---
   const handleOpenModal = async () => {
@@ -183,7 +177,7 @@ export default function AutoDMHeader() {
       if (!activeInstagramId) return;
 
       const response = await fetch(
-        `http://localhost:8080/api/v1/getAll/my_media/${activeInstagramId}`,
+        `/api/v1/getAll/my_media/${activeInstagramId}`,
         {
           method: "GET",
           headers: { Authorization: `Bearer ${token}` },
@@ -247,7 +241,7 @@ export default function AutoDMHeader() {
       const token = await user.getIdToken();
 
       const response = await fetch(
-        `http://localhost:8080/api/v1/automation/rule/${automation.id || automation.mediaId}`,
+        `/api/v1/automation/rule/${automation.id || automation.mediaId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         },
@@ -326,7 +320,7 @@ export default function AutoDMHeader() {
       const token = await user.getIdToken();
 
       const response = await fetch(
-        `http://localhost:8080/api/v1/automation/delete/rule/${mediaId}`,
+        `/api/v1/automation/delete/rule/${mediaId}`,
         {
           method: "DELETE",
           headers: { Authorization: `Bearer ${token}` },
@@ -361,7 +355,7 @@ export default function AutoDMHeader() {
       const token = await user.getIdToken();
 
       const response = await fetch(
-        `http://localhost:8080/api/v1/automation/toggle/rule/${mediaId}`,
+        `/api/v1/automation/toggle/rule/${mediaId}`,
         {
           method: "PATCH",
           headers: { Authorization: `Bearer ${token}` },
@@ -516,8 +510,8 @@ export default function AutoDMHeader() {
       };
 
       const url = isEditing
-        ? `http://localhost:8080/api/v1/automation/update/rule/${safeMediaId}`
-        : "http://localhost:8080/api/v1/automation/new/rule";
+        ? `/api/v1/automation/update/rule/${safeMediaId}`
+        : `/api/v1/automation/new/rule`;
 
       const method = isEditing ? "PUT" : "POST";
 
@@ -545,24 +539,22 @@ export default function AutoDMHeader() {
   };
 
   return (
-    // 👈 ADDED pt-14 and md:pl-64 to accommodate the new fixed layout components
-    <div className="w-full relative bg-background min-h-screen pt-14 md:pt-0 pb-20 md:pb-0 md:pl-64">
-      {/* 👈 INJECT THE LAYOUT COMPONENTS */}
-      <MobileNavbar />
-      <DesktopSidebar />
-      <BottomDock />
-
+    <>
       <InstagramSettingsModal 
         isOpen={isSettingsModalOpen} 
         onClose={() => setIsSettingsModalOpen(false)} 
       />
 
-      {/* BACKGROUND HEADER UI */}
-      <div
-        className="relative w-full bg-cover bg-center bg-no-repeat pb-28 pt-6 px-4 lg:px-8 overflow-hidden max-md:hidden"
-        style={{ backgroundImage: `url(${BgImage.src})` }}
-      >
-        <div className="relative z-10 max-w-7xl mx-auto">
+      {/* BRAND CONSISTENT HEADER UI */}
+      <div className="relative w-full bg-white border-b border-zinc-200 pb-24 pt-8 px-4 lg:px-8 overflow-hidden max-md:hidden">
+        {/* Soft Red Ambient Glow */}
+        <div 
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-red-500 rounded-full opacity-[0.05] blur-[120px] pointer-events-none z-0"
+          aria-hidden="true"
+        />
+        
+        <div className="relative z-10 max-w-7xl mx-auto flex flex-col">
+          {/* Top Bar Navigation (Desktop) */}
           <div className="hidden md:flex items-center justify-end w-full gap-4">
             <Field
               orientation="horizontal"
@@ -570,147 +562,148 @@ export default function AutoDMHeader() {
             >
               <Input
                 type="search"
-                placeholder="Search..."
-                className="w-full bg-white/10 border-white/20 text-white placeholder:text-white/60 focus-visible:ring-white/40 h-10"
+                placeholder="Search automations..."
+                className="w-full bg-white border-zinc-200 text-zinc-900 placeholder:text-zinc-400 focus-visible:ring-zinc-300 h-10 rounded-full px-4 shadow-sm"
               />
-              <Button variant="secondary" className="h-10">
-                <Search className="mr-2 size-4" />
-                Search
-              </Button>
             </Field>
 
-            {/* 👈 UPDATED: Settings Button for Desktop */}
             <Button
               onClick={() => setIsSettingsModalOpen(true)}
-              variant="secondary"
-              className="h-10 bg-white/10 text-white border-white/20 hover:bg-white/20 backdrop-blur-sm px-4"
+              variant="outline"
+              className="h-10 rounded-full border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900 px-5 shadow-sm transition-colors"
             >
               <Settings className="mr-2 size-4" /> Settings
             </Button>
 
             <Button
               onClick={handleOpenModal}
-              className="rounded-full bg-slate-950 hover:bg-slate-800 text-white border border-slate-800 shadow-md h-10 px-5 text-sm"
+              className="rounded-full bg-zinc-900 hover:bg-zinc-800 text-white shadow-md h-10 px-6 text-sm font-medium transition-colors"
             >
               <Plus className="mr-2 size-4" /> Create Automation
             </Button>
           </div>
 
-          <div className="flex flex-col items-center justify-center mt-4 mb-6 text-center text-white">
-  {/* 👈 HIDDEN ON MOBILE: We only show this big title on desktop now */}
-  <h1 className="text-3xl md:text-5xl font-semibold mb-2 tracking-wide hidden md:block">
-    Auto-DM
-  </h1>
-  {/* 👈 ADDED SUBTITLE */}
-  <p className="text-sm md:text-base text-white/80 font-medium max-w-xl hidden md:block">
-    Automate your DMs, capture leads, and grow your audience effortlessly.
-  </p>
-</div>
+          <div className="flex flex-col items-start justify-center mt-12 mb-4 text-left">
+            <div className="inline-flex items-center px-4 py-1.5 rounded-full border border-zinc-200 bg-white text-zinc-900 text-sm font-medium mb-4 shadow-sm">
+              Dashboard
+            </div>
+            <h1 className="text-4xl md:text-5xl font-medium text-zinc-900 mb-3 tracking-tight hidden md:block">
+              Auto-DM <span className="text-red-600 italic font-serif tracking-tight">automations</span>
+            </h1>
+            <p className="text-sm md:text-lg text-zinc-500 font-normal max-w-xl hidden md:block">
+              Automate your DMs, capture leads, and grow your audience effortlessly.
+            </p>
+          </div>
         </div>
       </div>
 
       {/* STATS & CARDS UI */}
-      <div className="max-w-7xl mx-auto px-4 lg:px-8 mt-4 md:-mt-14 relative z-20 pb-12">
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6">
-          <Card className="p-4 shadow-sm border-border/50 rounded-xl bg-card flex flex-col justify-between">
-            <div className="text-[10px] md:text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+      <div className="max-w-7xl mx-auto px-4 lg:px-8 mt-4 md:-mt-12 relative z-20 pb-12">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+          <Card className="p-6 shadow-sm border border-zinc-200 rounded-2xl bg-white/80 backdrop-blur-md flex flex-col justify-between transition-shadow hover:shadow-md">
+            <div className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">
               Total DM Sent
             </div>
             <div className="flex items-center justify-between mt-1">
-              <span className="text-2xl md:text-3xl font-bold tracking-tight">
+              <span className="text-3xl md:text-4xl font-medium text-zinc-900 tracking-tight">
                 {stats.totalDmsSent}
               </span>
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Send className="size-4 md:size-5 text-blue-600" />
+              <div className="p-3 bg-zinc-100 rounded-xl">
+                <Send className="size-5 md:size-6 text-zinc-700" />
               </div>
             </div>
           </Card>
-          <Card className="p-4 shadow-sm border-border/50 rounded-xl bg-card flex flex-col justify-between">
-            <div className="text-[10px] md:text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+          <Card className="p-6 shadow-sm border border-zinc-200 rounded-2xl bg-white/80 backdrop-blur-md flex flex-col justify-between transition-shadow hover:shadow-md">
+            <div className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">
               Followers Gained
             </div>
             <div className="flex items-center justify-between mt-1">
-              <span className="text-2xl md:text-3xl font-bold tracking-tight">
+              <span className="text-3xl md:text-4xl font-medium text-zinc-900 tracking-tight">
                 {stats.totalFollowersGained}
               </span>
-              <div className="p-2 bg-green-100 rounded-lg">
-                <UserPlus className="size-4 md:size-5 text-green-600" />
+              <div className="p-3 bg-zinc-100 rounded-xl">
+                <UserPlus className="size-5 md:size-6 text-zinc-700" />
               </div>
             </div>
           </Card>
-          <Card className="p-4 shadow-sm border-border/50 rounded-xl bg-card flex flex-col justify-between col-span-2 md:col-span-1">
-            <div className="text-[10px] md:text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+          <Card className="p-6 shadow-sm border border-zinc-200 rounded-2xl bg-white/80 backdrop-blur-md flex flex-col justify-between col-span-2 md:col-span-1 transition-shadow hover:shadow-md">
+            <div className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">
               Active Automations
             </div>
             <div className="flex items-center justify-between mt-1">
-              <span className="text-2xl md:text-3xl font-bold tracking-tight">
+              <span className="text-3xl md:text-4xl font-medium text-zinc-900 tracking-tight">
                 {stats.activeAutomationsCount}
               </span>
-              <div className="p-2 bg-amber-100 rounded-lg">
-                <Zap className="size-4 md:size-5 text-amber-600" />
+              <div className="p-3 bg-red-50 rounded-xl">
+                <Zap className="size-5 md:size-6 text-red-600" />
               </div>
             </div>
           </Card>
         </div>
 
-        {/* 👈 UPDATED: Mobile Actions (Smaller, Pop Color, Settings on Right) */}
-        <div className="mt-4 flex gap-2 md:hidden w-full items-center">
+        {/* Mobile Actions */}
+        <div className="mt-6 flex gap-3 md:hidden w-full items-center">
           <Button
             onClick={handleOpenModal}
-            className="flex-1 rounded-xl bg-blue-600 hover:bg-blue-700 text-white h-9 px-4 text-xs font-semibold shadow-md transition-colors"
+            className="flex-1 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white h-11 px-4 text-sm font-semibold shadow-md transition-colors"
           >
-            <Plus className="mr-1.5 size-3.5" /> Create Automation
+            <Plus className="mr-1.5 size-4" /> Create Automation
           </Button>
 
-            {/* 👈 UPDATED: Mobile Settings Button */}
           <Button
             onClick={() => setIsSettingsModalOpen(true)}
             variant="outline"
             size="icon"
-            className="rounded-xl h-9 w-9 bg-background border-border shrink-0"
+            className="rounded-xl h-11 w-11 bg-white border border-zinc-200 text-zinc-900 shadow-sm shrink-0"
           >
-            <Settings className="size-4 text-muted-foreground" />
+            <Settings className="size-5" />
           </Button>
         </div>
 
         {/* --- AUTOMATIONS GRID SECTION WITH TABS --- */}
         <div className="mt-12 mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-            <h2 className="text-xl font-semibold flex items-center gap-2">
-              Automations
-              <span className="text-muted-foreground text-lg font-medium">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+            <h2 className="text-2xl font-medium text-zinc-900 flex items-center gap-2">
+              Your Automations
+              <span className="text-zinc-400 text-xl font-normal">
                 ({automations.length})
               </span>
             </h2>
 
-            <div className="flex items-center bg-muted/50 p-1 rounded-lg w-fit border shadow-sm">
-              <button
-                onClick={() => setFilterTab("all")}
-                className={`px-4 py-1.5 text-xs font-semibold rounded-md transition-all ${filterTab === "all" ? "bg-background shadow text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted/80"}`}
-              >
-                All
-              </button>
-              <button
-                onClick={() => setFilterTab("active")}
-                className={`px-4 py-1.5 text-xs font-semibold rounded-md transition-all ${filterTab === "active" ? "bg-background shadow text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted/80"}`}
-              >
-                Active
-              </button>
-              <button
-                onClick={() => setFilterTab("inactive")}
-                className={`px-4 py-1.5 text-xs font-semibold rounded-md transition-all ${filterTab === "inactive" ? "bg-background shadow text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted/80"}`}
-              >
-                Not Active
-              </button>
-            </div>
+            <div className="flex items-center bg-zinc-100/80 p-1.5 rounded-xl border border-zinc-200/60 shadow-sm w-fit">
+  <button
+    onClick={() => setFilterTab("all")}
+    className={`px-5 py-1.5 text-sm font-semibold rounded-lg transition-all ${
+      filterTab === "all" ? "bg-white shadow text-zinc-900" : "text-zinc-500 hover:text-zinc-900"
+    }`}
+  >
+    All
+  </button>
+  <button
+    onClick={() => setFilterTab("active")}
+    className={`px-5 py-1.5 text-sm font-semibold rounded-lg transition-all ${
+      filterTab === "active" ? "bg-white shadow text-zinc-900" : "text-zinc-500 hover:text-zinc-900"
+    }`}
+  >
+    Active
+  </button>
+  <button
+    onClick={() => setFilterTab("inactive")}
+    className={`px-5 py-1.5 text-sm font-semibold rounded-lg transition-all ${
+      filterTab === "inactive" ? "bg-white shadow text-zinc-900" : "text-zinc-500 hover:text-zinc-900"
+    }`}
+  >
+    Inactive
+  </button>
+</div>
           </div>
 
           {isLoadingAutomations ? (
-            <div className="flex justify-center py-12 text-muted-foreground">
+            <div className="flex justify-center py-16 text-zinc-400">
               <Loader2 className="size-8 animate-spin" />
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredAutomations.map((automation) => (
                 <AutomationMediaCard
                   key={automation.id}
@@ -732,10 +725,10 @@ export default function AutoDMHeader() {
               ))}
 
               {filteredAutomations.length === 0 && (
-                <div className="col-span-full py-12 text-center text-muted-foreground bg-muted/20 rounded-xl border border-dashed flex flex-col items-center justify-center gap-2">
-                  <Zap className="size-8 opacity-20" />
-                  <p className="text-sm">
-                    No automations found in this category.
+                <div className="col-span-full py-20 text-center text-zinc-500 bg-white rounded-3xl border border-zinc-200 border-dashed flex flex-col items-center justify-center gap-3">
+                  <Zap className="size-10 text-zinc-300" />
+                  <p className="text-base font-medium text-zinc-500">
+                    No automations found.
                   </p>
                 </div>
               )}
@@ -744,16 +737,17 @@ export default function AutoDMHeader() {
         </div>
       </div>
 
-      {/* --- 9:16 CREATION MODAL OVERLAY --- */}
+      {/* --- CREATION MODAL OVERLAY --- */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-background border shadow-2xl rounded-3xl overflow-hidden relative flex flex-col w-full max-w-[400px] aspect-[9/16] max-h-[90vh]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/40 backdrop-blur-sm p-4">
+          <div className="bg-zinc-50 border border-zinc-200 shadow-2xl rounded-[2rem] overflow-hidden relative flex flex-col w-full max-w-[420px] aspect-[9/16] max-h-[90vh]">
+            
             {/* Modal Header */}
-            <div className="flex items-center justify-between p-4 border-b shrink-0">
+            <div className="flex items-center justify-between p-5 border-b border-zinc-200 shrink-0 bg-white">
               {modalStep > 0 && !isEditing ? (
                 <button
                   onClick={() => setModalStep((s) => s - 1)}
-                  className="p-2 rounded-full hover:bg-muted transition-colors"
+                  className="p-2 rounded-full hover:bg-zinc-100 transition-colors text-zinc-500"
                   disabled={isSubmitting}
                 >
                   <ChevronLeft className="size-5" />
@@ -763,7 +757,7 @@ export default function AutoDMHeader() {
               )}
 
               <div className="text-center">
-                <h3 className="font-semibold text-lg">
+                <h3 className="font-semibold text-lg text-zinc-900">
                   {modalStep === 0
                     ? "Select Post"
                     : isEditing
@@ -771,7 +765,7 @@ export default function AutoDMHeader() {
                       : "Setup Automation"}
                 </h3>
                 {modalStep > 0 && !isEditing && (
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-zinc-500 font-medium mt-0.5">
                     Step {modalStep} of 3
                   </p>
                 )}
@@ -779,7 +773,7 @@ export default function AutoDMHeader() {
 
               <button
                 onClick={handleCloseModal}
-                className="p-2 rounded-full hover:bg-muted transition-colors"
+                className="p-2 rounded-full hover:bg-zinc-100 transition-colors text-zinc-500"
                 disabled={isSubmitting}
               >
                 <X className="size-5" />
@@ -787,24 +781,24 @@ export default function AutoDMHeader() {
             </div>
 
             {/* Modal Body (Scrollable) */}
-            <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+            <div className="flex-1 overflow-y-auto p-5 custom-scrollbar">
               {/* SCREEN 0: Select Media */}
               {modalStep === 0 && (
                 <div className="space-y-4">
-                  <p className="text-sm text-muted-foreground text-center mb-4">
+                  <p className="text-sm text-zinc-500 text-center mb-6">
                     Select an Instagram post or reel to automate.
                   </p>
                   {isLoadingMedia ? (
-                    <div className="flex justify-center py-10 animate-pulse text-muted-foreground">
-                      <ImageIcon className="size-8" />
+                    <div className="flex justify-center py-10 animate-pulse text-zinc-300">
+                      <ImageIcon className="size-10" />
                     </div>
                   ) : (
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-3 gap-3">
                       {availableMedia.map((media) => (
                         <div
                           key={media.id}
                           onClick={() => handleSelectMedia(media.id)}
-                          className={`aspect-square rounded-md overflow-hidden cursor-pointer border-2 transition-all bg-muted ${formData.mediaId === media.id ? "border-primary" : "border-transparent hover:opacity-80"}`}
+                          className={`aspect-square rounded-xl overflow-hidden cursor-pointer border-2 transition-all bg-white shadow-sm ${formData.mediaId === media.id ? "border-zinc-900 shadow-md scale-[1.02]" : "border-transparent hover:opacity-80"}`}
                         >
                           {media.url ? (
                             <img
@@ -813,7 +807,7 @@ export default function AutoDMHeader() {
                               className="w-full h-full object-cover"
                             />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                            <div className="w-full h-full flex items-center justify-center text-zinc-400">
                               <ImageIcon className="size-6 opacity-50" />
                             </div>
                           )}
@@ -829,9 +823,9 @@ export default function AutoDMHeader() {
                 <div className="space-y-5 flex flex-col h-full">
                   {/* Selected Media Preview Card */}
                   {selectedMediaData && (
-                    <div className="flex gap-4 p-3 border rounded-xl bg-muted/20 items-start shadow-sm mb-2">
-                      <div className="w-20 h-20 shrink-0 rounded-lg overflow-hidden bg-muted relative">
-                        <div className="absolute top-1 right-1 bg-black/60 text-white text-[8px] px-1.5 py-0.5 rounded backdrop-blur-sm font-semibold uppercase tracking-wider z-10">
+                    <div className="flex gap-4 p-4 border border-zinc-200 rounded-2xl bg-white shadow-sm mb-2">
+                      <div className="w-20 h-20 shrink-0 rounded-xl overflow-hidden bg-zinc-100 relative">
+                        <div className="absolute top-1 right-1 bg-black/60 text-white text-[8px] px-1.5 py-0.5 rounded font-semibold uppercase tracking-wider z-10">
                           {selectedMediaData.mediaType.replace("_", " ")}
                         </div>
                         {selectedMediaData.url ? (
@@ -842,59 +836,59 @@ export default function AutoDMHeader() {
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
-                            <ImageIcon className="size-5 opacity-40" />
+                            <ImageIcon className="size-5 opacity-40 text-zinc-500" />
                           </div>
                         )}
                       </div>
                       <div className="flex-1 min-w-0 flex flex-col">
                         <p
-                          className="text-xs text-muted-foreground line-clamp-2 mb-2"
+                          className="text-xs text-zinc-500 line-clamp-2 mb-2 font-medium"
                           title={selectedMediaData.caption}
                         >
                           {selectedMediaData.caption || "No caption available"}
                         </p>
-                        <div className="flex items-center gap-3 text-xs font-medium text-slate-600 dark:text-slate-400 mb-2 mt-auto">
-                          <span className="flex items-center gap-1">
-                            <Heart className="size-3.5" />{" "}
+                        <div className="flex items-center gap-4 text-xs font-semibold text-zinc-600 mb-3 mt-auto">
+                          <span className="flex items-center gap-1.5">
+                            <Heart className="size-3.5 text-zinc-400" />{" "}
                             {selectedMediaData.likeCount}
                           </span>
-                          <span className="flex items-center gap-1">
-                            <MessageCircle className="size-3.5" />{" "}
+                          <span className="flex items-center gap-1.5">
+                            <MessageCircle className="size-3.5 text-zinc-400" />{" "}
                             {selectedMediaData.commentsCount}
                           </span>
                         </div>
                         <Button
                           variant="outline"
                           size="sm"
-                          className="h-6 text-[10px] px-2 w-fit bg-background"
+                          className="h-7 text-[10px] px-3 w-fit bg-zinc-50 border-zinc-200 text-zinc-900 rounded-lg hover:bg-zinc-100 transition-colors"
                           onClick={() =>
                             window.open(selectedMediaData.permalink, "_blank")
                           }
                         >
-                          <ExternalLink className="size-3 mr-1" /> View Link
+                          <ExternalLink className="size-3 mr-1.5" /> View on IG
                         </Button>
                       </div>
                     </div>
                   )}
 
                   {/* Trigger Keywords */}
-                  <div className="p-4 border-2 border-dotted border-border/70 rounded-xl bg-background/50 space-y-4">
+                  <div className="p-5 border border-zinc-200 rounded-2xl bg-white shadow-sm space-y-4">
                     <div>
-                      <label className="text-sm font-semibold mb-1 block">
+                      <label className="text-sm font-semibold text-zinc-900 mb-1 block">
                         Trigger Keywords
                       </label>
-                      <p className="text-[11px] text-muted-foreground mb-3">
+                      <p className="text-xs text-zinc-500 mb-4">
                         Type a word and press Enter.
                       </p>
                       <div className="flex flex-wrap gap-2 mb-3">
                         {formData.triggerKeywords.map((kw) => (
                           <span
                             key={kw}
-                            className="bg-primary/10 text-primary px-3 py-1 rounded-full text-xs flex items-center font-medium"
+                            className="bg-zinc-100 border border-zinc-200 text-zinc-700 px-3 py-1 rounded-full text-xs flex items-center font-semibold shadow-sm"
                           >
                             {kw}{" "}
                             <X
-                              className="size-3 ml-2 cursor-pointer"
+                              className="size-3 ml-2 cursor-pointer hover:text-zinc-900"
                               onClick={() => removeKeyword(kw)}
                             />
                           </span>
@@ -910,17 +904,18 @@ export default function AutoDMHeader() {
                         }
                         onKeyDown={handleAddKeyword}
                         placeholder="e.g. GROW, GUIDE, LINK..."
+                        className="bg-zinc-50 border-zinc-200 focus-visible:ring-zinc-300 rounded-xl"
                       />
                     </div>
                   </div>
 
                   {/* Auto-Reply Comment */}
-                  <div className="p-4 border-2 border-dotted border-border/70 rounded-xl bg-background/50 space-y-3">
-                    <label className="text-sm font-semibold block">
+                  <div className="p-5 border border-zinc-200 rounded-2xl bg-white shadow-sm space-y-3">
+                    <label className="text-sm font-semibold text-zinc-900 block">
                       Auto-Reply Comment
                     </label>
                     <textarea
-                      className="w-full text-sm border rounded-xl p-3 bg-background focus:ring-1 outline-none min-h-[80px]"
+                      className={uniformTextAreaClass}
                       value={formData.commentText}
                       onChange={(e) =>
                         setFormData({
@@ -937,13 +932,13 @@ export default function AutoDMHeader() {
               {modalStep === 2 && (
                 <div className="space-y-5">
                   {/* Opening DM Text */}
-                  <div className="p-4 border-2 border-dotted border-border/70 rounded-xl bg-background/50 space-y-5">
+                  <div className="p-5 border border-zinc-200 rounded-2xl bg-white shadow-sm space-y-5">
                     <div>
-                      <label className="text-sm font-semibold mb-2 block">
+                      <label className="text-sm font-semibold text-zinc-900 mb-3 block">
                         Opening DM Text
                       </label>
                       <textarea
-                        className="w-full text-sm border rounded-xl p-3 bg-background focus:ring-1 outline-none min-h-[80px]"
+                        className={uniformTextAreaClass}
                         value={formData.openingMessage.text}
                         onChange={(e) =>
                           setFormData({
@@ -957,12 +952,12 @@ export default function AutoDMHeader() {
                       />
                     </div>
 
-                    <div className="space-y-2">
-                      <label className="text-xs font-semibold block text-muted-foreground uppercase tracking-wider">
+                    <div className="space-y-2 pt-2 border-t border-zinc-100">
+                      <label className="text-[10px] font-bold block text-zinc-400 uppercase tracking-widest mt-3">
                         Attached Button
                       </label>
                       <div className="relative group">
-                        <Pencil className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-primary/60 group-focus-within:text-primary transition-colors" />
+                        <Pencil className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-zinc-400 group-focus-within:text-zinc-900 transition-colors" />
                         <Input
                           className={uniformButtonInputClass}
                           value={formData.openingMessage.button.text}
@@ -984,10 +979,10 @@ export default function AutoDMHeader() {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between bg-muted/50 p-4 rounded-xl mt-4 border border-border/50">
+                  <div className="flex items-center justify-between bg-white p-5 rounded-2xl border border-zinc-200 shadow-sm">
                     <div>
-                      <h4 className="text-sm font-semibold">Require Follow?</h4>
-                      <p className="text-xs text-muted-foreground">
+                      <h4 className="text-sm font-semibold text-zinc-900">Require Follow?</h4>
+                      <p className="text-xs text-zinc-500 mt-1">
                         User must follow you to get the final link.
                       </p>
                     </div>
@@ -998,23 +993,23 @@ export default function AutoDMHeader() {
                           requireFollow: !formData.requireFollow,
                         })
                       }
-                      className={`w-12 h-6 rounded-full transition-colors relative ${formData.requireFollow ? "bg-primary" : "bg-slate-300 dark:bg-slate-700"}`}
+                      className={`w-12 h-6 rounded-full transition-colors relative shadow-inner ${formData.requireFollow ? "bg-zinc-900" : "bg-zinc-200"}`}
                     >
                       <div
-                        className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-transform ${formData.requireFollow ? "translate-x-6" : "translate-x-0.5"}`}
+                        className={`w-5 h-5 bg-white rounded-full absolute top-0.5 shadow-sm transition-transform ${formData.requireFollow ? "translate-x-6" : "translate-x-0.5"}`}
                       />
                     </button>
                   </div>
 
                   {/* Ask Follow Form */}
                   {formData.requireFollow && (
-                    <div className="p-4 border-2 border-dotted border-amber-500/50 bg-amber-50/30 dark:bg-amber-950/10 rounded-xl space-y-5 animate-in slide-in-from-top-2 fade-in duration-200">
+                    <div className="p-5 border border-zinc-200 bg-white rounded-2xl space-y-5 animate-in slide-in-from-top-2 fade-in duration-200 shadow-sm">
                       <div>
-                        <label className="text-sm font-semibold mb-2 flex items-center text-amber-700 dark:text-amber-500">
-                          <Zap className="size-4 mr-2" /> Follow Request Message
+                        <label className="text-sm font-semibold mb-3 flex items-center text-zinc-900">
+                          Follow Request Message
                         </label>
                         <textarea
-                          className="w-full text-sm border-amber-200 rounded-xl p-3 bg-white dark:bg-slate-900 focus:ring-1 outline-none min-h-[70px]"
+                          className={uniformTextAreaClass}
                           value={formData.askFollowMessage.text}
                           onChange={(e) =>
                             setFormData({
@@ -1028,10 +1023,9 @@ export default function AutoDMHeader() {
                         />
                       </div>
 
-                      <div className="space-y-2 pt-1">
-                        {/* 🚀 ONLY ONE EDITABLE BUTTON NOW */}
+                      <div className="space-y-3 pt-3 border-t border-zinc-100">
                         <div className="relative group">
-                          <Pencil className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-primary/60 group-focus-within:text-primary transition-colors" />
+                          <Pencil className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-zinc-400 group-focus-within:text-zinc-900 transition-colors" />
                           <Input
                             value={
                               formData.askFollowMessage.buttons[0]?.text || ""
@@ -1056,10 +1050,9 @@ export default function AutoDMHeader() {
                           />
                         </div>
 
-                        {/* 🚀 LOCKED PREVIEW FOR THE AUTO-GENERATED URL BUTTON */}
                         <div className="relative">
                           <div
-                            className={`${uniformButtonInputClass} flex items-center justify-center bg-background/50 border-dashed border-border/60 text-muted-foreground select-none cursor-not-allowed opacity-70`}
+                            className={`${uniformButtonInputClass} flex items-center justify-center bg-zinc-50 border-dashed text-zinc-400 select-none cursor-not-allowed`}
                           >
                             <Lock className="size-3 mr-2" /> Visit Profile
                             (Auto-Linked)
@@ -1074,14 +1067,13 @@ export default function AutoDMHeader() {
               {/* SCREEN 3: Final Goal / Link */}
               {modalStep === 3 && (
                 <div className="space-y-5">
-                  {/* Final Message */}
-                  <div className="p-4 border-2 border-dotted border-border/70 rounded-xl bg-background/50 space-y-5">
+                  <div className="p-5 border border-zinc-200 rounded-2xl bg-white shadow-sm space-y-5">
                     <div>
-                      <label className="text-sm font-semibold mb-2 block">
+                      <label className="text-sm font-semibold text-zinc-900 mb-3 block">
                         Final Message (Delivery)
                       </label>
                       <textarea
-                        className="w-full text-sm border rounded-xl p-3 bg-background focus:ring-1 outline-none min-h-[90px]"
+                        className={uniformTextAreaClass}
                         value={formData.finalGoalMessage.text}
                         onChange={(e) =>
                           setFormData({
@@ -1095,12 +1087,12 @@ export default function AutoDMHeader() {
                       />
                     </div>
 
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between mb-1">
-                        <label className="text-xs font-semibold block text-muted-foreground uppercase tracking-wider">
+                    <div className="space-y-3 pt-2 border-t border-zinc-100">
+                      <div className="flex items-center justify-between mb-2 mt-2">
+                        <label className="text-[10px] font-bold block text-zinc-400 uppercase tracking-widest">
                           Attached Links
                         </label>
-                        <span className="text-[10px] font-semibold text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                        <span className="text-[10px] font-bold text-zinc-500 bg-zinc-100 px-2 py-0.5 rounded-full">
                           {formData.finalGoalMessage.buttons.length}/3
                         </span>
                       </div>
@@ -1108,22 +1100,22 @@ export default function AutoDMHeader() {
                       {formData.finalGoalMessage.buttons.map((btn, idx) => (
                         <div
                           key={idx}
-                          className="relative p-3 border border-border/60 bg-muted/10 rounded-xl space-y-2 shadow-sm"
+                          className="relative p-4 border border-zinc-200 bg-zinc-50/50 rounded-xl space-y-3"
                         >
                           <div className="flex items-center justify-between pb-1">
-                            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
                               Button {idx + 1}
                             </span>
                             <button
                               onClick={() => removeFinalButton(idx)}
-                              className="text-red-500 hover:text-red-700 p-1 bg-red-50 hover:bg-red-100 rounded transition-colors"
+                              className="text-zinc-400 hover:text-red-600 p-1 bg-white border border-zinc-200 rounded-md transition-colors"
                             >
                               <Trash2 className="size-3.5" />
                             </button>
                           </div>
 
                           <div className="relative group">
-                            <Pencil className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-primary/60 group-focus-within:text-primary transition-colors" />
+                            <Pencil className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-zinc-400 group-focus-within:text-zinc-900 transition-colors" />
                             <Input
                               className={uniformButtonInputClass}
                               placeholder="Label (e.g. Download Now)"
@@ -1135,7 +1127,7 @@ export default function AutoDMHeader() {
                           </div>
 
                           <Input
-                            className="text-sm bg-background border-dashed h-9 focus-visible:ring-1"
+                            className="text-sm bg-white border border-zinc-200 rounded-xl h-11 focus-visible:ring-zinc-300 px-4 text-zinc-900 placeholder:text-zinc-400 shadow-sm"
                             placeholder="🔗 URL (https://...)"
                             value={btn.url}
                             onChange={(e) =>
@@ -1148,10 +1140,10 @@ export default function AutoDMHeader() {
                       {formData.finalGoalMessage.buttons.length < 3 && (
                         <Button
                           variant="outline"
-                          className="w-full border-dashed border-2 text-muted-foreground mt-2 h-10 text-sm rounded-xl hover:bg-muted/50 transition-colors"
+                          className="w-full border-dashed border-2 border-zinc-200 text-zinc-700 font-medium mt-3 h-11 text-sm rounded-xl hover:bg-zinc-50 hover:border-zinc-300 transition-all"
                           onClick={addFinalButton}
                         >
-                          <Plus className="mr-2 size-4" /> Add Another Button
+                          <Plus className="mr-2 size-4" /> Add Another Link
                         </Button>
                       )}
                     </div>
@@ -1162,13 +1154,12 @@ export default function AutoDMHeader() {
 
             {/* Explicit Back & Next Footer Navigation */}
             {modalStep > 0 && (
-              <div className="p-4 border-t bg-background shrink-0 flex gap-3 shadow-[0_-10px_20px_-15px_rgba(0,0,0,0.1)]">
-                {/* Hide Back button in Edit Mode if on Step 1, since we skip Step 0 */}
+              <div className="p-4 border-t border-zinc-200 bg-white shrink-0 flex gap-3 rounded-b-[2rem]">
                 {(!isEditing || modalStep > 1) && (
                   <Button
                     variant="outline"
                     onClick={() => setModalStep((s) => s - 1)}
-                    className="w-1/3 h-10 rounded-xl text-sm font-semibold border-border/50 text-muted-foreground hover:text-foreground"
+                    className="w-1/3 h-11 rounded-xl text-sm font-semibold border-zinc-200 text-zinc-700 hover:bg-zinc-50"
                     disabled={isSubmitting}
                   >
                     Back
@@ -1181,7 +1172,7 @@ export default function AutoDMHeader() {
                       ? handleSubmit()
                       : setModalStep((s) => s + 1)
                   }
-                  className="flex-1 h-10 rounded-xl text-sm font-semibold flex items-center justify-center"
+                  className="flex-1 h-11 rounded-xl text-sm font-semibold flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 text-white transition-colors"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (
@@ -1203,6 +1194,6 @@ export default function AutoDMHeader() {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }

@@ -1,4 +1,3 @@
-"use client";
 
 import { Lock, ShoppingBag } from "lucide-react";
 // 👈 IMPORT YOUR LAYOUT COMPONENTS (Adjust paths if needed)
@@ -58,19 +57,6 @@ export default function ShopComingSoonPage() {
           <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent shadow-[0_0_15px_3px_rgba(59,130,246,0.5)]" />
         </div>
 
-        {/* CSS for custom background animation within this page only */}
-        <style jsx global>{`
-          @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.7; transform: scale(1.05); }
-          }
-          .animate-pulse {
-            animation: pulse 6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-          }
-          .delay-700 {
-            animation-delay: 2s;
-          }
-        `}</style>
       </main>
     </div>
   );

@@ -4,8 +4,11 @@ import { Instrument_Serif } from "next/font/google";
 import { motion } from "motion/react";
 import AnimatedButton from "../../radix/button/button-01";
 import { SignupForm } from "@/components/signup-form";
-import { useState } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import { useState } from "react";
+import { X } from "lucide-react";
+
+// Import Radix UI primitives directly to control the background and close button
+import * as DialogPrimitive from "@radix-ui/react-dialog";
 
 const instrumentSerif = Instrument_Serif({
   subsets: ["latin"],
@@ -23,113 +26,139 @@ type HeroSectionProps = {
 
 function HeroSection({ avatarList }: HeroSectionProps) {
   const [isSignInOpen, setIsSignInOpen] = useState(false);
-  const handleGetStartedClick = () => {
-    // Add your logic here, e.g., redirecting to a signup page or opening a modal
-    console.log("Get Started button clicked!");
-  };
 
   return (
-    <section>
-      <div className="w-full h-full relative">
-        <div className="relative w-full pt-0 md:pt-20 pb-6 md:pb-10 before:absolute before:w-full before:h-full before:bg-linear-to-r before:from-sky-100 before:via-white before:to-amber-100 before:rounded-full before:top-24 before:blur-3xl before:-z-10 dark:before:from-slate-800 dark:before:via-black dark:before:to-stone-700 dark:before:rounded-full dark:before:blur-3xl dark:before:-z-10">
-          <div className="container mx-auto relative z-10">
-            <div className="flex flex-col max-w-5xl mx-auto gap-8">
-              <div className="relative flex flex-col text-center items-center sm:gap-6 gap-4 px-4">
-                <motion.h1
-                  initial={{ opacity: 0, y: 32 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 1, ease: "easeInOut" }}
-                  // 1. Scaled down starting at 4xl for mobile, growing up to 8xl on massive screens
-                  // 2. Used leading-[1.1] which perfectly and automatically adjusts line-height for ANY text size
-                  className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-medium leading-[1.1]"
-                >
-                  Built for real{" "}
-                  <span
-                    className={`${instrumentSerif.className} tracking-tight`}
-                  >
-                    Growth
-                  </span>
-                  , Loved by{" "}
-                  <span
-                    className={`${instrumentSerif.className} tracking-tight`}
-                  >
-                    Creators
-                  </span>{" "}
-                </motion.h1>
+    <section className="relative w-full min-h-[100dvh] lg:h-[100dvh] flex flex-col overflow-hidden bg-red-950 pt-20 lg:pt-0">
+      {/* Deep Red Radial Gradient Background */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-red-600 via-red-900 to-[#1a0000] z-0"></div>
+      
+      {/* Extra glow directly behind the character */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] lg:w-[700px] lg:h-[700px] bg-red-500 rounded-full blur-[100px] lg:blur-[140px] opacity-40 z-0 pointer-events-none"></div>
 
-                <motion.p
-                  initial={{ opacity: 0, y: 32 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 1, delay: 0.1, ease: "easeInOut" }}
-                  // 3. Scaled the paragraph to start at text-sm on mobile and grow to text-xl on desktop
-                  className="text-sm sm:text-base md:text-lg lg:text-xl font-normal max-w-2xl text-muted-foreground"
-                >
-                  Grow your reach, earn more, and save time,
-                  {/* 4. Hide the break on mobile so it wraps naturally, but show it on sm screens and up */}
-                  <br className="hidden sm:block" />
-                  so you can focus on delivering real value to your audience.
-                </motion.p>
-              </div>
-              <motion.div
-                initial={{ opacity: 0, y: 32 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 1, delay: 0.2, ease: "easeInOut" }}
-                className="flex items-center flex-col md:flex-row justify-center gap-8"
-              >
+      <div className="relative z-10 container mx-auto px-4 flex-1 flex flex-col">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 lg:gap-4 flex-1 h-full">
+          
+          {/* LEFT COLUMN: Headings & Text */}
+          <motion.div 
+            initial={{ opacity: 0, x: -32 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 1, ease: "easeInOut" }}
+            className="lg:col-span-4 flex flex-col text-center lg:text-left items-center lg:items-start justify-center gap-4 lg:gap-6 order-1 relative z-20 h-full pt-10 lg:pt-0"
+          >
+            <h1 className="text-4xl sm:text-5xl md:text-6xl xl:text-7xl font-medium leading-[1.1] text-white">
+              Built for real{" "}
+              <span className={`${instrumentSerif.className} tracking-tight text-red-200`}>
+                Growth
+              </span>
+              ,<br className="hidden lg:block" /> Loved by{" "}
+              <span className={`${instrumentSerif.className} tracking-tight text-red-200`}>
+                Creators
+              </span>
+            </h1>
 
+            <p className="text-sm sm:text-base md:text-lg text-white/80 max-w-md">
+              Grow your reach, earn more, and save time, so you can focus on delivering real value to your audience.
+            </p>
+          </motion.div>
 
-              <AnimatedButton onClick={() => setIsSignInOpen(true)}>Get Started</AnimatedButton>
+          {/* CENTER COLUMN: Hero Image */}
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9, y: 32 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
+            className="lg:col-span-4 flex justify-center items-end order-2 relative z-10 mt-4 lg:mt-0 h-full"
+          >
+            <div className="relative flex flex-col items-center justify-end h-full w-full">
+              
+              {/* PERFORMANCE FIX: Using the <picture> element for responsive loading */}
+              <picture className="flex justify-center w-full relative z-10">
+                {/* Desktop screens (1024px and up): Loads the high-res original */}
+                <source 
+                  media="(min-width: 1024px)" 
+                  srcSet="https://i.ibb.co/h3KPQsH/Gemini-Generated-Image-4v0dha4v0dha4v0d-Photoroom.png" 
+                />
+                
+                {/* Mobile screens (Default fallback): Loads your optimized smaller image */}
+                <img 
+                  src="https://i.ibb.co/mVwPqKPK/Gemini-Generated-Image-4v0dha4v0dha4v0d-Photoroom-1.png" 
+                  alt="Hero Character" 
+                  className="w-auto h-[45vh] lg:h-[85vh] xl:h-[90vh] max-w-[320px] sm:max-w-sm md:max-w-md lg:max-w-none object-contain object-bottom drop-shadow-2xl"
+                />
+              </picture>
 
-
-
-
-                <div className="flex items-center sm:gap-7 gap-3">
-                  <ul className="avatar flex flex-row items-center">
-                    {avatarList.map((avatar, index) => (
-                      <li key={index} className="-mr-2 z-1 avatar-hover:ml-2">
-                        <img
-                          src={avatar.image}
-                          alt="Avatar"
-                          width={40}
-                          height={40}
-                          className="rounded-full border-2 border-white"
-                        />
-                      </li>
-                    ))}
-                  </ul>
-                  <div className="gap-1 flex flex-col items-start">
-                    <div className="flex gap-1">
-                      {Array.from({ length: 5 }).map((_, index) => (
-                        <img
-                          key={index}
-                          src="https://images.shadcnspace.com/assets/svgs/icon-star.svg"
-                          alt="star"
-                          className="h-4 w-4"
-                        />
-                      ))}
-                    </div>
-                    <p className="sm:text-sm text-xs font-normal text-muted-foreground">
-                      Trusted by 1000+ clients
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
+              <div className="absolute bottom-0 w-[60%] lg:w-[40%] h-[12px] lg:h-[20px] bg-black/80 blur-[8px] lg:blur-[12px] rounded-[100%] z-0 translate-y-1/2"></div>
             </div>
-            <Dialog open={isSignInOpen} onOpenChange={setIsSignInOpen}>
-        <DialogContent className="sm:max-w-md w-[95vw] rounded-xl">
-          <DialogTitle className="sr-only">Sign In to Loomingo</DialogTitle>
-          
-          {/* Notice the correct closing tag here! */}
-          <DialogDescription className="sr-only">
-            Fill out the form below to get started.
-          </DialogDescription>
-          
-          <SignupForm />
-        </DialogContent>
-      </Dialog>
-          </div>
+          </motion.div>
+
+          {/* RIGHT COLUMN: Call to Action & Social Proof */}
+          <motion.div 
+            initial={{ opacity: 0, x: 32 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 1, delay: 0.4, ease: "easeInOut" }}
+            className="lg:col-span-4 flex flex-col items-center lg:items-start justify-center text-center lg:text-left gap-8 order-3 relative z-30 -mt-24 lg:mt-0 pb-10 lg:pb-0 h-full"
+          >
+            <div className="bg-white/10 border border-white/20 backdrop-blur-xl p-6 sm:p-8 rounded-3xl flex flex-col items-center lg:items-start gap-6 shadow-2xl w-full max-w-sm lg:ml-auto">
+              
+              <AnimatedButton onClick={() => setIsSignInOpen(true)}>
+                Get Started
+              </AnimatedButton>
+
+              <div className="flex flex-col items-center lg:items-start gap-3 mt-2">
+                <ul className="flex flex-row items-center">
+                  {avatarList.map((avatar, index) => (
+                    <li key={index} className="-mr-3 z-10 hover:ml-2 transition-all duration-300">
+                      <img
+                        src={avatar.image}
+                        alt="Avatar"
+                        width={44}
+                        height={44}
+                        className="rounded-full border-2 border-red-900 object-cover shadow-lg"
+                      />
+                    </li>
+                  ))}
+                </ul>
+                <div className="gap-1 flex flex-col items-center lg:items-start">
+                  <div className="flex gap-1">
+                    {Array.from({ length: 5 }).map((_, index) => (
+                      <img
+                        key={index}
+                        src="https://images.shadcnspace.com/assets/svgs/icon-star.svg"
+                        alt="star"
+                        className="h-4 w-4"
+                      />
+                    ))}
+                  </div>
+                  <p className="text-sm font-medium text-white/90">
+                    Trusted by 1000+ clients
+                  </p>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
         </div>
       </div>
+
+      {/* Auth Modal using Radix Primitives */}
+      <DialogPrimitive.Root open={isSignInOpen} onOpenChange={setIsSignInOpen}>
+        <DialogPrimitive.Portal>
+          
+          <DialogPrimitive.Content 
+            className="fixed left-[50%] top-[50%] z-50 translate-x-[-50%] translate-y-[-50%] p-0 border-none rounded-[2rem] shadow-2xl bg-white outline-none w-full max-w-sm"
+          >
+            <DialogPrimitive.Title className="sr-only">Sign In to Loomingo</DialogPrimitive.Title>
+            <DialogPrimitive.Description className="sr-only">Fill out the form below to get started.</DialogPrimitive.Description>
+            
+            {/* Custom positioned Close Icon */}
+            <DialogPrimitive.Close className="absolute right-4 top-4 z-50 rounded-full p-2 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-900 transition-colors focus:outline-none">
+              <X size={18} />
+              <span className="sr-only">Close</span>
+            </DialogPrimitive.Close>
+            
+            <SignupForm />
+          </DialogPrimitive.Content>
+        </DialogPrimitive.Portal>
+      </DialogPrimitive.Root>
     </section>
   );
 }

@@ -1,178 +1,136 @@
 "use client";
 
-
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList } from "@/components/ui/navigation-menu";
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  NavigationMenu,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+} from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
-import { TextAlignJustify } from "lucide-react"; // Removed ArrowUpRight since it's now in the button component
+import { Menu, X } from "lucide-react";
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { ThemeToggle } from "@/components/ThemeToggle"; 
-
-// 1. Import your new reusable button here (Adjust the path if necessary!)
 import AnimatedButton from "../../button/button-01";
 import { SignupForm } from "@/components/signup-form";
-import Loomingo from "@/assets/logo/Loomingo.png";
 import SwitchToggleThemeDemo from "../../switch/switch-03";
 
-export type NavigationSection = {
-  title: string;
-  href: string;
-};
+// Import Radix UI primitives directly to gain full control over the overlay and close button
+import * as DialogPrimitive from "@radix-ui/react-dialog";
 
-const navigationData: NavigationSection[] = [
-  {
-    title: "Upcoming Tools",
-    href: "#",
-  },
-  {
-    title: "Pricing",
-    href: "#",
-  },
-  {
-    title: "About us",
-    href: "#",
-  },
+const navigationData = [
+  { title: "Home", href: "/" },
+  { title: "Upcoming Tools", href: "#" },
+  { title: "Pricing", href: "#" },
+  { title: "About us", href: "/about" },
 ];
-
-// 2. The old CollaborateButton code block has been completely removed from here.
 
 const Navbar = () => {
   const [sticky, setSticky] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
   const [isSignInOpen, setIsSignInOpen] = useState(false);
-  
-  const handleScroll = useCallback(() => {
-    setSticky(window.scrollY >= 50);
-  }, []);
 
-  const handleResize = useCallback(() => {
-    if (window.innerWidth >= 1024) setIsOpen(false);
-  }, []);
-
+  const handleScroll = useCallback(() => setSticky(window.scrollY >= 50), []);
   useEffect(() => {
     window.addEventListener("scroll", handleScroll);
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", handleResize);
-    };
-  }, [handleScroll, handleResize]);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [handleScroll]);
 
   return (
-    <div>
-      <header className="bg-background">
-        <div className="max-w-7xl mx-auto w-full px-4 py-4 sm:px-6">
-          <nav
+    <header className="fixed top-0 w-full z-50 p-4 transition-all duration-300">
+      <nav
+        className={cn(
+          "max-w-6xl mx-auto w-full flex items-center h-16 justify-between px-6 rounded-2xl border transition-all duration-300",
+          sticky
+            ? "bg-white/80 backdrop-blur-md border-zinc-200 shadow-sm"
+            : "bg-transparent border-transparent",
+        )}
+      >
+        {/* Logo */}
+          <Link href="/" className="flex items-center gap-2">
+            <img
+              src="/icon.png"
+              alt="Loomingo"
+              className="h-8 w-8 rounded-lg object-contain"
+            />
+          </Link>
+
+        {/* Desktop Nav */}
+        <div className="max-lg:hidden flex">
+          <NavigationMenu>
+            <NavigationMenuList className="flex gap-1">
+              {navigationData.map((navItem) => (
+                <NavigationMenuItem key={navItem.title}>
+                  <NavigationMenuLink
+                    href={navItem.href}
+                    className={cn(
+                      "px-4 py-2 text-sm font-medium rounded-full transition-colors",
+                      // DYNAMIC TEXT COLOR based on scroll state
+                      sticky
+                        ? "text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100" // Scrolled down
+                        : "text-white/80 hover:text-white hover:bg-white/10", // At the top
+                    )}
+                  >
+                    {navItem.title}
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+              ))}
+            </NavigationMenuList>
+          </NavigationMenu>
+        </div>
+
+        {/* Actions */}
+        <div className="flex items-center gap-3">
+
+          <AnimatedButton onClick={() => setIsSignInOpen(true)}>
+            Start for Free
+          </AnimatedButton>
+
+          {/* DYNAMIC HAMBURGER ICON COLOR */}
+          <div
             className={cn(
-              "w-full flex items-center h-fit justify-between gap-2 lg:gap-6 transition-all duration-500",
-              sticky
-                ? "p-2.5 bg-background/60 backdrop-blur-lg border border-border/40 shadow-2xl shadow-primary/5 rounded-full"
-                : "bg-transparent border-transparent"
+              "lg:hidden transition-colors",
+              sticky ? "text-zinc-900" : "text-white",
             )}
           >
-            {/* Left: Logo */}
-            <a href="#" className="flex-shrink-0">
-              <img 
-                src={Loomingo.src} 
-                alt="Loomingo Logo" 
-                className="h-7 w-auto object-contain" 
-              />
-            </a>
-
-            {/* Center: Desktop Navigation */}
-            <div className="flex-1 flex justify-center">
-              <NavigationMenu className="max-lg:hidden bg-muted p-0.5 rounded-full">
-                <NavigationMenuList className="flex gap-0">
-                  {navigationData.map((navItem) => (
-                    <NavigationMenuItem key={navItem.title}>
-                      <NavigationMenuLink
-                        href={navItem.href}
-                        className="px-2 lg:px-4 py-2 text-sm font-medium rounded-full text-muted-foreground hover:text-foreground hover:bg-background outline outline-transparent hover:outline-border hover:shadow-xs transition tracking-normal"
-                      >
-                        {navItem.title}
-                      </NavigationMenuLink>
-                    </NavigationMenuItem>
-                  ))}
-                </NavigationMenuList>
-              </NavigationMenu>
-            </div>
-            
-            {/* Right: Actions Group */}
-            <div className="flex items-center gap-2 lg:gap-4 flex-shrink-0">
-              
-              {/* Theme Toggle - Hidden on Mobile, Visible on Desktop */}
-              <div className="hidden lg:block">
-                <SwitchToggleThemeDemo/>
-              </div>
-              
-              {/* 3. Replaced the old CollaborateButton with your new Reusable Component! */}
-              {/* Note: I added responsive sizing via className so it still scales down perfectly on mobile */}
-              <AnimatedButton onClick={() => setIsSignInOpen(true)}>Start for Free</AnimatedButton>
-              
-
-              {/* Mobile Hamburger Menu */}
-              <div className="lg:hidden">
-                <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
-                  <DropdownMenuTrigger className="rounded-full bg-background border border-border p-2 outline-none flex items-center justify-center cursor-pointer transition-colors">
-                    <TextAlignJustify size={20} />
-                    <span className="sr-only">Menu</span>
-                  </DropdownMenuTrigger>
-
-                  <DropdownMenuContent
-                    align="end"
-                    className="w-56 mt-2"
-                  >
-                    {/* Navigation Links */}
-                    {navigationData.map((item) => (
-                      <DropdownMenuItem key={item.title}>
-                        <a
-                          href={item.href}
-                          className="w-full cursor-pointer text-sm font-medium"
-                        >
-                          {item.title}
-                        </a>
-                      </DropdownMenuItem>
-                    ))}
-                    
-                    {/* Sign In Mobile Link */}
-                    <DropdownMenuItem className="border-t mt-1 pt-2" onSelect={() => setIsSignInOpen(true)}>
-                      <span
-                        className="w-full cursor-pointer text-sm font-medium text-primary block"
-                      >
-                        Sign In
-                      </span>
-                    </DropdownMenuItem>
-
-                    {/* Theme Toggle Mobile Row */}
-                    <div className="flex items-center justify-between px-2 py-2 mt-1 border-t border-border">
-                      <span className="text-sm font-medium text-muted-foreground">Theme</span>
-                      <SwitchToggleThemeDemo />
-                    </div>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </div>
-            
-            {/* --- The Modal (Dialog) --- */}
-            <Dialog open={isSignInOpen} onOpenChange={setIsSignInOpen}>
-        <DialogContent className="sm:max-w-md w-[95vw] rounded-xl">
-          <DialogTitle className="sr-only">Sign In to Loomingo</DialogTitle>
-          
-          {/* Add this new line to silence the warning! */}
-          <DialogDescription className="sr-only">
-            Fill out the form below to get started.
-          </DialogDescription>
-          
-          <SignupForm />
-        </DialogContent>
-      </Dialog>
-
-          </nav>
+            <DropdownMenu>
+              <DropdownMenuTrigger className="p-2 outline-none">
+                <Menu />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56 rounded-2xl mt-2">
+                {navigationData.map((item) => (
+                  <DropdownMenuItem key={item.title} className="cursor-pointer">
+                    {item.title}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
-      </header>
-    </div>
+      </nav>
+
+      {/* Authentication Modal - Using raw primitives to remove background and custom position the X */}
+      <DialogPrimitive.Root open={isSignInOpen} onOpenChange={setIsSignInOpen}>
+        <DialogPrimitive.Portal>
+          <DialogPrimitive.Content className="fixed left-[50%] top-[50%] z-50 translate-x-[-50%] translate-y-[-50%] p-0 border-none rounded-[2rem] shadow-2xl bg-white outline-none w-full max-w-sm">
+            <DialogPrimitive.Title className="sr-only">
+              Authentication
+            </DialogPrimitive.Title>
+
+            <DialogPrimitive.Close className="absolute right-4 top-4 z-50 rounded-full p-2 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-900 transition-colors focus:outline-none">
+              <X size={18} />
+              <span className="sr-only">Close</span>
+            </DialogPrimitive.Close>
+
+            <SignupForm />
+          </DialogPrimitive.Content>
+        </DialogPrimitive.Portal>
+      </DialogPrimitive.Root>
+    </header>
   );
 };
 

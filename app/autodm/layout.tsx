@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Auto-DM-Loomingo",
+  title: "Auto-DM",
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {

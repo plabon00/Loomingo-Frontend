@@ -77,7 +77,7 @@ export function InstagramSettingsModal({ isOpen, onClose }: InstagramSettingsMod
         setActiveAccountId(activeId);
 
         const token = await user.getIdToken();
-        const res = await fetch("http://localhost:8080/api/v1/me/instagram/accounts", {
+        const res = await fetch(`/api/v1/me/instagram/accounts`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -113,7 +113,7 @@ export function InstagramSettingsModal({ isOpen, onClose }: InstagramSettingsMod
     try {
       const token = await getToken();
       const res = await fetch(
-        `http://localhost:8080/api/v1/me/instagram/accounts/${accountId}/webhook`,
+        `/api/v1/me/instagram/accounts/${accountId}/webhook`,
         {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },
@@ -153,7 +153,7 @@ export function InstagramSettingsModal({ isOpen, onClose }: InstagramSettingsMod
     try {
       const token = await getToken();
       const res = await fetch(
-        `http://localhost:8080/api/v1/me/instagram/accounts/${accountId}/webhook`,
+        `/api/v1/me/instagram/accounts/${accountId}/webhook`,
         {
           method: "DELETE",
           headers: { Authorization: `Bearer ${token}` },
@@ -194,7 +194,7 @@ export function InstagramSettingsModal({ isOpen, onClose }: InstagramSettingsMod
     try {
       const token = await getToken();
       const res = await fetch(
-        `http://localhost:8080/api/v1/me/instagram/accounts/${accountId}`,
+        `/api/v1/me/instagram/accounts/${accountId}`,
         {
           method: "DELETE",
           headers: { Authorization: `Bearer ${token}` },

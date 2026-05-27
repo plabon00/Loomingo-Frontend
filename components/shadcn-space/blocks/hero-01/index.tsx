@@ -52,7 +52,6 @@ export default function AgencyHeroSection() {
     <div className="relative">
       <main>
         <HeroSection avatarList={avatarList} />
-        <BrandSlider brandList={brandList} />
       </main>
     </div>
   );
