@@ -64,7 +64,7 @@ export default function RecentActivityFeed() {
       setIsLive(false);
 
       try {
-        // Using relative path so Next.js rewrites it cleanly to localhost:8080 (or production URL)
+        // Using relative path so Next.js rewrites it cleanly to the backend URL
         const response = await fetch(`/api/dms/recent/${userId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });

@@ -19,7 +19,7 @@ const nextConfig: NextConfig = {
       {
         source: '/api/:path*',
         // Use an environment variable for the backend URL
-        destination: `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080'}/api/:path*`,
+        destination: `${process.env.NEXT_PUBLIC_BACKEND_URL || 'https://jesica-noncommendatory-marjory.ngrok-free.dev'}/api/:path*`,
       },
     ];
   },
