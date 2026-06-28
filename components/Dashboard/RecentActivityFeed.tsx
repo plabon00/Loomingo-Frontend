@@ -66,10 +66,13 @@ export default function RecentActivityFeed() {
       try {
         // Using relative path so Next.js rewrites it cleanly to the backend URL
         const response = await fetch(`/api/dms/recent/${userId}`, {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            "ngrok-skip-browser-warning": "true"
+          }
         });
         
-        if (response.ok) {
+        if (response.ok && response.headers.get("content-type")?.includes("application/json")) {
           const data: SentDmDTO[] = await response.json();
           setRecentDMs(data.map(formatDmData).slice(0, 4));
         } else {

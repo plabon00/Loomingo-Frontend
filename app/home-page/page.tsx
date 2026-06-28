@@ -11,7 +11,14 @@ import {
 } from "@/components/AppNavigation"; 
 
 export default function HomePage() {
-  const footerLinks = {
+  type FooterLink = {
+    title: string;
+    href: string;
+    disabled: boolean;
+    badge?: string;
+  };
+
+  const footerLinks: Record<string, FooterLink[]> = {
     Product: [
         { title: 'DM Automation', href: '#', disabled: false },
         { title: 'Follow Gate Links', href: '#', disabled: false },
@@ -37,7 +44,7 @@ export default function HomePage() {
       
       {/* Signature Red Glow Background */}
       <div 
-        className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-red-400 rounded-full opacity-[0.15] blur-[140px] pointer-events-none z-0"
+        className="absolute top-0 left-1/2 -translate-x-1/2 w-200 h-100 bg-red-400 rounded-full opacity-[0.15] blur-[140px] pointer-events-none z-0"
         aria-hidden="true"
       />
 
@@ -65,7 +72,7 @@ export default function HomePage() {
           
           {/* Subtle Brand Glow */}
           <div 
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-red-400 rounded-full opacity-[0.15] blur-[160px] pointer-events-none z-0"
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 w-200 h-100 bg-red-400 rounded-full opacity-[0.15] blur-[160px] pointer-events-none z-0"
               aria-hidden="true"
           />
 

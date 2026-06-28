@@ -24,15 +24,16 @@ export default function InstagramProfileCard() {
         const response = await fetch(`/api/v1/me/instagram/portfolio`, {
           method: "GET",
           headers: {
-            "Authorization": `Bearer ${token}`
+            "Authorization": `Bearer ${token}`,
+            "ngrok-skip-browser-warning": "true"
           }
         });
 
-        if (response.ok) {
+        if (response.ok && response.headers.get("content-type")?.includes("application/json")) {
           const data = await response.json();
           setProfileData(data);
         } else {
-          console.error("Failed to fetch. Status:", response.status);
+          console.error("Failed to fetch. Status or content type mismatch. Status:", response.status);
         }
       } catch (error) {
         console.error("Failed to fetch Instagram profile:", error);

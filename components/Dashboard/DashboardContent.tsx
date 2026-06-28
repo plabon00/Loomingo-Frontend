@@ -180,7 +180,7 @@ export default function DashboardContent() {
         </p>
 
         {isConnected && (
-          <Link href="/auto-dm" className="mt-3">
+          <Link href="/autodm" className="mt-3">
             <Button className="rounded-full bg-zinc-900 hover:bg-zinc-800 text-white shadow-md h-11 px-6 text-sm font-medium transition-colors">
               <Plus className="mr-2 size-4" /> New Automation
             </Button>
