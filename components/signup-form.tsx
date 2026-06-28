@@ -26,6 +26,7 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${idToken}`,
+          "ngrok-skip-browser-warning": "true",
         },
         body: JSON.stringify({
           email: user.email,

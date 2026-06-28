@@ -39,7 +39,8 @@ export default function DashboardContent() {
           method: "GET",
           headers: {
             "Authorization": `Bearer ${token}`, 
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "true"
           }
         });
 
@@ -57,7 +58,8 @@ export default function DashboardContent() {
               method: "GET",
               headers: {
                 "Authorization": `Bearer ${token}`, 
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "ngrok-skip-browser-warning": "true"
               }
             });
 

@@ -205,6 +205,7 @@ async function verifyInstagramConnection(user: User) {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true",
       },
     });
 
@@ -246,7 +247,10 @@ export function MobileNavbar() {
       try {
         const token = await currentUser.getIdToken();
         const res = await fetch(`/api/v1/me/profile`, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            "ngrok-skip-browser-warning": "true"
+          },
         });
         if (res.ok) {
           const data = await res.json();
@@ -337,7 +341,10 @@ export function BottomDock() {
       try {
         const token = await currentUser.getIdToken();
         const res = await fetch(`/api/v1/me/profile`, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            "ngrok-skip-browser-warning": "true"
+          },
         });
         if (res.ok) {
           const data = await res.json();
@@ -553,7 +560,10 @@ export function DesktopSidebar() {
       try {
         const token = await currentUser.getIdToken();
         const res = await fetch(`/api/v1/me/profile`, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            "ngrok-skip-browser-warning": "true"
+          },
         });
         if (res.ok) {
           const data = await res.json();

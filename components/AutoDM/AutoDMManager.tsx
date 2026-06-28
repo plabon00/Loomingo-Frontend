@@ -133,6 +133,7 @@ export default function AutoDMManager() {
           headers: {
             Authorization: `Bearer ${userToken}`,
             "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "true",
           },
         },
       );
@@ -244,7 +245,10 @@ export default function AutoDMManager() {
         `/api/v1/getAll/my_media/${activeInstagramId}`,
         {
           method: "GET",
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            "ngrok-skip-browser-warning": "true"
+          },
         },
       );
 
@@ -308,7 +312,10 @@ export default function AutoDMManager() {
       const response = await fetch(
         `/api/v1/automation/rule/${automation.id || automation.mediaId}`,
         {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            "ngrok-skip-browser-warning": "true"
+          },
         },
       );
 
@@ -416,7 +423,10 @@ export default function AutoDMManager() {
         `/api/v1/automation/delete/rule/${mediaId}`,
         {
           method: "DELETE",
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            "ngrok-skip-browser-warning": "true"
+          },
         },
       );
 
@@ -451,7 +461,10 @@ export default function AutoDMManager() {
         `/api/v1/automation/toggle/rule/${mediaId}`,
         {
           method: "PATCH",
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            "ngrok-skip-browser-warning": "true"
+          },
         },
       );
 
@@ -658,6 +671,7 @@ export default function AutoDMManager() {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true",
         },
         body: JSON.stringify(payload),
       });

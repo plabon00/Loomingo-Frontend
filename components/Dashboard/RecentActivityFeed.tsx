@@ -43,7 +43,6 @@ function formatDmData(dm: SentDmDTO) {
 export default function RecentActivityFeed() {
   const [recentDMs, setRecentDMs] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isLive, setIsLive] = useState(false);
   const [, setTick] = useState(0);
 
   // Force time-ago update every 30s
@@ -53,114 +52,40 @@ export default function RecentActivityFeed() {
   }, []);
 
   useEffect(() => {
-    let es: EventSource | null = null;
-    let fallbackTriggered = false;
-    let connectionTimeout: NodeJS.Timeout;
-
-    // The Fallback Method (Static Fetch from DB)
-    const fetchStaticSnapshot = async (userId: string, token: string) => {
-      if (fallbackTriggered) return;
-      fallbackTriggered = true;
-      setIsLive(false);
-
-      try {
-        // Using relative path so Next.js rewrites it cleanly to the backend URL
-        const response = await fetch(`/api/dms/recent/${userId}`, {
-          headers: { 
-            Authorization: `Bearer ${token}`,
-            "ngrok-skip-browser-warning": "true"
-          }
-        });
-        
-        if (response.ok && response.headers.get("content-type")?.includes("application/json")) {
-          const data: SentDmDTO[] = await response.json();
-          setRecentDMs(data.map(formatDmData).slice(0, 4));
-        } else {
-          console.error("Database fetch failed with status:", response.status);
-        }
-      } catch (err) {
-        console.error("Fallback database fetch failed:", err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    const setupStream = async (user: any) => {
+    const fetchRecentDMs = async (user: any) => {
       try {
         const token = await user.getIdToken();
         const userId = sessionStorage.getItem("userId") || user.uid;
 
-        const streamUrl = `/api/dms/stream/${userId}?token=${token}&ngrok-skip-browser-warning=true`;
-        es = new EventSource(streamUrl);
-
-        // 1. Strict Timeout Fallback
-        // If we receive ABSOLUTELY NOTHING from the SSE stream for 4 seconds,
-        // assume it's stuck/empty, close it, and forcefully fetch from the database.
-        connectionTimeout = setTimeout(() => {
-          if (!fallbackTriggered) {
-            console.warn("No data from SSE stream. Falling back to database snapshot.");
-            if (es) es.close();
-            fetchStaticSnapshot(userId, token);
-          }
-        }, 4000);
-
-        // 2. Initial Load Event (Success!)
-        es.addEventListener("init", (e) => {
-          clearTimeout(connectionTimeout); // We got data! Cancel the fallback.
-          try {
-            const data: SentDmDTO[] = JSON.parse(e.data);
-            setRecentDMs(data.map(formatDmData).slice(0, 4));
-            setIsLoading(false);
-            setIsLive(true);
-          } catch (err) {
-            console.error("Error parsing init event data:", err);
-            if (es) es.close();
-            fetchStaticSnapshot(userId, token);
-          }
+        const response = await fetch(`/api/dms/recent/${userId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "ngrok-skip-browser-warning": "true",
+          },
         });
 
-        // 3. Real-time New DM Event
-        es.addEventListener("new-dm", (e) => {
-          try {
-            const newDm: SentDmDTO = JSON.parse(e.data);
-            const formatted = formatDmData(newDm);
-            setRecentDMs((prev) => [formatted, ...prev].slice(0, 4));
-          } catch (err) {
-            console.error("Error parsing new-dm event:", err);
-          }
-        });
-
-        // 4. Error Fallback
-        es.onerror = (error) => {
-          clearTimeout(connectionTimeout);
-          if (!fallbackTriggered) {
-            console.error("SSE Connection Error. Falling back to static snapshot.");
-            if (es) es.close();
-            fetchStaticSnapshot(userId, token);
-          }
-        };
-
-      } catch (error) {
-        console.error("Error setting up stream:", error);
+        if (response.ok && response.headers.get("content-type")?.includes("application/json")) {
+          const data: SentDmDTO[] = await response.json();
+          setRecentDMs(data.map(formatDmData).slice(0, 4));
+        }
+      } catch (err) {
+        console.warn("Could not load recent activity:", err);
+      } finally {
         setIsLoading(false);
       }
     };
 
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
-        setupStream(user);
+        fetchRecentDMs(user);
       } else {
         setIsLoading(false);
-        if (es) es.close();
       }
     });
 
-    return () => {
-      unsubscribe();
-      clearTimeout(connectionTimeout);
-      if (es) es.close();
-    };
+    return () => unsubscribe();
   }, []);
+
 
   return (
     <div className="bg-white/80 backdrop-blur-md border border-zinc-200 rounded-[2rem] p-6 sm:p-8 shadow-sm flex flex-col h-full transition-all">
@@ -173,13 +98,6 @@ export default function RecentActivityFeed() {
           </div>
           <h3 className="text-lg font-semibold text-zinc-900 flex items-center gap-2">
             Recent Activity
-            {/* Live Indicator Dot */}
-            {isLive && !isLoading && (
-              <span className="relative flex h-2 w-2 ml-1">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-              </span>
-            )}
           </h3>
         </div>
         <Link href="/auto-dm" className="text-xs font-semibold text-zinc-500 hover:text-zinc-900 transition-colors bg-zinc-100 px-3 py-1.5 rounded-full">

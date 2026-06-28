@@ -78,7 +78,10 @@ export function InstagramSettingsModal({ isOpen, onClose }: InstagramSettingsMod
 
         const token = await user.getIdToken();
         const res = await fetch(`/api/v1/me/instagram/accounts`, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            "ngrok-skip-browser-warning": "true"
+          },
         });
 
         if (res.ok) {
@@ -116,7 +119,10 @@ export function InstagramSettingsModal({ isOpen, onClose }: InstagramSettingsMod
         `/api/v1/me/instagram/accounts/${accountId}/webhook`,
         {
           method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            "ngrok-skip-browser-warning": "true"
+          },
         }
       );
 
@@ -156,7 +162,10 @@ export function InstagramSettingsModal({ isOpen, onClose }: InstagramSettingsMod
         `/api/v1/me/instagram/accounts/${accountId}/webhook`,
         {
           method: "DELETE",
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            "ngrok-skip-browser-warning": "true"
+          },
         }
       );
 
@@ -197,7 +206,10 @@ export function InstagramSettingsModal({ isOpen, onClose }: InstagramSettingsMod
         `/api/v1/me/instagram/accounts/${accountId}`,
         {
           method: "DELETE",
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            "ngrok-skip-browser-warning": "true"
+          },
         }
       );
 

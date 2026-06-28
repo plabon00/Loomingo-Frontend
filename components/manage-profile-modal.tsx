@@ -41,7 +41,10 @@ export function ManageProfileModal({ isOpen, onClose, onSuccess, onError }: Mana
 
         // 🚀 UPDATED: Fetching from the new Controller endpoint
         const res = await fetch(`/api/v1/me/profile`, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            "ngrok-skip-browser-warning": "true"
+          },
         });
 
         if (res.ok) {
@@ -119,6 +122,7 @@ export function ManageProfileModal({ isOpen, onClose, onSuccess, onError }: Mana
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
+          "ngrok-skip-browser-warning": "true",
         },
         body: JSON.stringify(payload),
       });
