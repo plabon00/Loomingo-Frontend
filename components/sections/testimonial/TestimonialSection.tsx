@@ -155,7 +155,7 @@ export default function TestimonialSection() {
                       <p className="text-[10px] md:text-xs text-zinc-500 mb-2 md:mb-4">{review.followers}</p>
                       <div className="text-yellow-400 text-sm md:text-lg mb-2 md:mb-4 tracking-widest">★★★★★</div>
                       <p className="text-red-950/80 leading-relaxed text-xs md:text-sm">
-                        "{review.text}"
+                        &quot;{review.text}&quot;
                       </p>
                     </div>
                   </motion.div>

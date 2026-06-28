@@ -13,6 +13,7 @@ const SwitchToggleThemeDemo = () => {
 
   // Prevent hydration mismatch by only rendering the toggle after the client has mounted
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 

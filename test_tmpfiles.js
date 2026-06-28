@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 const FormData = require('form-data');
 const fetch = require('node-fetch'); // we can just use native fetch if node >= 18
 

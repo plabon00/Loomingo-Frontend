@@ -5,6 +5,18 @@ const nextConfig: NextConfig = {
     "*.trycloudflare.com",
   ],
   output: "standalone",
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'i.ibb.co',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.shadcnspace.com',
+      }
+    ],
+  },
   typescript: {
     // 👈 This will ignore the 'mediaType' error and let Docker finish building
     ignoreBuildErrors: true,

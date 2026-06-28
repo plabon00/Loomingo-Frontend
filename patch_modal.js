@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 const fs = require('fs');
 
 const path = '/Users/plabansarkar/Dev Enviorment/Loomingo Frontend/my-app/components/AutoDM/AutoDMManager.tsx';
