@@ -146,7 +146,10 @@ export default function DashboardContent() {
     const width = 500, height = 600;
     const left = window.screen.width / 2 - width / 2;
     const top = window.screen.height / 2 - height / 2;
-    const authUrl = `/api/instagram/connect_account?uid=${firebaseUid}`;
+    
+    // Updated to point directly to your ngrok backend
+    const backendUrl = "https://jesica-noncommendatory-marjory.ngrok-free.dev";
+    const authUrl = `${backendUrl}/api/instagram/connect_account?uid=${firebaseUid}`;
     
     const popup = window.open(authUrl, "Instagram Auth", `width=${width},height=${height},top=${top},left=${left}`);
 
