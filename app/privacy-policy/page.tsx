@@ -1,9 +1,9 @@
 'use client';
 
 import Navbar from '@/components/shadcn-space/radix/blocks/navbar-01/navbar';
-import PrivacySection from '@/components/PrivacySection/PrivacySection'; // Update this path to where you saved PrivacySection.tsx
+import PrivacySection from '@/components/sections/legal/PrivacySection'; // Update this path to where you saved PrivacySection.tsx
 import Link from 'next/link';
-import OtherPagesFooter from '@/components/other-pages-footer';
+import OtherPagesFooter from '@/components/layout/other-pages-footer';
 
 export default function PrivacyPage() {
 

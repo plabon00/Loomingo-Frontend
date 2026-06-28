@@ -2,8 +2,8 @@ import {
   MobileNavbar,
   BottomDock,
   DesktopSidebar,
-} from "@/components/AppNavigation";
-import AutoDMManager from "@/components/AutoDM/AutoDMManager";
+} from "@/components/layout/AppNavigation";
+import AutoDMManager from "@/components/features/autodm/AutoDMManager";
 
 export default function AutoDMPage() {
   return (

@@ -1,8 +1,8 @@
 'use client';
 
 import Navbar from '@/components/shadcn-space/radix/blocks/navbar-01/navbar';
-import OtherPagesFooter from '@/components/other-pages-footer';
-import BillingSection from '@/components/help/BillingSection'; 
+import OtherPagesFooter from '@/components/layout/other-pages-footer';
+import BillingSection from '@/components/sections/help/BillingSection'; 
 
 export default function BillingPage() {
   return (

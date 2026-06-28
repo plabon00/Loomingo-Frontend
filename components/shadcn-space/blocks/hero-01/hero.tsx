@@ -3,7 +3,7 @@
 import { Instrument_Serif } from "next/font/google";
 import { motion } from "motion/react";
 import AnimatedButton from "../../radix/button/button-01";
-import { SignupForm } from "@/components/signup-form";
+import { SignupForm } from "@/components/forms/signup-form";
 import { useState } from "react";
 import { X } from "lucide-react";
 

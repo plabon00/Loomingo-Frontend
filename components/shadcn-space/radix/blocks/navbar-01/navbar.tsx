@@ -17,7 +17,7 @@ import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import AnimatedButton from "../../button/button-01";
-import { SignupForm } from "@/components/signup-form";
+import { SignupForm } from "@/components/forms/signup-form";
 import SwitchToggleThemeDemo from "../../switch/switch-03";
 
 // Import Radix UI primitives directly to gain full control over the overlay and close button

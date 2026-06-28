@@ -1,6 +1,6 @@
 import { FocusIcon, MessageSquareDashed, Rocket } from "lucide-react";
 // Adjust this import path based on where you saved the BorderGlow file!
-import BorderGlow from "@/components/BorderGlow"; 
+import BorderGlow from "@/components/features/misc/BorderGlow"; 
 
 export default function AutomationSteps() {
   const steps = [

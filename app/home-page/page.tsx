@@ -1,14 +1,14 @@
 import Link from "next/link";
 import HowItWorks from "@/components/ui/how-it-work";
-import UpcomingFeatures from "@/components/upcoming-featurs";
-import DashboardContent from "@/components/Dashboard/DashboardContent";
-import GettingStartedGuide from "@/components/Dashboard/TutorialCard";
+import UpcomingFeatures from "@/components/sections/marketing/upcoming-features";
+import DashboardContent from "@/components/sections/dashboard/DashboardContent";
+import GettingStartedGuide from "@/components/sections/dashboard/TutorialCard";
 
 import { 
   MobileNavbar, 
   BottomDock, 
   DesktopSidebar 
-} from "@/components/AppNavigation"; 
+} from "@/components/layout/AppNavigation"; 
 
 export default function HomePage() {
   type FooterLink = {

@@ -1,7 +1,7 @@
 
 import { Lock, ShoppingBag } from "lucide-react";
 // 👈 IMPORT YOUR LAYOUT COMPONENTS (Adjust paths if needed)
-import { MobileNavbar, BottomDock, DesktopSidebar } from "@/components/AppNavigation"; 
+import { MobileNavbar, BottomDock, DesktopSidebar } from "@/components/layout/AppNavigation"; 
 
 export default function ShopComingSoonPage() {
   return (

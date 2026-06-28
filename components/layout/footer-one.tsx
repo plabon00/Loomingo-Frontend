@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import CallToAction from './call-to-action';
+import CallToAction from "@/components/sections/marketing/call-to-action";
 
 // Categorized links for a more structured, premium footer layout
 const footerLinks = {

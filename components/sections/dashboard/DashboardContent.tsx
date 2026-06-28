@@ -3,19 +3,19 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import InstagramPortfolio from "@/components/instagram-profile";
+import InstagramPortfolio from "@/components/features/instagram/instagram-profile";
 import InstagramIcon from "@/components/ui/icon/instagram-icon";
-import UserGreeting from "@/components/user-greating";
+import UserGreeting from "@/components/layout/user-greeting";
 import { Plus, Lock } from "lucide-react";
 
-import QuickActionCTA from "@/components/Dashboard/QuickActionCTA";
-import MiniAnalytics from "@/components/Dashboard/MiniAnalytics";
-import RecentActivityFeed from "@/components/Dashboard/RecentActivityFeed";
+import QuickActionCTA from "@/components/sections/dashboard/QuickActionCTA";
+import MiniAnalytics from "@/components/sections/dashboard/MiniAnalytics";
+import RecentActivityFeed from "@/components/sections/dashboard/RecentActivityFeed";
 
 import { auth } from "@/lib/firebase"; 
 import { onAuthStateChanged, User } from "firebase/auth"; 
 
-import { AuthModal, TopAlert } from "@/components/AppNavigation"; 
+import { AuthModal, TopAlert } from "@/components/layout/AppNavigation"; 
 
 export default function DashboardContent() {
   const [isConnecting, setIsConnecting] = useState(false);

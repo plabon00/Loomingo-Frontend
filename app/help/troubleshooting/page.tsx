@@ -1,8 +1,8 @@
 'use client';
 
 import Navbar from '@/components/shadcn-space/radix/blocks/navbar-01/navbar';
-import OtherPagesFooter from '@/components/other-pages-footer';
-import TroubleshootingSection from '@/components/help/TroubleshootingSection'; 
+import OtherPagesFooter from '@/components/layout/other-pages-footer';
+import TroubleshootingSection from '@/components/sections/help/TroubleshootingSection'; 
 
 export default function TroubleshootingPage() {
   return (

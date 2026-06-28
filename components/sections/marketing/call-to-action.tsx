@@ -1,8 +1,8 @@
 'use client';
 
-import { SignupForm } from "@/components/signup-form";
+import { SignupForm } from "@/components/forms/signup-form";
 import { useState } from 'react';
-import AnimatedButton from "./shadcn-space/radix/button/button-01";
+import AnimatedButton from "@/components/shadcn-space/radix/button/button-01";
 import { X } from "lucide-react";
 
 // Import Radix UI primitives directly to control the background and close button

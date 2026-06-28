@@ -1,8 +1,8 @@
 'use client';
 
 import Navbar from '@/components/shadcn-space/radix/blocks/navbar-01/navbar';
-import OtherPagesFooter from '@/components/other-pages-footer';
-import ConversationsSection from '@/components/help/ConversationsSection'; 
+import OtherPagesFooter from '@/components/layout/other-pages-footer';
+import ConversationsSection from '@/components/sections/help/ConversationsSection'; 
 
 export default function ConversationsPage() {
   return (

@@ -14,28 +14,28 @@ import AgencyHeroSection from '@/components/shadcn-space/blocks/hero-01';
 
 // DYNAMIC IMPORTS (Below the fold)
 // Added a 'loading' state to prevent layout shift while downloading chunks
-const SuperchargeSection = dynamic(() => import('@/components/SuperchargeSection/SuperchargeSection'), {
+const SuperchargeSection = dynamic(() => import('@/components/sections/marketing/SuperchargeSection'), {
   ssr: false, 
   loading: () => <div className="min-h-[200vh] w-full bg-white" /> // Reserves space to prevent scroll jumping
 });
 
-const PotentialSection = dynamic(() => import('@/components/potential/PotentialSection'), {
+const PotentialSection = dynamic(() => import('@/components/sections/marketing/PotentialSection'), {
   loading: () => <div className="min-h-screen w-full bg-transparent" />
 });
 
-const ProcessSection = dynamic(() => import('@/components/ProcessSection/ProcessSection'), {
+const ProcessSection = dynamic(() => import('@/components/sections/process/ProcessSection'), {
   loading: () => <div className="min-h-screen w-full bg-transparent" />
 });
 
-const TestimonialSection = dynamic(() => import('@/components/TestimonialSection/TestimonialSection'), {
+const TestimonialSection = dynamic(() => import('@/components/sections/testimonial/TestimonialSection'), {
   loading: () => <div className="min-h-screen w-full bg-transparent" />
 });
 
-const FAQs = dynamic(() => import('@/components/faqs-section-two'), {
+const FAQs = dynamic(() => import('@/components/sections/help/faqs-section-two'), {
   loading: () => <div className="min-h-screen w-full bg-transparent" />
 });
 
-const FooterSection = dynamic(() => import('@/components/footer-one'));
+const FooterSection = dynamic(() => import('@/components/layout/footer-one'));
 
 export default function Page() {
   const router = useRouter();

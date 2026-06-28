@@ -1,6 +1,6 @@
 import React from 'react';
-import { AppleHelloEffectEnglish } from "@/components/apple-hello-effect/apple-hello-effect-english";
-import AnimatedName from "@/components/animated-name"; // Adjust this import path to wherever you saved it!
+import { AppleHelloEffectEnglish } from "@/components/features/misc/apple-hello-effect-english";
+import AnimatedName from "@/components/features/misc/animated-name"; // Adjust this import path to wherever you saved it!
 
 export interface UserGreetingProps {
   name: string;

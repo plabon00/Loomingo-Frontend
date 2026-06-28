@@ -1,8 +1,8 @@
 'use client';
 
 import Navbar from '@/components/shadcn-space/radix/blocks/navbar-01/navbar';
-import OtherPagesFooter from '@/components/other-pages-footer';
-import AccountSafetySection from '@/components/help/AccountSafetySection'; 
+import OtherPagesFooter from '@/components/layout/other-pages-footer';
+import AccountSafetySection from '@/components/sections/help/AccountSafetySection'; 
 
 export default function AccountSafetyPage() {
   return (

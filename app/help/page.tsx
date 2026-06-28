@@ -1,8 +1,8 @@
 'use client';
 
 import Navbar from '@/components/shadcn-space/radix/blocks/navbar-01/navbar';
-import HelpCenterSection from '@/components/HelpCenterSection/HelpCenterSection';
-import OtherPagesFooter from '@/components/other-pages-footer';
+import HelpCenterSection from '@/components/sections/help/HelpCenterSection';
+import OtherPagesFooter from '@/components/layout/other-pages-footer';
 
 export default function HelpPage() {
   return (

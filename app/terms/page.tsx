@@ -1,8 +1,8 @@
 'use client';
 
-import OtherPagesFooter from '@/components/other-pages-footer';
+import OtherPagesFooter from '@/components/layout/other-pages-footer';
 import Navbar from '@/components/shadcn-space/radix/blocks/navbar-01/navbar';
-import TermsSection from '@/components/TermsSection/TermsSection'; // Ensure this path matches where you saved the component
+import TermsSection from '@/components/sections/legal/TermsSection'; // Ensure this path matches where you saved the component
 import Link from 'next/link';
 
 export default function TermsPage() {

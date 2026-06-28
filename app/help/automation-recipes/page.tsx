@@ -1,9 +1,9 @@
 'use client';
 
 import Navbar from '@/components/shadcn-space/radix/blocks/navbar-01/navbar';
-import OtherPagesFooter from '@/components/other-pages-footer';
+import OtherPagesFooter from '@/components/layout/other-pages-footer';
 // CHANGE THIS IMPORT FOR EACH PAGE
-import AutomationRecipesSection from '@/components/help/AutomationRecipesSection'; 
+import AutomationRecipesSection from '@/components/sections/help/AutomationRecipesSection'; 
 
 export default function HelpArticlePage() {
   return (

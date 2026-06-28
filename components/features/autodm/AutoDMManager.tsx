@@ -31,7 +31,7 @@ import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import AutomationMediaCard from "@/components/ui/automation-card";
 import { auth } from "@/lib/firebase";
-import { InstagramSettingsModal } from "@/components/instagram-settings-modal";
+import { InstagramSettingsModal } from "@/components/modals/instagram-settings-modal";
 
 type AutomationStatsDTO = {
   totalDmsSent: number;

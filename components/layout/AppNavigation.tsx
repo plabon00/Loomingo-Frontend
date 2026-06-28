@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { SuggestUsModal } from "@/components/suggest-us-modal";
+import { SuggestUsModal } from "@/components/modals/suggest-us-modal";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ManageProfileModal } from "@/components/manage-profile-modal";
+import { ManageProfileModal } from "@/components/modals/manage-profile-modal";
 
 import {
   Home,
@@ -29,7 +29,7 @@ import { auth } from "@/lib/firebase";
 import { signOut, onAuthStateChanged, User } from "firebase/auth";
 
 // Signup Form
-import { SignupForm } from "@/components/signup-form";
+import { SignupForm } from "@/components/forms/signup-form";
 
 import {
   Alert,

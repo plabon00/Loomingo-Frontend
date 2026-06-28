@@ -1,8 +1,8 @@
 'use client';
 
 import Navbar from '@/components/shadcn-space/radix/blocks/navbar-01/navbar';
-import OtherPagesFooter from '@/components/other-pages-footer';
-import GettingStartedSection from '@/components/help/GettingStartedSection'; // Ensure path is correct
+import OtherPagesFooter from '@/components/layout/other-pages-footer';
+import GettingStartedSection from '@/components/sections/help/GettingStartedSection'; // Ensure path is correct
 
 export default function GettingStartedPage() {
   return (
