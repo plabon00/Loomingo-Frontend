@@ -12,10 +12,12 @@ import { Plus, Trash2, Settings, History, Loader2, FileDown, Check, X, LayoutTem
 import Link from "next/link";
 
 const TEMPLATES = [
-  { id: 1, name: "Template 1" },
-  { id: 2, name: "Template 2" },
-  { id: 3, name: "Template 3" },
-  { id: 4, name: "Template 4" },
+  { id: 1, name: "Modern Teal (Default)" },
+  { id: 2, name: "Retro Beige" },
+  { id: 3, name: "Teal Ribbon" },
+  { id: 4, name: "Blue Wave" },
+  { id: 5, name: "Minimal Gold" },
+  { id: 6, name: "Dark Professional" },
 ];
 
 const DELIVERABLE_OPTIONS = ["Instagram Reel", "Instagram Story", "YouTube Video", "YouTube Short", "Static Post", "Carousel Post", "Other"];
@@ -34,7 +36,7 @@ export default function InvoiceGenerator() {
 
   // Form State
   const [formData, setFormData] = useState({
-    templateId: 4,
+    templateId: 1,
     brandName: "",
     billingAddress: "",
     gstin: "",
@@ -220,7 +222,7 @@ export default function InvoiceGenerator() {
   const [savedInvoiceNumber, setSavedInvoiceNumber] = useState<string | null>(null);
 
   const resetForm = () => {
-    setFormData({ templateId: 4, brandName: "", billingAddress: "", gstin: "", pan: "", contact: "", igUserName: "", liveDate: "", currency: "INR", campaignName: "" });
+    setFormData({ templateId: 1, brandName: "", billingAddress: "", gstin: "", pan: "", contact: "", igUserName: "", liveDate: "", currency: "INR", campaignName: "" });
     setSelectedDeliverables([]);
     setLineItems([{ no: 1, type: "Reels", name: "Instagram Reel", quantity: 1, price: 5000 }]);
     setIsNewBrand(true);
