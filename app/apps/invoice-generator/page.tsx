@@ -217,9 +217,20 @@ export default function InvoiceGenerator() {
   };
 
   const [isSaving, setIsSaving] = useState(false);
+  const [savedInvoiceNumber, setSavedInvoiceNumber] = useState<string | null>(null);
+
+  const resetForm = () => {
+    setFormData({ templateId: 4, brandName: "", billingAddress: "", gstin: "", pan: "", contact: "", igUserName: "", liveDate: "", currency: "INR", campaignName: "" });
+    setSelectedDeliverables([]);
+    setLineItems([{ no: 1, type: "Reels", name: "Instagram Reel", quantity: 1, price: 5000 }]);
+    setIsNewBrand(true);
+    setSelectedBrandId("");
+    setPreviewPdfUrl(null);
+  };
 
   const handleGenerate = async (mode: 'preview' | 'save' | 'saveAndDownload' = 'preview') => {
     if (!user) return;
+    if (mode !== 'preview' && (isSaving || isGenerating)) return; // guard against double-submit
     
     if (mode === 'preview') {
       setIsPreviewLoading(true);
@@ -286,9 +297,12 @@ export default function InvoiceGenerator() {
             a.download = `Invoice_${formData.brandName.replace(/\s+/g, '_')}_${Date.now()}.pdf`;
             a.click();
           }
+          setSavedInvoiceNumber(data.invoiceNumber || "");
+          resetForm();
         } else {
           // Just save
-          alert("Invoice saved successfully!");
+          setSavedInvoiceNumber(data.invoiceNumber || "");
+          resetForm();
         }
       } else {
         if (mode !== 'preview') alert(data.error || "Failed to generate invoice");
@@ -622,6 +636,25 @@ export default function InvoiceGenerator() {
         </div>
 
       </main>
+
+      {/* Saved Success Popup */}
+      {savedInvoiceNumber !== null && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setSavedInvoiceNumber(null)}>
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center animate-in fade-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
+            <div className="mx-auto mb-4 size-16 rounded-full bg-green-100 flex items-center justify-center">
+              <Check className="size-8 text-green-600" />
+            </div>
+            <h3 className="text-xl font-bold text-zinc-900">Invoice Saved!</h3>
+            {savedInvoiceNumber && <p className="text-sm text-zinc-500 mt-1">Invoice <span className="font-semibold text-zinc-700">{savedInvoiceNumber}</span> has been saved.</p>}
+            <div className="flex gap-2 mt-6">
+              <Link href="/apps/invoice-generator/history" className="flex-1">
+                <Button variant="outline" className="w-full">View History</Button>
+              </Link>
+              <Button className="flex-1 bg-green-600 hover:bg-green-700 text-white" onClick={() => setSavedInvoiceNumber(null)}>Done</Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <BottomDock />
     </div>

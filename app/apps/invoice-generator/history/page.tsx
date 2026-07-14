@@ -6,7 +6,7 @@ import { onAuthStateChanged, User } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { DesktopSidebar, MobileNavbar, BottomDock } from "@/components/layout/AppNavigation";
 import { Button } from "@/components/ui/button";
-import { Loader2, ArrowLeft, FileDown, Search, X } from "lucide-react";
+import { Loader2, ArrowLeft, FileDown, Search, X, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 
@@ -96,6 +96,20 @@ export default function InvoiceHistory() {
     setIsDownloading(false);
   };
 
+  const handleDelete = async (inv: Invoice) => {
+    if (!user || !confirm(`Delete invoice ${inv.invoiceNumber}? This cannot be undone.`)) return;
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_INVOICE_SERVICE_URL}/api/invoices?id=${inv.id}&userId=${user.uid}`, { method: "DELETE" });
+      if (res.ok) {
+        setInvoices(prev => prev.filter(i => i.id !== inv.id));
+      } else {
+        alert("Failed to delete invoice.");
+      }
+    } catch {
+      alert("Network error deleting invoice.");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-zinc-50 text-zinc-900 pb-20 md:pb-0">
       <DesktopSidebar />
@@ -151,15 +165,25 @@ export default function InvoiceHistory() {
                         <td className="px-6 py-4 text-sm text-zinc-600">{inv.brandName}</td>
                         <td className="px-6 py-4 text-sm text-zinc-500">{new Date(inv.createdAt).toLocaleDateString()}</td>
                         <td className="px-6 py-4 text-right">
-                          <button 
+                          <button
                             onClick={(e) => {
                               e.stopPropagation(); // prevent row click
                               openPreview(inv);
                             }}
-                            className="inline-flex items-center justify-center p-2 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            className="inline-flex items-center justify-center p-2 text-zinc-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                             title="View & Download PDF"
                           >
                             <FileDown className="size-5" />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation(); // prevent row click
+                              handleDelete(inv);
+                            }}
+                            className="inline-flex items-center justify-center p-2 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            title="Delete Invoice"
+                          >
+                            <Trash2 className="size-5" />
                           </button>
                         </td>
                       </tr>
