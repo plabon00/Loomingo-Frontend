@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Plus, Trash2, Settings, History, Loader2, FileDown, Check, X, LayoutTemplate, Building, Megaphone, List, Save, Eye } from "lucide-react";
 import Link from "next/link";
+import { InvoiceHtmlPreview } from "@/components/invoice/InvoiceHtmlPreview";
 
 const TEMPLATES = [
   { id: 1, name: "Modern Teal (Default)" },
@@ -30,9 +31,8 @@ export default function InvoiceGenerator() {
   const [isGenerating, setIsGenerating] = useState(false);
   
   // Preview State
-  const [previewPdfUrl, setPreviewPdfUrl] = useState<string | null>(null);
-  const [isPreviewLoading, setIsPreviewLoading] = useState(false);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
+  const [creatorSettings, setCreatorSettings] = useState<any>(null);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -59,15 +59,13 @@ export default function InvoiceGenerator() {
   const [selectedBrandId, setSelectedBrandId] = useState<string>("");
   const [isSavingBrand, setIsSavingBrand] = useState(false);
 
-  // Refs for debouncing
-  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
-
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
         await fetchInstagramUsername(currentUser);
         await fetchBrands(currentUser.uid);
+        await fetchCreatorSettings(currentUser.uid);
       } else {
         router.push("/");
       }
@@ -76,22 +74,17 @@ export default function InvoiceGenerator() {
     return () => unsub();
   }, [router]);
 
-  // Trigger preview generation whenever form data changes (debounced)
-  useEffect(() => {
-    if (!user || isLoading) return;
-    
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
+  const fetchCreatorSettings = async (userId: string) => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_INVOICE_SERVICE_URL}/api/creator/settings?userId=${userId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setCreatorSettings(data.settings);
+      }
+    } catch (err) {
+      console.error("Failed to fetch creator settings", err);
     }
-
-    debounceTimerRef.current = setTimeout(() => {
-      handleGenerate('preview');
-    }, 1500); // 1.5s debounce
-
-    return () => {
-      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
-    };
-  }, [formData, lineItems, selectedDeliverables, user]);
+  };
 
   const fetchInstagramUsername = async (currentUser: User) => {
     try {
@@ -227,16 +220,13 @@ export default function InvoiceGenerator() {
     setLineItems([{ no: 1, type: "Reels", name: "Instagram Reel", quantity: 1, price: 5000 }]);
     setIsNewBrand(true);
     setSelectedBrandId("");
-    setPreviewPdfUrl(null);
   };
 
-  const handleGenerate = async (mode: 'preview' | 'save' | 'saveAndDownload' = 'preview') => {
+  const handleGenerate = async (mode: 'save' | 'saveAndDownload' = 'save') => {
     if (!user) return;
-    if (mode !== 'preview' && (isSaving || isGenerating)) return; // guard against double-submit
+    if (isSaving || isGenerating) return; // guard against double-submit
     
-    if (mode === 'preview') {
-      setIsPreviewLoading(true);
-    } else if (mode === 'saveAndDownload') {
+    if (mode === 'saveAndDownload') {
       setIsGenerating(true);
     } else {
       setIsSaving(true);
@@ -264,7 +254,7 @@ export default function InvoiceGenerator() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userId: user.uid,
-          preview: mode === 'preview',
+          preview: false,
           invoiceData: { 
             ...formData, 
             deliverables: selectedDeliverables.join(", "),
@@ -289,9 +279,7 @@ export default function InvoiceGenerator() {
           finalUrl = data.pdfUrl;
         }
 
-        if (mode === 'preview') {
-          setPreviewPdfUrl(finalUrl);
-        } else if (mode === 'saveAndDownload') {
+        if (mode === 'saveAndDownload') {
           // Trigger download directly for final generation
           if (finalUrl) {
             const a = document.createElement("a");
@@ -307,14 +295,13 @@ export default function InvoiceGenerator() {
           resetForm();
         }
       } else {
-        if (mode !== 'preview') alert(data.error || "Failed to generate invoice");
+        alert(data.error || "Failed to generate invoice");
       }
     } catch (err) {
       console.error(err);
-      if (mode !== 'preview') alert("Network error generating invoice.");
+      alert("Network error generating invoice.");
     } finally {
-      if (mode === 'preview') setIsPreviewLoading(false);
-      else if (mode === 'saveAndDownload') setIsGenerating(false);
+      if (mode === 'saveAndDownload') setIsGenerating(false);
       else setIsSaving(false);
     }
   };
@@ -617,23 +604,19 @@ export default function InvoiceGenerator() {
 
           <div className="hidden lg:flex w-full p-3 items-center justify-between bg-white border-b border-zinc-200 z-10 shrink-0 shadow-sm">
             <h3 className="text-sm font-semibold text-black flex items-center gap-2">
-              Live Preview
-              {isPreviewLoading && <Loader2 className="size-3.5 animate-spin text-zinc-500" />}
+              Live HTML Preview
             </h3>
-            <span className="text-xs text-zinc-500 font-medium bg-zinc-100 px-2 py-1 rounded-md">Auto-updates as you type</span>
+            <span className="text-xs text-zinc-500 font-medium bg-zinc-100 px-2 py-1 rounded-md">Instantaneous</span>
           </div>
           
-          <div className="flex-1 p-4 md:p-8 flex items-center justify-center overflow-hidden">
-            {previewPdfUrl ? (
-              <div className="w-full h-full max-w-3xl rounded-lg shadow-xl overflow-hidden border border-zinc-300 bg-white">
-                <iframe src={`${previewPdfUrl}#view=FitH`} className="w-full h-full border-0" />
-              </div>
-            ) : (
-              <div className="text-center text-zinc-400 flex flex-col items-center">
-                <FileDown className="size-12 mb-3 opacity-20" />
-                <p>Fill out the form to generate a live preview</p>
-              </div>
-            )}
+          <div className="flex-1 p-4 md:p-8 flex items-center justify-center overflow-auto custom-scrollbar">
+            <div className="w-[794px] min-w-[794px] h-[1123px] min-h-[1123px] bg-white rounded-sm shadow-2xl overflow-hidden border border-zinc-300 relative scale-75 lg:scale-90 xl:scale-100 transform origin-top">
+              <InvoiceHtmlPreview 
+                invoiceData={formData} 
+                lineItems={lineItems} 
+                creatorSettings={creatorSettings} 
+              />
+            </div>
           </div>
         </div>
 
