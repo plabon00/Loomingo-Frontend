@@ -20,6 +20,8 @@ import {
   X,
   AlertCircle,
   CheckCircle2,
+  LayoutGrid,
+  FileText,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -239,91 +241,16 @@ async function verifyInstagramConnection(user: User) {
 
 export function MobileNavbar() {
   const pathname = usePathname();
-  const [user, setUser] = useState<User | null>(null);
-  const [customPhoto, setCustomPhoto] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchCustomProfile = async (currentUser: User) => {
-      try {
-        const token = await currentUser.getIdToken();
-        const res = await fetch(`/api/v1/me/profile`, {
-          headers: { 
-            Authorization: `Bearer ${token}`,
-            "ngrok-skip-browser-warning": "true"
-          },
-        });
-        if (res.ok) {
-          const data = await res.json();
-          setCustomPhoto(data.photoUrl || null);
-        }
-      } catch (error) {
-        console.error("Failed to fetch custom profile photo", error);
-      }
-    };
-
-    const unsub = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      if (currentUser) {
-        fetchCustomProfile(currentUser);
-      } else {
-        setCustomPhoto(null);
-      }
-    });
-
-    const handleProfileUpdate = () => {
-      if (auth.currentUser) fetchCustomProfile(auth.currentUser);
-    };
-
-    window.addEventListener("userProfileUpdated", handleProfileUpdate);
-
-    return () => {
-      unsub();
-      window.removeEventListener("userProfileUpdated", handleProfileUpdate);
-    };
-  }, []);
-
-  let pageTitle = "Loomingo";
-
-  if (pathname === "/home-page") pageTitle = "Home";
-  else if (pathname === "/autodm") pageTitle = "Auto-DM";
-  else if (pathname === "/store") pageTitle = "Store";
-
-  return (
-    <div className="md:hidden fixed top-0 left-0 right-0 h-14 bg-white/80 backdrop-blur-md border-b border-zinc-100 z-50 flex items-center justify-between px-4">
-      
-      <div className="flex items-center">
-        <img 
-          src="/icon.png" 
-          alt="Loomingo Logo" 
-          className="h-7 w-auto object-contain" 
-        />
-      </div>
-
-      <h1 className="font-semibold text-base text-zinc-900 tracking-wide absolute left-1/2 -translate-x-1/2">
-        {pageTitle}
-      </h1>
-
-      <div className="flex items-center justify-end min-w-[24px]">
-      </div>
-    </div>
-  );
-}
-
-/* =========================================================
-   MOBILE BOTTOM DOCK
-========================================================= */
-
-export function BottomDock() {
-  const pathname = usePathname();
   const router = useRouter();
+
+  // Profile and Modals State
   const [showManageAccount, setShowManageAccount] = useState(false);
   const [showSuggestModal, setShowSuggestModal] = useState(false);
-
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+
   const [user, setUser] = useState<User | null>(null);
   const [customPhoto, setCustomPhoto] = useState<string | null>(null);
 
-  // Overlay states
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMessage, setAuthMessage] = useState("");
   const [showForm, setShowForm] = useState(true);
@@ -336,7 +263,6 @@ export function BottomDock() {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   useEffect(() => {
-    // ... logic remains exactly the same
     const fetchCustomProfile = async (currentUser: User) => {
       try {
         const token = await currentUser.getIdToken();
@@ -406,6 +332,194 @@ export function BottomDock() {
     }
   };
 
+  let pageTitle = "Loomingo";
+
+  if (pathname === "/home-page") pageTitle = "Home";
+  else if (pathname === "/autodm") pageTitle = "Auto-DM";
+  else if (pathname === "/store") pageTitle = "Store";
+  else if (pathname.startsWith("/apps")) pageTitle = "Apps";
+
+  return (
+    <>
+      <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} message={authMessage} showForm={showForm} />
+      <TopAlert message={alertConfig.message} variant={alertConfig.variant} onClose={() => setAlertConfig({ message: "", variant: "default" })} />
+      <LogoutConfirmModal isOpen={showLogoutConfirm} onClose={() => setShowLogoutConfirm(false)} onConfirm={confirmLogout} />
+      <SuggestUsModal isOpen={showSuggestModal} onClose={() => setShowSuggestModal(false)} onSuccess={(message) => setAlertConfig({ message, variant: "default" })} />
+      <ManageProfileModal isOpen={showManageAccount} onClose={() => setShowManageAccount(false)} onSuccess={(message) => setAlertConfig({ message, variant: "default" })} onError={(message) => setAlertConfig({ message, variant: "destructive" })} />
+
+      {isProfileOpen && (
+        <div className="fixed inset-0 z-40" onClick={() => setIsProfileOpen(false)} />
+      )}
+
+      <div className="md:hidden fixed top-0 left-0 right-0 h-14 bg-white/80 backdrop-blur-md border-b border-zinc-100 z-50 flex items-center justify-between px-4">
+        
+        <div className="flex items-center">
+          <img 
+            src="/icon.png" 
+            alt="Loomingo Logo" 
+            className="h-7 w-auto object-contain" 
+          />
+        </div>
+
+        <h1 className="font-semibold text-base text-zinc-900 tracking-wide absolute left-1/2 -translate-x-1/2">
+          {pageTitle}
+        </h1>
+
+        <div className="flex items-center justify-end min-w-[24px] relative">
+          <button
+            onClick={() => setIsProfileOpen(!isProfileOpen)}
+            className="flex items-center justify-center size-8 rounded-full border border-zinc-200 bg-white hover:bg-zinc-50 transition-colors"
+          >
+            {customPhoto ? (
+              <img src={customPhoto} alt="Profile" className="size-full rounded-full object-cover" referrerPolicy="no-referrer" />
+            ) : (
+              <UserCircle className="size-5 text-zinc-500" />
+            )}
+          </button>
+
+          {isProfileOpen && (
+            <div className="absolute top-10 right-0 w-48 bg-white border border-zinc-100 shadow-2xl rounded-[1.5rem] py-2 flex flex-col z-50 animate-in slide-in-from-top-2 fade-in zoom-in-95">
+              <button
+                onClick={() => handleProtectedAction("Manage Account")}
+                className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 text-left transition-colors"
+              >
+                <Settings className="size-4 text-zinc-400" /> Manage Account
+              </button>
+              <button
+                onClick={() => handleProtectedAction("Help")}
+                className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 text-left transition-colors"
+              >
+                <LifeBuoy className="size-4 text-zinc-400" /> Help
+              </button>
+              <button
+                onClick={() => handleProtectedAction("Suggestions")}
+                className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 text-left transition-colors"
+              >
+                <Lightbulb className="size-4 text-zinc-400" /> Suggest us
+              </button>
+
+              <div className="border-t my-1 border-zinc-100" />
+
+              {user ? (
+                <button
+                  onClick={() => { setIsProfileOpen(false); setShowLogoutConfirm(true); }}
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 text-left transition-colors"
+                >
+                  <LogOut className="size-4" /> Sign-out
+                </button>
+              ) : (
+                <button
+                  onClick={() => { setIsProfileOpen(false); setAuthMessage(""); setShowForm(true); setShowAuthModal(true); }}
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-red-950 hover:bg-zinc-50 text-left transition-colors"
+                >
+                  <UserCircle className="size-4" /> Sign-in/up
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
+
+/* =========================================================
+   MOBILE BOTTOM DOCK
+========================================================= */
+
+export function BottomDock() {
+  const pathname = usePathname();
+  const router = useRouter();
+  const [showManageAccount, setShowManageAccount] = useState(false);
+  const [showSuggestModal, setShowSuggestModal] = useState(false);
+
+  const [isAppsOpen, setIsAppsOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [customPhoto, setCustomPhoto] = useState<string | null>(null);
+
+  // Overlay states
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authMessage, setAuthMessage] = useState("");
+  const [showForm, setShowForm] = useState(true);
+
+  const [alertConfig, setAlertConfig] = useState<{
+    message: string;
+    variant: "default" | "destructive";
+  }>({ message: "", variant: "default" });
+
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
+  useEffect(() => {
+    // ... logic remains exactly the same
+    const fetchCustomProfile = async (currentUser: User) => {
+      try {
+        const token = await currentUser.getIdToken();
+        const res = await fetch(`/api/v1/me/profile`, {
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            "ngrok-skip-browser-warning": "true"
+          },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setCustomPhoto(data.photoUrl || null);
+        }
+      } catch (error) {
+        console.error("Failed to fetch custom profile photo", error);
+      }
+    };
+
+    const unsub = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      if (currentUser) {
+        fetchCustomProfile(currentUser);
+      } else {
+        setCustomPhoto(null);
+      }
+    });
+
+    const handleProfileUpdate = () => {
+      if (auth.currentUser) fetchCustomProfile(auth.currentUser);
+    };
+
+    window.addEventListener("userProfileUpdated", handleProfileUpdate);
+
+    return () => {
+      unsub();
+      window.removeEventListener("userProfileUpdated", handleProfileUpdate);
+    };
+  }, []);
+
+  const confirmLogout = async () => {
+    try {
+      await signOut(auth);
+      sessionStorage.clear();
+      localStorage.clear();
+      setShowLogoutConfirm(false);
+      setIsAppsOpen(false);
+      router.push("/");
+    } catch (error) {
+      console.error("Failed to logout:", error);
+    }
+  };
+
+  const handleProtectedAction = (actionName: string) => {
+    setIsAppsOpen(false);
+    if (!user) {
+      setAuthMessage(`Please sign in first to access ${actionName}.`);
+      setShowForm(true);
+      setShowAuthModal(true);
+      return;
+    }
+    if (actionName === "Suggestions") {
+      setShowSuggestModal(true);
+    } else if (actionName === "Manage Account") {
+      setShowManageAccount(true);
+    } else {
+      console.log(`Navigating to ${actionName}`);
+    }
+  };
+
   const handleAutoDMClick = async (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     if (!user) {
@@ -444,8 +558,8 @@ export function BottomDock() {
       <SuggestUsModal isOpen={showSuggestModal} onClose={() => setShowSuggestModal(false)} onSuccess={(message) => setAlertConfig({ message, variant: "default" })} />
       <ManageProfileModal isOpen={showManageAccount} onClose={() => setShowManageAccount(false)} onSuccess={(message) => setAlertConfig({ message, variant: "default" })} onError={(message) => setAlertConfig({ message, variant: "destructive" })} />
 
-      {isProfileOpen && (
-        <div className="fixed inset-0 z-40" onClick={() => setIsProfileOpen(false)} />
+      {isAppsOpen && (
+        <div className="fixed inset-0 z-40" onClick={() => setIsAppsOpen(false)} />
       )}
 
       <div className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white/80 backdrop-blur-xl border-t border-zinc-100 shadow-[0_-5px_15px_-10px_rgba(0,0,0,0.05)] z-50 flex items-center justify-around px-2 pb-safe">
@@ -466,58 +580,25 @@ export function BottomDock() {
 
         <div className="relative">
           <button
-            onClick={() => setIsProfileOpen(!isProfileOpen)}
+            onClick={() => setIsAppsOpen(!isAppsOpen)}
             className={cn(
               "flex flex-col items-center gap-1 p-2 transition-colors duration-300",
-              isProfileOpen ? "text-red-600 font-semibold" : "text-zinc-400 hover:text-zinc-900"
+              isAppsOpen ? "text-red-600 font-semibold" : "text-zinc-400 hover:text-zinc-900"
             )}
           >
-            {customPhoto ? (
-              <img src={customPhoto} alt="Profile" className="size-5 rounded-full object-cover border border-zinc-200" referrerPolicy="no-referrer" />
-            ) : (
-              <UserCircle className="size-5" />
-            )}
-            <span className="text-[10px]">Profile</span>
+            <LayoutGrid className="size-5" />
+            <span className="text-[10px]">Apps</span>
           </button>
 
-          {isProfileOpen && (
+          {isAppsOpen && (
             <div className="absolute bottom-16 right-0 w-48 bg-white border border-zinc-100 shadow-2xl rounded-[1.5rem] py-2 flex flex-col z-50 animate-in slide-in-from-bottom-2 fade-in zoom-in-95">
-              <button
-                onClick={() => handleProtectedAction("Manage Account")}
+              <Link
+                href="/apps/invoice-generator"
+                onClick={() => setIsAppsOpen(false)}
                 className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 text-left transition-colors"
               >
-                <Settings className="size-4 text-zinc-400" /> Manage Account
-              </button>
-              <button
-                onClick={() => handleProtectedAction("Help")}
-                className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 text-left transition-colors"
-              >
-                <LifeBuoy className="size-4 text-zinc-400" /> Help
-              </button>
-              <button
-                onClick={() => handleProtectedAction("Suggestions")}
-                className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 text-left transition-colors"
-              >
-                <Lightbulb className="size-4 text-zinc-400" /> Suggest us
-              </button>
-
-              <div className="border-t my-1 border-zinc-100" />
-
-              {user ? (
-                <button
-                  onClick={() => { setIsProfileOpen(false); setShowLogoutConfirm(true); }}
-                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 text-left transition-colors"
-                >
-                  <LogOut className="size-4" /> Sign-out
-                </button>
-              ) : (
-                <button
-                  onClick={() => { setIsProfileOpen(false); setAuthMessage(""); setShowForm(true); setShowAuthModal(true); }}
-                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-red-950 hover:bg-zinc-50 text-left transition-colors"
-                >
-                  <UserCircle className="size-4" /> Sign-in/up
-                </button>
-              )}
+                <FileText className="size-4 text-zinc-400" /> Invoice Generator
+              </Link>
             </div>
           )}
         </div>
@@ -709,6 +790,14 @@ export function DesktopSidebar() {
             <ShoppingBag className="size-5 shrink-0" />
             {!isCollapsed && <span>Store</span>}
           </Link>
+
+          <div className="pt-4 mt-4 border-t border-zinc-100">
+            {!isCollapsed && <p className="px-4 text-xs font-semibold text-zinc-400 mb-2 uppercase tracking-wider">Apps</p>}
+            <Link href="/apps/invoice-generator" className={getSidebarItemClass("/apps/invoice-generator")}>
+              <FileText className="size-5 shrink-0" />
+              {!isCollapsed && <span>Invoice Generator</span>}
+            </Link>
+          </div>
         </nav>
 
         <div className="mt-auto border-t border-zinc-100 pt-4 pb-6 px-3 space-y-2">

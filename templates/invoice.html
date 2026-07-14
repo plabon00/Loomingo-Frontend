@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Template</title>
+    <style>
+        /* 
+         * PROFESSIONAL MARGINS & A4 SETUP 
+         * Designed to render perfectly at 794px x 1123px (A4 size at 96 DPI)
+         */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            color: #1a1a1a;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .invoice-box {
+            background-color: #ffffff;
+            width: 210mm;
+            min-height: 297mm;
+            padding: 0;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        /* SVG Background Wave */
+        .header-wave {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100px;
+            z-index: 1;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%23d9d9d9' fill-opacity='1' d='M0,64L80,74.7C160,85,320,107,480,101.3C640,96,800,64,960,64C1120,64,1280,96,1360,112L1440,128L1440,0L1360,0C1280,0,1120,0,960,0C800,0,640,0,480,0C320,0,160,0,80,0L0,0Z'%3E%3C/path%3E%3C/svg%3E");
+            background-size: cover;
+            background-position: top;
+        }
+
+        .content-wrapper {
+            position: relative;
+            z-index: 2;
+            padding: 25mm 20mm 25mm 20mm; /* Top padding clears the wave */
+        }
+
+        /* Header Section */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 10px;
+            margin-top: -30px;
+        }
+
+        h1.title {
+            font-size: 36px;
+            font-weight: 900;
+            letter-spacing: -1px;
+            text-transform: uppercase;
+        }
+
+        .invoice-no {
+            font-size: 20px;
+            font-weight: 800;
+            color: #1a1a1a;
+            letter-spacing: 1px;
+        }
+
+        .date-section {
+            font-size: 12px;
+            margin-bottom: 15px;
+        }
+
+        .date-section strong {
+            font-weight: 700;
+        }
+
+        /* Billing & Details Grids */
+        .flex-grid {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-size: 11.5px;
+            line-height: 1.6;
+        }
+
+        .flex-column {
+            width: 45%;
+        }
+
+        .flex-column h3 {
+            font-size: 12px;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+        
+        .flex-column strong {
+            font-weight: 700;
+        }
+
+        /* Info Box for Campaign & Bank */
+        .info-box {
+            background-color: #fbfbfb;
+            border-left: 3px solid #1a1a1a;
+            padding: 10px;
+            font-size: 11px;
+            line-height: 1.5;
+        }
+
+        .info-box h3 {
+            font-size: 11.5px;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        /* Table Section */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+            font-size: 11.5px;
+        }
+
+        th {
+            background-color: #ebebeb;
+            padding: 8px;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        th.left-align { text-align: left; }
+        th.right-align { text-align: right; }
+
+        td {
+            padding: 10px 8px;
+            text-align: center;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        td.left-align { text-align: left; }
+        td.right-align { text-align: right; }
+
+        /* Total Section */
+        .total-section {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 12px 8px;
+            font-size: 14px;
+            border-bottom: 1px solid #e0e0e0;
+            margin-bottom: 20px;
+        }
+
+        .total-section .label {
+            font-weight: 800;
+            margin-right: 60px;
+        }
+
+        .total-section .amount {
+            font-weight: 800;
+        }
+
+        /* Signature Section */
+        .signature-section {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 30px;
+        }
+
+        .signature-content {
+            text-align: center;
+            font-size: 12px;
+            font-weight: 800;
+            width: 150px;
+        }
+
+        .signature-img-placeholder {
+            height: 60px;
+            width: 100%;
+            margin-bottom: 5px;
+            border-bottom: 1px solid #333;
+        }
+
+        /* Footer / Terms */
+        .footer {
+            font-size: 9px;
+            line-height: 1.2;
+        }
+
+        .footer h4 {
+            font-size: 10px;
+            font-weight: 800;
+            margin: 0;
+            padding: 0;
+            margin-bottom: 2px;
+        }
+        
+        /* Copyright Footer */
+        .copyright-footer {
+            position: absolute;
+            bottom: 15mm;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 10px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="invoice-box">
+        <!-- Abstract Top Wave -->
+        <div class="header-wave"></div>
+
+        <div class="content-wrapper">
+            
+            <!-- Title & Number -->
+            <div class="header">
+                <h1 class="title">INVOICE</h1>
+                <div class="invoice-no">INVOICE NO. 01</div>
+            </div>
+
+            <!-- Date -->
+            <div class="date-section">
+                <strong>Date:</strong> DD/MM/YYYY
+            </div>
+
+            <!-- Billing Grid -->
+            <div class="flex-grid">
+                <div class="flex-column">
+                    <h3>Billed to:</h3>
+                    <strong>Brand/Agency Name</strong><br>
+                    Billing Address<br>
+                    PAN: <br>
+                    GST: <br>
+                    Email: <br>
+                    Phone: 
+                </div>
+                <div class="flex-column">
+                    <h3>From:</h3>
+                    <strong>Creator's Name</strong><br>
+                    Billing Address<br>
+                    PAN: <br>
+                    Email: <br>
+                    Phone: 
+                </div>
+            </div>
+
+            <!-- Campaign & Bank Details Grid -->
+            <div class="flex-grid">
+                <!-- Campaign Details -->
+                <div class="flex-column info-box">
+                    <h3>Campaign Details</h3>
+                    Instagram Handle: <strong>@ig_user_Name</strong><br>
+                    Deliverables: [Description of reels/stories]<br>
+                    Live date: DD/MM/YYYY
+                </div>
+                <!-- Bank Details -->
+                <div class="flex-column info-box">
+                    <h3>Bank Details</h3>
+                    Account Name: <br>
+                    Account Number: <br>
+                    IFSC: <br>
+                    Account Type: <br>
+                    Bank Name: <br>
+                    UPI ID: 
+                </div>
+            </div>
+
+            <!-- Invoice Table -->
+            <table>
+                <thead>
+                    <tr>
+                        <th class="left-align">Item</th>
+                        <th>Quantity</th>
+                        <th class="right-align">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="left-align">XYZ</td>
+                        <td>1</td>
+                        <td class="right-align">₹2,000.00</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Total -->
+            <div class="total-section">
+                <div class="label">Total</div>
+                <div class="amount">₹2,000.00</div>
+            </div>
+
+            <!-- Signature -->
+            <div class="signature-section">
+                <div class="signature-content">
+                    <div class="signature-img-placeholder"></div>
+                    Signature
+                </div>
+            </div>
+
+            <!-- Footer / Terms -->
+            <div class="footer">
+                <h4>Payment Terms</h4>
+                • 100% amount payable after the reel going live.
+            </div>
+
+        </div>
+
+        <!-- Copyright Footer -->
+        <div class="copyright-footer">
+            All copyright reserved by @iguserid
+        </div>
+    </div>
+
+</body>
+</html>
