@@ -493,81 +493,109 @@ export default function InvoiceGenerator() {
               </CardContent>
             </Card>
 
-            <Card className="shadow-sm border-zinc-200/60 bg-white">
-              <CardHeader className="pb-3 border-b border-zinc-100 bg-zinc-50/50 flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle className="text-lg font-semibold text-black flex items-center gap-2">
-                    <List className="size-5 text-orange-500" /> Line Items
-                  </CardTitle>
-                  <CardDescription className="mt-1.5">Add your services and pricing.</CardDescription>
-                </div>
-                <Button size="sm" onClick={addLineItem} className="h-8 gap-1 bg-green-600 hover:bg-green-700 text-white shadow-sm"><Plus className="size-3.5" /> Add</Button>
+            <Card className="shadow-sm border-zinc-200/60 bg-white overflow-hidden">
+              <CardHeader className="pb-4 border-b border-zinc-100 bg-zinc-50/50">
+                <CardTitle className="text-lg font-semibold text-black flex items-center gap-2">
+                  <List className="size-5 text-orange-500" /> Line Items
+                </CardTitle>
+                <CardDescription className="mt-1.5">Add your services and pricing.</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4 pt-4">
-                {lineItems.map((item, index) => (
-                  <div key={index} className="flex flex-col sm:flex-row gap-3 items-start sm:items-center bg-zinc-50 p-3 rounded-lg border border-zinc-200/60 shadow-sm transition-all hover:border-zinc-300">
-                    <select 
-                      className="h-10 w-full sm:w-24 shrink-0 rounded-md border border-zinc-200 bg-white px-2 text-sm font-medium text-zinc-900 focus-visible:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                      value={item.type}
-                      onChange={(e) => updateLineItem(index, "type", e.target.value)}
-                    >
-                      {ITEM_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-                    </select>
-                    
-                    <Input 
-                      placeholder="Item name" 
-                      value={item.name} 
-                      onChange={(e) => updateLineItem(index, "name", e.target.value)} 
-                      className="flex-1 bg-white h-10 text-zinc-900 border-zinc-200 focus:ring-2 focus:ring-indigo-500/20"
-                      disabled={item.type !== "Product"} // Auto-filled for Reels/Story
-                    />
-                    
-                      <div className="flex items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
-                      {/* Quantity Counter */}
-                      <div className="flex items-center border border-zinc-200 rounded-md bg-white overflow-hidden h-10 shrink-0">
-                        <button 
-                          onClick={() => updateLineItem(index, "quantity", Math.max(1, (item.quantity || 1) - 1))}
-                          className="px-3 bg-zinc-50 hover:bg-zinc-100 text-zinc-600 border-r border-zinc-200 h-full transition-colors"
-                        >-</button>
-                        <input 
-                          type="number" 
-                          value={item.quantity || 1} 
-                          onChange={(e) => updateLineItem(index, "quantity", parseInt(e.target.value) || 1)} 
-                          className="w-10 text-center text-sm font-medium outline-none text-zinc-900 [-moz-appearance:_textfield] [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none" 
-                          min={1}
-                        />
-                        <button 
-                          onClick={() => updateLineItem(index, "quantity", (item.quantity || 1) + 1)}
-                          className="px-3 bg-zinc-50 hover:bg-zinc-100 text-zinc-600 border-l border-zinc-200 h-full transition-colors"
-                        >+</button>
-                      </div>
-
-                      {/* Price Input */}
-                      <div className="relative flex items-center shrink-0">
-                        <span className="absolute left-3 text-zinc-500 text-sm font-medium">
-                          {formData.currency === 'USD' ? '$' : formData.currency === 'EUR' ? '€' : formData.currency === 'GBP' ? '£' : '₹'}
-                        </span>
-                        <input 
-                          type="number" 
-                          placeholder="Price" 
-                          value={item.price || ''} 
-                          onChange={(e) => updateLineItem(index, "price", parseFloat(e.target.value) || 0)} 
-                          className="w-24 h-10 pl-8 pr-2 rounded-md border border-zinc-200 bg-white text-sm font-medium text-zinc-900 outline-none focus:ring-2 focus:ring-indigo-500/20 [-moz-appearance:_textfield] [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none transition-all" 
-                        />
-                      </div>
-                      
-                      <Button variant="ghost" size="icon" onClick={() => removeLineItem(index)} className="text-red-500 hover:text-red-700 hover:bg-red-50 h-10 w-10 shrink-0 ml-1 transition-colors"><Trash2 className="size-4.5" /></Button>
-                    </div>
-                  </div>
-                ))}
-
-                <div className="flex justify-between items-center pt-2 mt-2 border-t border-zinc-100">
-                  <span className="text-sm font-medium text-zinc-600">Total Amount:</span>
-                  <span className="text-lg font-bold text-black">
-                    {formData.currency === 'USD' ? '$' : formData.currency === 'EUR' ? '€' : formData.currency === 'GBP' ? '£' : '₹'}
-                    {lineItems.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0).toFixed(2)}
-                  </span>
+              <CardContent className="p-0">
+                {/* Desktop Header Row */}
+                <div className="hidden sm:grid grid-cols-12 gap-3 px-6 py-3 bg-zinc-50/50 border-b border-zinc-100 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+                  <div className="col-span-6">Item Details</div>
+                  <div className="col-span-2 text-center">Qty</div>
+                  <div className="col-span-2 text-right">Price</div>
+                  <div className="col-span-2 text-right">Amount</div>
                 </div>
+
+                {/* Rows */}
+                <div className="flex flex-col divide-y divide-zinc-100">
+                  {lineItems.map((item, index) => (
+                    <div key={index} className="flex flex-col sm:grid sm:grid-cols-12 gap-4 sm:gap-3 px-4 sm:px-6 py-4 items-start sm:items-center hover:bg-zinc-50/30 transition-colors">
+                      
+                      {/* Item Details (Type & Name) */}
+                      <div className="col-span-6 flex gap-2 w-full">
+                        <select 
+                          className="h-10 w-28 shrink-0 rounded-md border border-zinc-200 bg-white px-2 text-sm font-medium text-zinc-900 focus-visible:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                          value={item.type}
+                          onChange={(e) => updateLineItem(index, "type", e.target.value)}
+                        >
+                          {ITEM_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                        </select>
+                        <Input 
+                          placeholder="Item description..." 
+                          value={item.name} 
+                          onChange={(e) => updateLineItem(index, "name", e.target.value)} 
+                          className="flex-1 bg-white h-10 text-zinc-900 border-zinc-200 focus:ring-2 focus:ring-indigo-500/20"
+                          disabled={item.type !== "Product"} 
+                        />
+                      </div>
+
+                      {/* Qty & Price row on Mobile, Grid on Desktop */}
+                      <div className="col-span-6 w-full sm:contents flex flex-wrap gap-4 items-center justify-between">
+                        
+                        {/* Qty */}
+                        <div className="sm:col-span-2 flex items-center sm:justify-center">
+                          <label className="sm:hidden text-xs text-zinc-500 font-medium mr-2">Qty:</label>
+                          <Input 
+                            type="number" 
+                            value={item.quantity || 1} 
+                            onChange={(e) => updateLineItem(index, "quantity", parseInt(e.target.value) || 1)} 
+                            className="w-20 text-center h-10 text-zinc-900 border-zinc-200 focus:ring-2 focus:ring-indigo-500/20 [-moz-appearance:_textfield] [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none" 
+                            min={1}
+                          />
+                        </div>
+
+                        {/* Price */}
+                        <div className="sm:col-span-2 flex items-center sm:justify-end">
+                          <label className="sm:hidden text-xs text-zinc-500 font-medium mr-2">Price:</label>
+                          <div className="relative flex items-center">
+                            <span className="absolute left-3 text-zinc-500 text-sm font-medium">
+                              {formData.currency === 'USD' ? '$' : formData.currency === 'EUR' ? '€' : formData.currency === 'GBP' ? '£' : '₹'}
+                            </span>
+                            <Input 
+                              type="number" 
+                              placeholder="0.00" 
+                              value={item.price || ''} 
+                              onChange={(e) => updateLineItem(index, "price", parseFloat(e.target.value) || 0)} 
+                              className="w-28 h-10 pl-7 pr-3 text-right rounded-md border border-zinc-200 bg-white text-sm font-medium text-zinc-900 outline-none focus:ring-2 focus:ring-indigo-500/20 [-moz-appearance:_textfield] [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none transition-all" 
+                            />
+                          </div>
+                        </div>
+
+                        {/* Amount & Trash */}
+                        <div className="sm:col-span-2 flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto mt-2 sm:mt-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-zinc-100">
+                          <div className="flex items-center sm:justify-end">
+                            <label className="sm:hidden text-xs text-zinc-500 font-medium mr-2">Total:</label>
+                            <span className="text-sm font-semibold text-zinc-900">
+                              {formData.currency === 'USD' ? '$' : formData.currency === 'EUR' ? '€' : formData.currency === 'GBP' ? '£' : '₹'}
+                              {((item.price || 0) * (item.quantity || 1)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </span>
+                          </div>
+                          <Button variant="ghost" size="icon" onClick={() => removeLineItem(index)} className="text-zinc-400 hover:text-red-600 hover:bg-red-50 size-8 shrink-0 transition-colors"><Trash2 className="size-4" /></Button>
+                        </div>
+
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Footer / Summary Area */}
+                <div className="p-4 sm:p-6 bg-zinc-50/80 border-t border-zinc-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                  <Button variant="outline" size="sm" onClick={addLineItem} className="h-9 gap-1.5 text-zinc-700 bg-white border-zinc-300 hover:bg-zinc-100 hover:text-zinc-900 font-medium shadow-sm rounded-lg">
+                    <Plus className="size-3.5" /> Add Item
+                  </Button>
+                  
+                  <div className="bg-zinc-900 text-white px-6 py-4 rounded-xl shadow-md flex items-center gap-6 w-full sm:w-auto">
+                    <span className="text-zinc-300 font-medium text-sm uppercase tracking-wider">Total Amount</span>
+                    <span className="text-2xl font-bold tracking-tight">
+                      {formData.currency === 'USD' ? '$' : formData.currency === 'EUR' ? '€' : formData.currency === 'GBP' ? '£' : '₹'}
+                      {lineItems.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 1)), 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </span>
+                  </div>
+                </div>
+
               </CardContent>
             </Card>
 
