@@ -56,12 +56,7 @@ const calculateTotal = (items: LineItem[]) => {
 
 // Universal Components
 const Watermark = () => {
-  const url = process.env.NEXT_PUBLIC_INVOICE_SERVICE_URL || 'https://invoice-microservice.vercel.app';
-  return (
-    <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0 overflow-hidden">
-      <img src={`${url}/watermark.png`} alt="Watermark" className="w-3/5 opacity-15 select-none" />
-    </div>
-  );
+  return null;
 };
 
 const LoomingoFooter = ({ color = "text-gray-500" }: { color?: string }) => {
