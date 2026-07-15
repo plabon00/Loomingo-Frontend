@@ -8,7 +8,7 @@ import { DesktopSidebar, MobileNavbar, BottomDock } from "@/components/layout/Ap
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Plus, Trash2, Settings, History, Loader2, FileDown, Check, X, LayoutTemplate, Building, Megaphone, List, Save, Eye, RefreshCw } from "lucide-react";
+import { Plus, Trash2, Settings, History, Loader2, FileDown, Check, X, LayoutTemplate, Building, Megaphone, List, Save, Eye, RefreshCw, ChevronDown } from "lucide-react";
 import Link from "next/link";
 
 const TEMPLATES = [
@@ -51,7 +51,7 @@ export default function InvoiceGenerator() {
 
   const [selectedDeliverables, setSelectedDeliverables] = useState<string[]>([]);
   const [lineItems, setLineItems] = useState([
-    { no: 1, type: "Reels", name: "Instagram Reel", quantity: 1, price: 5000 }
+    { no: 1, type: "Reels", name: "Instagram Reel", quantity: 1, price: 0 }
   ]);
 
   // Brand Management
@@ -227,7 +227,7 @@ export default function InvoiceGenerator() {
   const resetForm = () => {
     setFormData({ templateId: 1, brandName: "", billingAddress: "", gstin: "", pan: "", contact: "", igUserName: "", liveDate: "", currency: "INR", campaignName: "" });
     setSelectedDeliverables([]);
-    setLineItems([{ no: 1, type: "Reels", name: "Instagram Reel", quantity: 1, price: 5000 }]);
+    setLineItems([{ no: 1, type: "Reels", name: "Instagram Reel", quantity: 1, price: 0 }]);
     setIsNewBrand(true);
     setSelectedBrandId("");
     setPreviewPdfUrl(null);
@@ -503,88 +503,82 @@ export default function InvoiceGenerator() {
               <CardContent className="p-0">
                 {/* Desktop Header Row */}
                 <div className="hidden sm:grid grid-cols-12 gap-4 px-6 py-2.5 bg-white border-b border-zinc-100 text-[10px] font-semibold text-zinc-400 uppercase tracking-widest">
-                  <div className="col-span-7">Item Details</div>
-                  <div className="col-span-3 text-right">Price / Qty</div>
-                  <div className="col-span-2 text-right pr-8">Amount</div>
+                  <div className="col-span-8">Item Details</div>
+                  <div className="col-span-4 text-right pr-4">Amount</div>
                 </div>
 
                 {/* Rows */}
                 <div className="flex flex-col divide-y divide-zinc-100">
                   {lineItems.map((item, index) => (
-                    <div key={index} className="group flex flex-col sm:grid sm:grid-cols-12 gap-4 sm:gap-4 px-4 sm:px-6 py-3 items-start sm:items-start hover:bg-zinc-50/50 transition-colors">
+                    <div key={index} className="group flex flex-col sm:grid sm:grid-cols-12 gap-4 sm:gap-4 px-4 sm:px-6 py-4 items-start hover:bg-zinc-50/50 transition-colors">
                       
                       {/* Item Details (Type & Name) */}
-                      <div className="col-span-7 flex flex-col w-full pt-1">
-                        <select 
-                          className="h-6 w-auto max-w-[140px] text-xs font-medium text-zinc-500 bg-transparent border-none px-0 outline-none focus:ring-0 cursor-pointer appearance-none -ml-1 hover:text-zinc-700"
-                          value={item.type}
-                          onChange={(e) => updateLineItem(index, "type", e.target.value)}
-                        >
-                          {ITEM_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-                        </select>
+                      <div className="col-span-8 flex flex-col sm:flex-row gap-0 sm:gap-2 w-full border border-zinc-200/60 rounded-md p-1 bg-white focus-within:border-zinc-300 focus-within:ring-2 focus-within:ring-indigo-500/10 transition-all shadow-sm">
+                        <div className="relative border-b sm:border-b-0 sm:border-r border-zinc-100">
+                          <select 
+                            className="h-9 w-full sm:w-32 text-sm font-medium text-zinc-600 bg-transparent border-none pl-3 pr-8 outline-none focus:ring-0 cursor-pointer appearance-none hover:text-zinc-900 transition-colors"
+                            value={item.type}
+                            onChange={(e) => updateLineItem(index, "type", e.target.value)}
+                          >
+                            {ITEM_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                          </select>
+                          <ChevronDown className="absolute right-2.5 top-3 size-3.5 text-zinc-400 pointer-events-none" />
+                        </div>
                         <Input 
                           placeholder="Item description..." 
                           value={item.name} 
                           onChange={(e) => updateLineItem(index, "name", e.target.value)} 
-                          className="w-full h-8 text-sm font-medium text-zinc-900 bg-transparent border-none px-0 shadow-none outline-none focus-visible:ring-0 placeholder:text-zinc-300 -ml-0.5"
+                          className="flex-1 h-9 text-sm font-medium text-zinc-900 bg-transparent border-none px-3 shadow-none outline-none focus-visible:ring-0 placeholder:text-zinc-300"
                           disabled={item.type !== "Product"} 
                         />
                       </div>
 
-                      {/* Qty & Price row on Mobile, Grid on Desktop */}
-                      <div className="col-span-5 w-full sm:contents flex flex-wrap gap-4 items-start justify-between pt-1">
+                      {/* Qty & Amount Stack */}
+                      <div className="col-span-4 flex flex-col items-end w-full relative sm:pr-4">
                         
-                        {/* Price & Qty Stack */}
-                        <div className="sm:col-span-3 flex flex-col items-end justify-start w-full sm:w-auto">
-                          <div className="flex items-center justify-end w-full gap-1 h-8">
-                            <span className="text-zinc-400 text-sm font-medium">
-                              {formData.currency === 'USD' ? '$' : formData.currency === 'EUR' ? '€' : formData.currency === 'GBP' ? '£' : '₹'}
-                            </span>
-                            <Input 
-                              type="number" 
-                              placeholder="0.00" 
-                              value={item.price || ''} 
-                              onChange={(e) => updateLineItem(index, "price", parseFloat(e.target.value) || 0)} 
-                              className="w-24 text-right bg-transparent border-none px-0 text-sm font-medium text-zinc-900 shadow-none outline-none focus-visible:ring-0 [-moz-appearance:_textfield] [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none" 
-                            />
-                          </div>
-                          
-                          <div className="flex items-center justify-end text-xs text-zinc-400 mt-1">
-                            <span className="mr-1">Qty:</span>
-                            <select 
-                              className="bg-transparent border-none p-0 text-zinc-500 text-right outline-none focus:ring-0 cursor-pointer font-medium hover:text-zinc-800"
-                              value={item.quantity || 1}
-                              onChange={(e) => updateLineItem(index, "quantity", parseInt(e.target.value) || 1)}
-                            >
-                              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 40, 50, 100].map(n => (
-                                <option key={n} value={n}>{n}</option>
-                              ))}
-                            </select>
-                          </div>
+                        {/* Amount Input */}
+                        <div className="flex items-center justify-end w-full gap-1.5 h-10">
+                          <span className="text-zinc-400 text-sm font-medium">
+                            {formData.currency === 'USD' ? '$' : formData.currency === 'EUR' ? '€' : formData.currency === 'GBP' ? '£' : '₹'}
+                          </span>
+                          <Input 
+                            type="number" 
+                            placeholder="0.00" 
+                            value={item.price || ''} 
+                            onChange={(e) => updateLineItem(index, "price", parseFloat(e.target.value) || 0)} 
+                            className="w-32 text-right bg-transparent border-none px-0 text-lg font-semibold text-zinc-900 shadow-none outline-none focus-visible:ring-0 [-moz-appearance:_textfield] [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none placeholder:font-normal" 
+                          />
                         </div>
-
-                        {/* Amount & Trash */}
-                        <div className="sm:col-span-2 flex items-start justify-between sm:justify-end gap-2 w-full sm:w-auto mt-2 sm:mt-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-zinc-100 relative sm:pr-8">
-                          <div className="flex items-center sm:justify-end h-8">
-                            <label className="sm:hidden text-xs text-zinc-400 font-medium mr-2">Total:</label>
-                            <span className="text-sm font-semibold text-zinc-900">
-                              {formData.currency === 'USD' ? '$' : formData.currency === 'EUR' ? '€' : formData.currency === 'GBP' ? '£' : '₹'}
-                              {((item.price || 0) * (item.quantity || 1)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                            </span>
+                        
+                        {/* Qty & Trash Row */}
+                        <div className="flex items-center justify-end gap-3 mt-1">
+                          <div className="flex items-center text-xs text-zinc-500 font-medium">
+                            <span className="mr-2">Qty:</span>
+                            <div className="relative border border-zinc-200 rounded-md bg-white hover:border-zinc-300 transition-colors shadow-sm">
+                              <select 
+                                className="h-7 pl-2.5 pr-7 text-xs text-zinc-700 outline-none focus:ring-0 cursor-pointer appearance-none font-medium bg-transparent"
+                                value={item.quantity || 1}
+                                onChange={(e) => updateLineItem(index, "quantity", parseInt(e.target.value) || 1)}
+                              >
+                                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 40, 50, 100].map(n => (
+                                  <option key={n} value={n}>{n}</option>
+                                ))}
+                              </select>
+                              <ChevronDown className="absolute right-2 top-2 size-3 text-zinc-400 pointer-events-none" />
+                            </div>
                           </div>
                           
-                          {/* Trash button hidden until row hover on desktop */}
                           <Button 
                             variant="ghost" 
                             size="icon" 
                             onClick={() => removeLineItem(index)} 
-                            className="text-zinc-300 hover:text-red-500 hover:bg-red-50 size-8 shrink-0 transition-all opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:absolute sm:right-0 sm:-top-0.5"
+                            className="text-zinc-300 hover:text-red-500 hover:bg-red-50 size-7 rounded-md transition-all opacity-100 sm:opacity-0 sm:group-hover:opacity-100 border border-transparent hover:border-red-100"
                           >
-                            <Trash2 className="size-4" />
+                            <Trash2 className="size-3.5" />
                           </Button>
                         </div>
-
                       </div>
+
                     </div>
                   ))}
                 </div>
