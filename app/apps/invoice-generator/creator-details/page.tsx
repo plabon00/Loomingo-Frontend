@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { auth } from "@/lib/firebase";
+import imageCompression from "browser-image-compression";
 import { DesktopSidebar, MobileNavbar, BottomDock } from "@/components/layout/AppNavigation";
 import Link from "next/link";
 
@@ -16,22 +17,30 @@ import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { ArrowLeft, Loader2, Save, User as UserIcon, Building, QrCode, UploadCloud, CheckCircle2, Eye, EyeOff } from "lucide-react";
+import { Toaster, toast } from "sonner";
+import { ArrowLeft, Loader2, Save, User as UserIcon, Building, QrCode, UploadCloud, CheckCircle2, Eye, EyeOff, Edit3, Lock } from "lucide-react";
 
 // 1. Zod Schema
 const settingsSchema = z.object({
   creatorName: z.string().min(2, "Name must be at least 2 characters."),
   creatorEmail: z.string().email("Please enter a valid email address."),
+  contactNumber: z.string().min(5, "Please enter a valid contact number."),
   creatorAddress: z.string().min(5, "Please enter your full address."),
   bankName: z.string().min(2, "Bank Name is required."),
+  holderName: z.string().min(2, "Holder Name is required."),
   accountNumber: z.string().min(5, "Account Number is required."),
   ifscCode: z.string().min(2, "IFSC code is required."),
   accountType: z.enum(["Savings", "Current"]),
   upiId: z.string().optional(),
   signatureUrl: z.string().optional(),
+  igUserName: z.string().optional(),
 });
 
 type SettingsFormValues = z.infer<typeof settingsSchema>;
+
+// Explicit colors so text stays readable even if the system prefers dark
+// mode (this page is light-locked). Editable = white; locked = grey.
+const fieldCls = "h-11 rounded-xl shadow-sm text-base sm:text-sm border-zinc-300 bg-white text-zinc-900 placeholder:text-zinc-400 disabled:bg-zinc-100 disabled:text-zinc-500 disabled:border-zinc-200 disabled:opacity-100";
 
 export default function CreatorSettings() {
   const router = useRouter();
@@ -43,7 +52,10 @@ export default function CreatorSettings() {
   const [showAccountNum, setShowAccountNum] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
-  const [isEditing, setIsEditing] = useState(true);
+  const [activeTab, setActiveTab] = useState<"personal" | "payment" | "signature">("personal");
+  const [isEditingPersonal, setIsEditingPersonal] = useState(false);
+  const [isEditingPayment, setIsEditingPayment] = useState(false);
+  const [isEditingSignature, setIsEditingSignature] = useState(false);
 
   const {
     register,
@@ -57,13 +69,16 @@ export default function CreatorSettings() {
     defaultValues: {
       creatorName: "",
       creatorEmail: "",
+      contactNumber: "",
       creatorAddress: "",
       bankName: "",
+      holderName: "",
       accountNumber: "",
       ifscCode: "",
       accountType: "Savings",
       upiId: "",
       signatureUrl: "",
+      igUserName: "",
     },
   });
 
@@ -80,22 +95,37 @@ export default function CreatorSettings() {
               const s = data.data;
               const payout = s.payoutDetails || {};
               reset({
-                creatorName: s.creatorName || "",
-                creatorEmail: s.creatorEmail || "",
+                creatorName: s.creatorName || currentUser.displayName || "",
+                creatorEmail: s.creatorEmail || currentUser.email || "",
                 creatorAddress: s.creatorAddress || "",
+                contactNumber: s.contactNumber || "",
+                igUserName: s.igUserName || "",
                 bankName: payout.bankName || "",
+                holderName: payout.holderName || "",
                 accountNumber: payout.accountNumber || "",
                 ifscCode: payout.ifscCode || "",
-                accountType: payout.accountType === "Current" ? "Current" : "Savings",
+                accountType: payout.accountType || "Savings",
                 upiId: payout.upiId || "",
-                signatureUrl: payout.signatureUrl || payout.qrCodeUrl || "",
+                signatureUrl: s.signatureUrl || payout.signatureUrl || "",
               });
-              if (payout.signatureUrl || payout.qrCodeUrl) setPreviewImage(payout.signatureUrl || payout.qrCodeUrl);
-              if (s.creatorName) setIsEditing(false); // Lock form if data exists
+              
+              if (s.signatureUrl || payout.signatureUrl) {
+                setPreviewImage(s.signatureUrl || payout.signatureUrl);
+              }
+
+              if (s.creatorName) {
+                setIsEditingPersonal(false);
+                setIsEditingPayment(false);
+                setIsEditingSignature(false);
+              } else {
+                setIsEditingPersonal(true);
+                setIsEditingPayment(true);
+                setIsEditingSignature(true);
+              }
             }
           }
         } catch (err) {
-          console.error("Failed to load settings", err);
+          console.error("Error loading settings", err);
         }
       } else {
         router.push("/");
@@ -104,49 +134,67 @@ export default function CreatorSettings() {
     });
     return () => unsub();
   }, [router, reset]);
-
-  // ImgBB Upload Logic
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate type
-    if (!file.type.startsWith("image/")) {
-      alert("Please upload a valid image file.");
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("File size must be less than 5MB");
       return;
     }
 
     setIsUploading(true);
-
     try {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64String = reader.result as string;
-        setPreviewImage(base64String);
-        setValue("signatureUrl", base64String);
-        setIsUploading(false);
+      // 1. Compress image to ~50-80kb
+      const options = {
+        maxSizeMB: 0.08,
+        maxWidthOrHeight: 1024,
+        useWebWorker: true
       };
-      reader.readAsDataURL(file);
+      const compressedFile = await imageCompression(file, options);
+
+      // 2. Upload to ImgBB
+      const formData = new FormData();
+      formData.append("image", compressedFile);
+
+      const apiKey = process.env.NEXT_PUBLIC_IMGBB_API_KEY;
+      const response = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
+        method: "POST",
+        body: formData,
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        const url = data.data.display_url;
+        setPreviewImage(url);
+        setValue("signatureUrl", url);
+        toast.success("Signature uploaded successfully!");
+      } else {
+        toast.error("ImgBB upload failed.");
+      }
     } catch (err) {
-      console.error("Upload error:", err);
-      alert("Error reading image file.");
+      console.error(err);
+      toast.error("Failed to compress and upload image.");
+    } finally {
       setIsUploading(false);
     }
   };
 
-  const onSubmit = async (data: SettingsFormValues) => {
+  const onSubmit = async (data: any) => {
     setIsSaving(true);
-    
-    // 2. (Optional) Save to backend
     if (user) {
       try {
         const payload = {
           userId: user.uid,
           creatorName: data.creatorName,
           creatorEmail: data.creatorEmail,
+          contactNumber: data.contactNumber,
           creatorAddress: data.creatorAddress,
+          igUserName: data.igUserName,
+          signatureUrl: data.signatureUrl,
           payoutDetails: {
             bankName: data.bankName,
+            holderName: data.holderName,
             accountNumber: data.accountNumber,
             ifscCode: data.ifscCode,
             accountType: data.accountType,
@@ -162,13 +210,15 @@ export default function CreatorSettings() {
         });
 
         if (res.ok) {
-          alert("Creator Details Saved Successfully!");
-          setIsEditing(false); // Lock form after successful save
+          toast.success("Creator Details Saved Successfully!");
+          setIsEditingPersonal(false);
+          setIsEditingPayment(false);
+          setIsEditingSignature(false);
         } else {
-          alert("Failed to save to database.");
+          toast.error("Failed to save to database.");
         }
       } catch (err) {
-        console.error("Save error", err);
+        toast.error("Network error saving details.");
       }
     }
 
@@ -181,90 +231,143 @@ export default function CreatorSettings() {
 
   return (
     <div className="flex bg-zinc-50 min-h-screen">
+      <Toaster richColors position="top-center" />
       <DesktopSidebar />
       <MobileNavbar />
 
       <main className="flex-1 md:ml-20 lg:ml-64 pt-16 md:pt-8 min-h-screen">
         <div className="max-w-3xl mx-auto px-4 md:px-8 pb-20">
           
-          <div className="flex items-center gap-3 mb-2">
+          <div className="flex items-center gap-3 mb-4">
             <Link href="/apps/invoice-generator">
               <Button variant="ghost" size="icon" className="text-zinc-500 hover:text-zinc-900"><ArrowLeft className="size-5" /></Button>
             </Link>
-            <div className="flex w-full items-center justify-between">
+            <div className="flex w-full flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <h1 className="text-3xl font-bold tracking-tight text-black">Creator Details</h1>
-                <p className="text-zinc-500 mt-1">Manage your billing and bank information.</p>
+                <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-zinc-900">Creator Details</h1>
+                <p className="text-zinc-600 mt-1 text-sm md:text-base">Manage your billing and bank information.</p>
+                <p className="text-[11px] text-zinc-400 mt-2 font-medium">Review and confirm your billing details below. Required fields are marked with an asterisk (<span className="text-red-500">*</span>).</p>
               </div>
-              {!isEditing && (
-                <Button onClick={() => setIsEditing(true)} className="bg-zinc-900 hover:bg-zinc-800 text-white">
-                  Edit Details
-                </Button>
-              )}
             </div>
+          </div>
+
+          {/* TAB NAVIGATION */}
+          <div className="flex border-b border-zinc-200 mb-6 overflow-x-auto custom-scrollbar">
+            <button 
+              type="button" 
+              onClick={() => setActiveTab("personal")} 
+              className={`px-4 py-3 font-medium text-sm transition-colors border-b-2 whitespace-nowrap ${activeTab === "personal" ? "border-indigo-600 text-indigo-600" : "border-transparent text-zinc-500 hover:text-zinc-800"}`}
+            >Personal Details</button>
+            <button 
+              type="button" 
+              onClick={() => setActiveTab("payment")} 
+              className={`px-4 py-3 font-medium text-sm transition-colors border-b-2 whitespace-nowrap ${activeTab === "payment" ? "border-indigo-600 text-indigo-600" : "border-transparent text-zinc-500 hover:text-zinc-800"}`}
+            >Payment Details</button>
+            <button 
+              type="button" 
+              onClick={() => setActiveTab("signature")} 
+              className={`px-4 py-3 font-medium text-sm transition-colors border-b-2 whitespace-nowrap ${activeTab === "signature" ? "border-indigo-600 text-indigo-600" : "border-transparent text-zinc-500 hover:text-zinc-800"}`}
+            >Signature</button>
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             
             {/* SECTION 1: BASIC INFORMATION */}
-            <Card className="shadow-sm border-zinc-200/60 bg-white">
+            {activeTab === "personal" && (
+            <Card className="shadow-sm border-zinc-200/60 bg-white animate-in fade-in slide-in-from-bottom-2">
               <CardHeader className="pb-3 border-b border-zinc-100 bg-zinc-50/50">
-                <CardTitle className="text-lg font-semibold text-black flex items-center gap-2">
-                  <UserIcon className="size-5 text-indigo-500" /> Basic Information
+                <CardTitle className="text-lg font-semibold text-black flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <UserIcon className="size-5 text-indigo-500" /> Basic Information
+                  </div>
+                  {!isEditingPersonal && (
+                    <Button type="button" onClick={() => setIsEditingPersonal(true)} variant="ghost" className="h-8 text-indigo-600 hover:bg-indigo-50 rounded-full px-3">
+                      <Edit3 className="size-3.5 mr-1" /> Edit
+                    </Button>
+                  )}
                 </CardTitle>
                 <CardDescription>This information will appear on the "From" section of your invoices.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4 pt-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm font-medium mb-1 block text-black">Creator / Brand Name</label>
-                    <Input {...register("creatorName")} placeholder="John Doe" className="text-black bg-zinc-50" disabled={!isEditing} />
+                    <label className="text-sm font-medium mb-1 block text-black">Creator / Brand Name <span className="text-red-500">*</span></label>
+                    <Input {...register("creatorName")} placeholder="John Doe" className={`${fieldCls} ${errors.creatorName ? "border-red-500 ring-1 ring-red-500/20" : ""}`} disabled={!isEditingPersonal} />
                     {errors.creatorName && <p className="text-red-500 text-xs mt-1">{errors.creatorName.message}</p>}
                   </div>
                   <div>
-                    <label className="text-sm font-medium mb-1 block text-black">Email Address</label>
-                    <Input type="email" {...register("creatorEmail")} placeholder="john@example.com" className="text-black bg-zinc-50" disabled={!isEditing} />
+                    <label className="text-sm font-medium mb-1 block text-black">Email Address <span className="text-red-500">*</span></label>
+                    <Input type="email" {...register("creatorEmail")} placeholder="john@example.com" className={`${fieldCls} ${errors.creatorEmail ? "border-red-500 ring-1 ring-red-500/20" : ""}`} disabled={!isEditingPersonal} />
                     {errors.creatorEmail && <p className="text-red-500 text-xs mt-1">{errors.creatorEmail.message}</p>}
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium mb-1 block text-black">Contact Number <span className="text-zinc-400 text-xs font-normal ml-1">(Optional)</span></label>
+                    <Input type="tel" {...register("contactNumber")} placeholder="+91 98765 43210" className={`${fieldCls} ${errors.contactNumber ? "border-red-500 ring-1 ring-red-500/20" : ""}`} disabled={!isEditingPersonal} />
+                    {errors.contactNumber && <p className="text-red-500 text-xs mt-1">{errors.contactNumber.message}</p>}
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium mb-1 block text-black">Instagram Username <span className="text-zinc-400 text-xs font-normal ml-1">(Optional)</span></label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 font-medium">@</span>
+                      <Input {...register("igUserName")} placeholder="username" className={`${fieldCls} pl-8 ${errors.igUserName ? "border-red-500 ring-1 ring-red-500/20" : ""}`} disabled={!isEditingPersonal} />
+                    </div>
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-1 block text-black">Full Address</label>
-                  <textarea 
+                  <label className="text-sm font-medium mb-1 block text-black">Full Address <span className="text-zinc-400 text-xs font-normal ml-1">(Optional)</span></label>
+                  <textarea
                     {...register("creatorAddress")}
-                    className="flex min-h-[80px] w-full rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950" 
-                    placeholder="123 Creator Studio, City, PIN" 
-                    disabled={!isEditing}
+                    className={`flex min-h-[100px] w-full rounded-xl border px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 ${fieldCls.replace('h-11', '')}`}
+                    placeholder="123 Creator Studio, City, PIN"
+                    disabled={!isEditingPersonal}
                   />
                   {errors.creatorAddress && <p className="text-red-500 text-xs mt-1">{errors.creatorAddress.message}</p>}
                 </div>
               </CardContent>
             </Card>
 
+            )}
+
             {/* SECTION 2: BANK DETAILS */}
-            <Card className="shadow-sm border-zinc-200/60 bg-white">
+            {activeTab === "payment" && (
+            <Card className="shadow-sm border-zinc-200/60 bg-white animate-in fade-in slide-in-from-bottom-2">
               <CardHeader className="pb-3 border-b border-zinc-100 bg-zinc-50/50">
-                <CardTitle className="text-lg font-semibold text-black flex items-center gap-2">
-                  <Building className="size-5 text-green-500" /> Bank Details
+                <CardTitle className="text-lg font-semibold text-black flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Building className="size-5 text-green-500" /> Bank Details
+                  </div>
+                  {!isEditingPayment && (
+                    <Button type="button" onClick={() => setIsEditingPayment(true)} variant="ghost" className="h-8 text-green-600 hover:bg-green-50 rounded-full px-3">
+                      <Edit3 className="size-3.5 mr-1" /> Edit
+                    </Button>
+                  )}
                 </CardTitle>
                 <CardDescription>Primary bank account for wire transfers (NEFT/RTGS/IMPS).</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4 pt-4">
-                <div>
-                  <label className="text-sm font-medium mb-1 block text-black">Bank Name</label>
-                  <Input {...register("bankName")} placeholder="HDFC Bank" className="text-black bg-zinc-50" disabled={!isEditing} />
-                  {errors.bankName && <p className="text-red-500 text-xs mt-1">{errors.bankName.message}</p>}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium mb-1 block text-black">Bank Name <span className="text-red-500">*</span></label>
+                    <Input {...register("bankName")} placeholder="HDFC Bank" className={`${fieldCls} ${errors.bankName ? "border-red-500 ring-1 ring-red-500/20" : ""}`} disabled={!isEditingPayment} />
+                    {errors.bankName && <p className="text-red-500 text-xs mt-1">{errors.bankName.message}</p>}
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium mb-1 block text-black">Account Holder Name <span className="text-red-500">*</span></label>
+                    <Input {...register("holderName")} placeholder="John Doe" className={`${fieldCls} ${errors.holderName ? "border-red-500 ring-1 ring-red-500/20" : ""}`} disabled={!isEditingPayment} />
+                    {errors.holderName && <p className="text-red-500 text-xs mt-1">{errors.holderName.message}</p>}
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm font-medium mb-1 block text-black">Account Number</label>
+                    <label className="text-sm font-medium mb-1 block text-black">Account Number <span className="text-red-500">*</span></label>
                     <div className="relative">
                       <Input 
                         type={showAccountNum ? "text" : "password"} 
                         {...register("accountNumber")} 
                         placeholder="000000000000" 
-                        className="text-black bg-zinc-50 pr-10" 
-                        disabled={!isEditing}
+                        className={`${fieldCls} pr-10`} 
+                        disabled={!isEditingPayment}
                       />
                       <button 
                         type="button" 
@@ -277,22 +380,22 @@ export default function CreatorSettings() {
                     {errors.accountNumber && <p className="text-red-500 text-xs mt-1">{errors.accountNumber.message}</p>}
                   </div>
                   <div>
-                    <label className="text-sm font-medium mb-1 block text-black">IFSC Code</label>
-                    <Input {...register("ifscCode")} placeholder="HDFC0001234" className="text-black bg-zinc-50 uppercase" disabled={!isEditing} />
+                    <label className="text-sm font-medium mb-1 block text-black">IFSC Code <span className="text-red-500">*</span></label>
+                    <Input {...register("ifscCode")} placeholder="HDFC0001234" className={`${fieldCls} uppercase ${errors.ifscCode ? "border-red-500 ring-1 ring-red-500/20" : ""}`} disabled={!isEditingPayment} />
                     {errors.ifscCode && <p className="text-red-500 text-xs mt-1">{errors.ifscCode.message}</p>}
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium mb-1 block text-black">Account Type</label>
+                  <label className="text-sm font-medium mb-1 block text-black">Account Type <span className="text-red-500">*</span></label>
                   <Controller
                     control={control}
                     name="accountType"
                     render={({ field }) => (
-                      <select 
+                      <select
                         {...field}
-                        className="flex h-10 w-full rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950"
-                        disabled={!isEditing}
+                        className={`flex w-full px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 ${fieldCls}`}
+                        disabled={!isEditingPayment}
                       >
                         <option value="Savings">Savings</option>
                         <option value="Current">Current</option>
@@ -301,29 +404,39 @@ export default function CreatorSettings() {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-1 block text-black">UPI ID</label>
-                  <Input {...register("upiId")} placeholder="username@upi" className="text-black bg-zinc-50" disabled={!isEditing} />
+                  <label className="text-sm font-medium mb-1 block text-black">UPI ID <span className="text-zinc-400 text-xs font-normal ml-1">(Optional)</span></label>
+                  <Input {...register("upiId")} placeholder="username@upi" className={`${fieldCls} ${errors.upiId ? "border-red-500 ring-1 ring-red-500/20" : ""}`} disabled={!isEditingPayment} />
                 </div>
               </CardContent>
             </Card>
 
+            )}
+
             {/* SECTION 3: DIGITAL SIGNATURE */}
-            <Card className="shadow-sm border-zinc-200/60 bg-white">
+            {activeTab === "signature" && (
+            <Card className="shadow-sm border-zinc-200/60 bg-white animate-in fade-in slide-in-from-bottom-2">
               <CardHeader className="pb-3 border-b border-zinc-100 bg-zinc-50/50">
-                <CardTitle className="text-lg font-semibold text-black flex items-center gap-2">
-                  <UploadCloud className="size-5 text-purple-500" /> Digital Signature
+                <CardTitle className="text-lg font-semibold text-black flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <UploadCloud className="size-5 text-purple-500" /> Digital Signature
+                  </div>
+                  {!isEditingSignature && (
+                    <Button type="button" onClick={() => setIsEditingSignature(true)} variant="ghost" className="h-8 text-purple-600 hover:bg-purple-50 rounded-full px-3">
+                      <Edit3 className="size-3.5 mr-1" /> Edit
+                    </Button>
+                  )}
                 </CardTitle>
                 <CardDescription>Upload your signature to automatically sign your invoices.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4 pt-4">
                 <div>
-                  <label className="text-sm font-medium mb-2 block text-black">Signature Image (Optional)</label>
+                  <label className="text-sm font-medium mb-2 block text-black">Signature Image <span className="text-zinc-400 text-xs font-normal ml-1">(Optional)</span></label>
                   
-                  <div className={`mt-2 flex items-center justify-center w-full h-40 border-2 border-dashed rounded-lg bg-zinc-50 transition-colors ${!isEditing ? 'border-zinc-200 opacity-70 cursor-not-allowed' : 'border-zinc-300 hover:bg-zinc-100 hover:border-blue-400'}`}>
+                  <div className={`mt-2 flex items-center justify-center w-full h-40 border-2 border-dashed rounded-lg bg-zinc-50 transition-colors ${!isEditingSignature ? 'border-zinc-200 opacity-70 cursor-not-allowed' : 'border-zinc-300 hover:bg-zinc-100 hover:border-blue-400'}`}>
                     {previewImage ? (
                       <div className="relative w-full h-full p-2 group">
                         <img src={previewImage} alt="Signature Preview" className="w-full h-full object-contain mix-blend-multiply" />
-                        {isEditing && (
+                        {isEditingSignature && (
                           <button 
                             type="button"
                             onClick={() => {
@@ -337,7 +450,7 @@ export default function CreatorSettings() {
                         )}
                       </div>
                     ) : (
-                      <label className={`flex flex-col items-center justify-center w-full h-full ${isEditing ? 'cursor-pointer' : 'cursor-not-allowed'}`}>
+                      <label className={`flex flex-col items-center justify-center w-full h-full ${isEditingSignature ? 'cursor-pointer' : 'cursor-not-allowed'}`}>
                         <div className="flex flex-col items-center justify-center pt-5 pb-6">
                           {isUploading ? (
                             <Loader2 className="size-8 text-blue-500 animate-spin mb-2" />
@@ -347,7 +460,8 @@ export default function CreatorSettings() {
                           <p className="text-sm text-zinc-600"><span className="font-semibold text-blue-600">Click to upload</span> signature</p>
                           <p className="text-xs text-zinc-400 mt-1">PNG, JPG up to 5MB (Transparent PNG preferred)</p>
                         </div>
-                        <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} disabled={!isEditing || isUploading} />
+                        <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} disabled={!isEditingSignature || isUploading} />
+                        <input type="hidden" {...register("signatureUrl")} />
                       </label>
                     )}
                   </div>
@@ -355,13 +469,15 @@ export default function CreatorSettings() {
               </CardContent>
             </Card>
 
-            {isEditing && (
+            )}
+
+            {(isEditingPersonal || isEditingPayment || isEditingSignature) && (
               <Button 
                 type="submit" 
                 className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl shadow-md shadow-blue-600/20"
                 disabled={isSaving || isUploading}
               >
-                {isSaving ? <><Loader2 className="animate-spin size-5 mr-2" /> Saving...</> : <><Save className="size-5 mr-2" /> Save All Details</>}
+                {isSaving ? <><Loader2 className="animate-spin size-5 mr-2" /> Saving...</> : <><Save className="size-5 mr-2" /> Save Changes</>}
               </Button>
             )}
           </form>

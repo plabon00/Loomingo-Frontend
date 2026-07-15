@@ -583,7 +583,7 @@ export function BottomDock() {
             onClick={() => setIsAppsOpen(!isAppsOpen)}
             className={cn(
               "flex flex-col items-center gap-1 p-2 transition-colors duration-300",
-              isAppsOpen ? "text-red-600 font-semibold" : "text-zinc-400 hover:text-zinc-900"
+              (isAppsOpen || pathname.startsWith("/apps")) ? "text-red-600 font-semibold" : "text-zinc-400 hover:text-zinc-900"
             )}
           >
             <LayoutGrid className="size-5" />
@@ -595,9 +595,12 @@ export function BottomDock() {
               <Link
                 href="/apps/invoice-generator"
                 onClick={() => setIsAppsOpen(false)}
-                className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 text-left transition-colors"
+                className={cn(
+                  "flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-left transition-colors",
+                  pathname.startsWith("/apps/invoice-generator") ? "text-red-600 bg-red-50" : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900"
+                )}
               >
-                <FileText className="size-4 text-zinc-400" /> Invoice Generator
+                <FileText className={cn("size-4", pathname.startsWith("/apps/invoice-generator") ? "text-red-600" : "text-zinc-400")} /> Invoice Generator
               </Link>
             </div>
           )}

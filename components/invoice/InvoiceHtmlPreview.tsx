@@ -8,6 +8,7 @@ type InvoiceData = {
   pan?: string;
   contact?: string;
   igUserName: string;
+  invoiceNumber?: string;
   liveDate: string;
   currency: string;
   campaignName: string;
@@ -102,6 +103,7 @@ const Template1 = ({ invoiceData, lineItems, creatorSettings }: Props) => {
             <p className="font-bold mb-1 uppercase">{cs.creatorName || cs.name || 'Your Name'}</p>
             <p className="text-[10px] text-gray-600 leading-tight">Address: {cs.creatorAddress || cs.address || 'Your Address'}</p>
             <p className="text-[10px] text-gray-600 leading-tight">Email: {cs.creatorEmail || cs.email || 'Your Email'}</p>
+            <p className="text-[10px] text-gray-600 leading-tight">Phone: {cs.contactNumber || cs.phone || 'Your Phone'}</p>
             <p className="text-[10px] text-gray-600 leading-tight">Contact: {cs.phone || 'Your Phone'}</p>
             {payout.pan && <p className="text-[10px] text-gray-600 leading-tight">PAN: {payout.pan}</p>}
           </div>
@@ -109,6 +111,8 @@ const Template1 = ({ invoiceData, lineItems, creatorSettings }: Props) => {
             <div className="bg-[#edf6f7] px-2 py-1 font-bold text-[10px] inline-block mb-2">BILL TO</div>
             <p className="font-bold mb-1 uppercase">{invoiceData.brandName || 'Brand Name'}</p>
             <p className="text-[10px] text-gray-600 leading-tight">{invoiceData.billingAddress || 'Brand Address'}</p>
+            {invoiceData.brandEmail && <p className="text-[10px] text-gray-600 leading-tight">Email: {invoiceData.brandEmail}</p>}
+            {invoiceData.contact && <p className="text-[10px] text-gray-600 leading-tight">Contact: {invoiceData.contact}</p>}
             {invoiceData.pan && <p className="text-[10px] text-gray-600 leading-tight">PAN: {invoiceData.pan}</p>}
             {invoiceData.gstin && <p className="text-[10px] text-gray-600 leading-tight">GSTIN: {invoiceData.gstin}</p>}
           </div>
@@ -149,7 +153,7 @@ const Template1 = ({ invoiceData, lineItems, creatorSettings }: Props) => {
             <div className="w-1/2 pl-2">
               <p className="font-bold text-[#129b9e] text-[10px] mb-1">Bank Details</p>
               <p className="text-[9px] text-gray-600 leading-tight"><span className="font-bold">Bank:</span> {payout.bankName || cs.bankName || 'N/A'}</p>
-              <p className="text-[9px] text-gray-600 leading-tight"><span className="font-bold">Bank Holder:</span> {payout.accountName || cs.accountName || 'N/A'}</p>
+              <p className="text-[9px] text-gray-600 leading-tight"><span className="font-bold">Bank Holder:</span> {payout.holderName || cs.creatorName || 'N/A'}</p>
               <p className="text-[9px] text-gray-600 leading-tight"><span className="font-bold">A/C no:</span> {payout.accountNumber || cs.accountNumber || 'N/A'}</p>
               <p className="text-[9px] text-gray-600 leading-tight"><span className="font-bold">IFSC:</span> {payout.ifscCode || cs.ifscCode || 'N/A'}</p>
               <p className="text-[9px] text-gray-600 leading-tight"><span className="font-bold">A/C Type:</span> {payout.accountType || cs.accountType || 'Savings'}</p>
@@ -160,8 +164,8 @@ const Template1 = ({ invoiceData, lineItems, creatorSettings }: Props) => {
 
         <div className="flex justify-end mt-4 mb-2">
           <div className="w-32 text-center">
-            {payout.signatureUrl ? (
-              <img src={payout.signatureUrl} alt="Signature" className="h-10 w-full object-contain border-b border-gray-800 mb-1" />
+            {(creatorSettings?.signatureUrl || payout.signatureUrl) ? (
+              <img src={(creatorSettings?.signatureUrl || payout.signatureUrl)} alt="Signature" className="h-10 w-full object-contain border-b border-gray-800 mb-1" />
             ) : (
               <div className="h-10 border-b border-gray-800 mb-1"></div>
             )}
@@ -169,7 +173,7 @@ const Template1 = ({ invoiceData, lineItems, creatorSettings }: Props) => {
           </div>
         </div>
 
-        <p className="text-center text-[9px] italic text-gray-500 mt-2">Please send payment within 30 days of receiving this invoice. 100% amount payable after the reel going live.</p>
+
         
         <LoomingoFooter />
       </div>
@@ -203,6 +207,8 @@ const Template2 = ({ invoiceData, lineItems, creatorSettings }: Props) => {
             <p className="text-[10px] font-bold tracking-wider mb-1">ISSUED TO:</p>
             <p className="text-[10px] leading-relaxed">{invoiceData.brandName || 'Brand Name'}</p>
             <p className="text-[10px] leading-relaxed">{invoiceData.billingAddress || 'Brand Address'}</p>
+            {invoiceData.brandEmail && <p className="text-[10px] leading-relaxed">Email: {invoiceData.brandEmail}</p>}
+            {invoiceData.contact && <p className="text-[10px] leading-relaxed">Contact: {invoiceData.contact}</p>}
             {invoiceData.gstin && <p className="text-[10px] leading-relaxed">GSTIN: {invoiceData.gstin}</p>}
           </div>
           <div className="w-[45%] text-right">
@@ -218,12 +224,12 @@ const Template2 = ({ invoiceData, lineItems, creatorSettings }: Props) => {
             <p className="text-[10px] leading-relaxed"><span className="font-bold">Name:</span> {cs.creatorName || cs.name || 'Your Name'}</p>
             <p className="text-[10px] leading-relaxed"><span className="font-bold">Address:</span> {cs.creatorAddress || cs.address || 'Your Address'}</p>
             <p className="text-[10px] leading-relaxed"><span className="font-bold">Email:</span> {cs.creatorEmail || cs.email || 'Your Email'}</p>
-            <p className="text-[10px] leading-relaxed"><span className="font-bold">Contact:</span> {cs.phone || 'Your Phone'}</p>
+            <p className="text-[10px] leading-relaxed"><span className="font-bold">Phone:</span> {cs.contactNumber || cs.phone || 'Your Phone'}</p>
           </div>
           <div className="w-[45%]">
             <p className="text-[10px] font-bold tracking-wider mb-1">PAY TO:</p>
             <p className="text-[10px] leading-relaxed"><span className="font-bold">Bank:</span> {payout.bankName || cs.bankName || 'N/A'}</p>
-            <p className="text-[10px] leading-relaxed"><span className="font-bold">Bank Holder:</span> {payout.accountName || cs.accountName || 'N/A'}</p>
+            <p className="text-[10px] leading-relaxed"><span className="font-bold">Bank Holder:</span> {payout.holderName || cs.creatorName || 'N/A'}</p>
             <p className="text-[10px] leading-relaxed"><span className="font-bold">A/C no:</span> {payout.accountNumber || cs.accountNumber || 'N/A'}</p>
             <p className="text-[10px] leading-relaxed"><span className="font-bold">IFSC:</span> {payout.ifscCode || cs.ifscCode || 'N/A'}</p>
             <p className="text-[10px] leading-relaxed"><span className="font-bold">A/C Type:</span> {payout.accountType || cs.accountType || 'Savings'}</p>
@@ -265,8 +271,8 @@ const Template2 = ({ invoiceData, lineItems, creatorSettings }: Props) => {
 
         <div className="flex justify-end mt-8 mb-10">
           <div className="w-32 text-center">
-            {payout.signatureUrl ? (
-              <img src={payout.signatureUrl} alt="Signature" className="h-10 w-full object-contain border-b border-gray-900 mb-1" />
+            {(creatorSettings?.signatureUrl || payout.signatureUrl) ? (
+              <img src={(creatorSettings?.signatureUrl || payout.signatureUrl)} alt="Signature" className="h-10 w-full object-contain border-b border-gray-900 mb-1" />
             ) : (
               <div className="h-10 border-b border-gray-900 mb-1"></div>
             )}
@@ -315,6 +321,8 @@ const Template3 = ({ invoiceData, lineItems, creatorSettings }: Props) => {
             <p className="text-[10px] font-bold tracking-wider mb-1">ISSUED TO:</p>
             <p className="text-[10px] leading-relaxed">{invoiceData.brandName || 'Brand Name'}</p>
             <p className="text-[10px] leading-relaxed">{invoiceData.billingAddress || 'Brand Address'}</p>
+            {invoiceData.brandEmail && <p className="text-[10px] leading-relaxed">Email: {invoiceData.brandEmail}</p>}
+            {invoiceData.contact && <p className="text-[10px] leading-relaxed">Contact: {invoiceData.contact}</p>}
           </div>
           <div className="w-[45%] text-right">
             <p className="text-[10px] leading-relaxed">INVOICE NO: {invoiceData.igUserName ? `${invoiceData.igUserName.substring(0,3).toUpperCase()}-001` : 'INV-001'}</p>
@@ -328,12 +336,12 @@ const Template3 = ({ invoiceData, lineItems, creatorSettings }: Props) => {
             <p className="text-[10px] leading-relaxed"><span className="font-bold">Name:</span> {cs.creatorName || cs.name}</p>
             <p className="text-[10px] leading-relaxed"><span className="font-bold">Address:</span> {cs.creatorAddress || cs.address}</p>
             <p className="text-[10px] leading-relaxed"><span className="font-bold">Email:</span> {cs.creatorEmail || cs.email}</p>
-            <p className="text-[10px] leading-relaxed"><span className="font-bold">Contact:</span> {cs.phone}</p>
+            <p className="text-[10px] leading-relaxed"><span className="font-bold">Phone:</span> {cs.contactNumber || cs.phone}</p>
           </div>
           <div className="w-[45%]">
             <p className="text-[10px] font-bold tracking-wider mb-1">PAY TO:</p>
             <p className="text-[10px] leading-relaxed"><span className="font-bold">Bank:</span> {payout.bankName || cs.bankName}</p>
-            <p className="text-[10px] leading-relaxed"><span className="font-bold">Bank Holder:</span> {payout.accountName || cs.accountName}</p>
+            <p className="text-[10px] leading-relaxed"><span className="font-bold">Bank Holder:</span> {payout.holderName || cs.creatorName}</p>
             <p className="text-[10px] leading-relaxed"><span className="font-bold">A/C no:</span> {payout.accountNumber || cs.accountNumber}</p>
             <p className="text-[10px] leading-relaxed"><span className="font-bold">IFSC:</span> {payout.ifscCode || cs.ifscCode}</p>
             <p className="text-[10px] leading-relaxed"><span className="font-bold">A/C Type:</span> {payout.accountType || cs.accountType || 'Savings'}</p>
@@ -375,8 +383,8 @@ const Template3 = ({ invoiceData, lineItems, creatorSettings }: Props) => {
         <div className="flex justify-between items-end mt-10">
           <p className="text-base text-gray-900 w-1/2 font-serif italic">Thank you for your<br/>business!</p>
           <div className="w-[40%] text-center flex flex-col items-center">
-            {payout.signatureUrl ? (
-              <img src={payout.signatureUrl} alt="Signature" className="h-10 w-32 object-contain border-b border-gray-900 mb-1" />
+            {(creatorSettings?.signatureUrl || payout.signatureUrl) ? (
+              <img src={(creatorSettings?.signatureUrl || payout.signatureUrl)} alt="Signature" className="h-10 w-32 object-contain border-b border-gray-900 mb-1" />
             ) : (
               <div className="h-10 w-32 border-b border-gray-900 mb-1"></div>
             )}
@@ -426,12 +434,15 @@ const Template4 = ({ invoiceData, lineItems, creatorSettings }: Props) => {
             <p className="text-base font-bold text-gray-900 mb-1">Bill To:</p>
             <p className="text-[11px] text-gray-600 leading-relaxed">{invoiceData.brandName}</p>
             <p className="text-[11px] text-gray-600 leading-relaxed">{invoiceData.billingAddress}</p>
+            {invoiceData.brandEmail && <p className="text-[11px] text-gray-600 leading-relaxed">Email: {invoiceData.brandEmail}</p>}
+            {invoiceData.contact && <p className="text-[11px] text-gray-600 leading-relaxed">Contact: {invoiceData.contact}</p>}
           </div>
           <div className="w-[45%] text-right">
             <p className="text-base font-bold text-gray-900 mb-1">From:</p>
             <p className="text-[11px] text-gray-600 leading-relaxed"><span className="font-bold">Name: </span>{cs.creatorName || cs.name}</p>
             <p className="text-[11px] text-gray-600 leading-relaxed"><span className="font-bold">Address: </span>{cs.creatorAddress || cs.address}</p>
             <p className="text-[11px] text-gray-600 leading-relaxed"><span className="font-bold">Email: </span>{cs.creatorEmail || cs.email}</p>
+            <p className="text-[11px] text-gray-600 leading-relaxed"><span className="font-bold">Phone: </span>{cs.contactNumber || cs.phone}</p>
             <p className="text-[11px] text-gray-600 leading-relaxed"><span className="font-bold">Contact: </span>{cs.phone}</p>
           </div>
         </div>
@@ -466,15 +477,15 @@ const Template4 = ({ invoiceData, lineItems, creatorSettings }: Props) => {
           <div className="w-[45%]">
             <p className="text-xs font-bold mb-1">Payment Information:</p>
             <p className="text-[11px] text-gray-600 leading-relaxed"><span className="font-bold">Bank: </span>{payout.bankName || cs.bankName}</p>
-            <p className="text-[11px] text-gray-600 leading-relaxed"><span className="font-bold">Bank Holder: </span>{payout.accountName || cs.accountName}</p>
+            <p className="text-[11px] text-gray-600 leading-relaxed"><span className="font-bold">Bank Holder: </span>{payout.holderName || cs.creatorName}</p>
             <p className="text-[11px] text-gray-600 leading-relaxed"><span className="font-bold">A/C no: </span>{payout.accountNumber || cs.accountNumber}</p>
             <p className="text-[11px] text-gray-600 leading-relaxed"><span className="font-bold">IFSC: </span>{payout.ifscCode || cs.ifscCode}</p>
             <p className="text-[11px] text-gray-600 leading-relaxed"><span className="font-bold">A/C Type: </span>{payout.accountType || cs.accountType}</p>
           </div>
           <div className="w-[45%] flex flex-col items-center">
             <div className="w-32 text-center">
-              {payout.signatureUrl ? (
-                <img src={payout.signatureUrl} alt="Signature" className="h-10 w-full object-contain border-b border-[#0f4c81] mb-1" />
+              {(creatorSettings?.signatureUrl || payout.signatureUrl) ? (
+                <img src={(creatorSettings?.signatureUrl || payout.signatureUrl)} alt="Signature" className="h-10 w-full object-contain border-b border-[#0f4c81] mb-1" />
               ) : (
                 <div className="h-10 border-b border-[#0f4c81] mb-1"></div>
               )}
@@ -523,6 +534,8 @@ const Template5 = ({ invoiceData, lineItems, creatorSettings }: Props) => {
             <p className="text-xs font-bold mb-2">Invoice to:</p>
             <p className="text-[11px] font-bold leading-relaxed">{invoiceData.brandName}</p>
             <p className="text-[10px] text-gray-700 leading-relaxed">{invoiceData.billingAddress}</p>
+            {invoiceData.brandEmail && <p className="text-[10px] text-gray-700 leading-relaxed">Email: {invoiceData.brandEmail}</p>}
+            {invoiceData.contact && <p className="text-[10px] text-gray-700 leading-relaxed">Contact: {invoiceData.contact}</p>}
           </div>
           <div className="w-[45%] flex flex-col items-end">
             <div className="flex mb-1">
@@ -542,6 +555,7 @@ const Template5 = ({ invoiceData, lineItems, creatorSettings }: Props) => {
             <p className="text-[10px] text-gray-700 leading-relaxed"><span className="font-bold">Name: </span>{cs.creatorName || cs.name}</p>
             <p className="text-[10px] text-gray-700 leading-relaxed"><span className="font-bold">Address: </span>{cs.creatorAddress || cs.address}</p>
             <p className="text-[10px] text-gray-700 leading-relaxed"><span className="font-bold">Email: </span>{cs.creatorEmail || cs.email}</p>
+            <p className="text-[10px] text-gray-700 leading-relaxed"><span className="font-bold">Phone: </span>{cs.contactNumber || cs.phone}</p>
             <p className="text-[10px] text-gray-700 leading-relaxed"><span className="font-bold">Contact: </span>{cs.phone}</p>
           </div>
         </div>
@@ -567,7 +581,7 @@ const Template5 = ({ invoiceData, lineItems, creatorSettings }: Props) => {
           <div className="w-[50%]">
             <p className="text-xs font-bold mb-2">PAYMENT METHOD</p>
             <p className="text-[10px] text-gray-700 leading-relaxed"><span className="font-bold">Bank: </span>{payout.bankName || cs.bankName}</p>
-            <p className="text-[10px] text-gray-700 leading-relaxed"><span className="font-bold">Bank Holder: </span>{payout.accountName || cs.accountName}</p>
+            <p className="text-[10px] text-gray-700 leading-relaxed"><span className="font-bold">Bank Holder: </span>{payout.holderName || cs.creatorName}</p>
             <p className="text-[10px] text-gray-700 leading-relaxed"><span className="font-bold">A/C no: </span>{payout.accountNumber || cs.accountNumber}</p>
             <p className="text-[10px] text-gray-700 leading-relaxed"><span className="font-bold">IFSC: </span>{payout.ifscCode || cs.ifscCode}</p>
             <p className="text-[10px] text-gray-700 leading-relaxed"><span className="font-bold">A/C Type: </span>{payout.accountType || cs.accountType}</p>
@@ -591,8 +605,8 @@ const Template5 = ({ invoiceData, lineItems, creatorSettings }: Props) => {
         <div className="flex justify-between items-end mt-10">
           <p className="text-sm text-gray-900 font-serif italic">Thank you for your business!</p>
           <div className="w-36 text-center">
-            {payout.signatureUrl ? (
-              <img src={payout.signatureUrl} alt="Signature" className="h-10 w-full object-contain border-b border-[#cca63f] mb-1" />
+            {(creatorSettings?.signatureUrl || payout.signatureUrl) ? (
+              <img src={(creatorSettings?.signatureUrl || payout.signatureUrl)} alt="Signature" className="h-10 w-full object-contain border-b border-[#cca63f] mb-1" />
             ) : (
               <div className="h-10 border-b border-[#cca63f] mb-1"></div>
             )}
@@ -645,6 +659,8 @@ const Template6 = ({ invoiceData, lineItems, creatorSettings }: Props) => {
             <p className="text-[11px] font-bold mb-1.5">Billed to:</p>
             <p className="text-[10px] font-bold text-gray-800">{invoiceData.brandName}</p>
             <p className="text-[10px] text-gray-700 leading-relaxed">{invoiceData.billingAddress}</p>
+            {invoiceData.brandEmail && <p className="text-[10px] text-gray-700 leading-relaxed">Email: {invoiceData.brandEmail}</p>}
+            {invoiceData.contact && <p className="text-[10px] text-gray-700 leading-relaxed">Contact: {invoiceData.contact}</p>}
             {invoiceData.pan && <p className="text-[10px] text-gray-700 leading-relaxed">PAN: {invoiceData.pan}</p>}
             {invoiceData.gstin && <p className="text-[10px] text-gray-700 leading-relaxed">GSTIN: {invoiceData.gstin}</p>}
           </div>
@@ -653,6 +669,7 @@ const Template6 = ({ invoiceData, lineItems, creatorSettings }: Props) => {
             <p className="text-[10px] text-gray-700 leading-relaxed"><span className="font-bold">Name: </span>{cs.creatorName || cs.name}</p>
             <p className="text-[10px] text-gray-700 leading-relaxed"><span className="font-bold">Address: </span>{cs.creatorAddress || cs.address}</p>
             <p className="text-[10px] text-gray-700 leading-relaxed"><span className="font-bold">Email: </span>{cs.creatorEmail || cs.email}</p>
+            <p className="text-[10px] text-gray-700 leading-relaxed"><span className="font-bold">Phone: </span>{cs.contactNumber || cs.phone}</p>
             <p className="text-[10px] text-gray-700 leading-relaxed"><span className="font-bold">Contact: </span>{cs.phone}</p>
           </div>
         </div>
@@ -667,7 +684,7 @@ const Template6 = ({ invoiceData, lineItems, creatorSettings }: Props) => {
           <div className="w-1/2 bg-[#fbfbfb] border-l-4 border-gray-900 p-2.5">
             <p className="text-[11px] font-bold mb-1">Bank Details</p>
             <p className="text-[10px] text-gray-700 leading-relaxed"><span className="font-bold">Bank: </span>{payout.bankName || cs.bankName}</p>
-            <p className="text-[10px] text-gray-700 leading-relaxed"><span className="font-bold">Bank Holder: </span>{payout.accountName || cs.accountName}</p>
+            <p className="text-[10px] text-gray-700 leading-relaxed"><span className="font-bold">Bank Holder: </span>{payout.holderName || cs.creatorName}</p>
             <p className="text-[10px] text-gray-700 leading-relaxed"><span className="font-bold">A/C no: </span>{payout.accountNumber || cs.accountNumber}</p>
             <p className="text-[10px] text-gray-700 leading-relaxed"><span className="font-bold">IFSC: </span>{payout.ifscCode || cs.ifscCode}</p>
             <p className="text-[10px] text-gray-700 leading-relaxed"><span className="font-bold">A/C Type: </span>{payout.accountType || cs.accountType}</p>
@@ -696,8 +713,8 @@ const Template6 = ({ invoiceData, lineItems, creatorSettings }: Props) => {
 
         <div className="flex justify-end mb-8">
           <div className="w-32 text-center">
-            {payout.signatureUrl ? (
-              <img src={payout.signatureUrl} alt="Signature" className="h-10 w-full object-contain border-b border-gray-800 mb-1" />
+            {(creatorSettings?.signatureUrl || payout.signatureUrl) ? (
+              <img src={(creatorSettings?.signatureUrl || payout.signatureUrl)} alt="Signature" className="h-10 w-full object-contain border-b border-gray-800 mb-1" />
             ) : (
               <div className="h-10 border-b border-gray-800 mb-1"></div>
             )}
@@ -707,7 +724,7 @@ const Template6 = ({ invoiceData, lineItems, creatorSettings }: Props) => {
 
         <div className="mb-8">
           <p className="text-[9px] font-bold mb-0.5">Payment Terms</p>
-          <p className="text-[8px] text-gray-800 leading-relaxed">• 100% amount payable after the reel going live.</p>
+
         </div>
         
         <LoomingoFooter color="text-gray-500" />
