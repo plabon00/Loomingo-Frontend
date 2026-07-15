@@ -8,9 +8,8 @@ import { DesktopSidebar, MobileNavbar, BottomDock } from "@/components/layout/Ap
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Plus, Trash2, Settings, History, Loader2, FileDown, Check, X, LayoutTemplate, Building, Megaphone, List, Save, Eye } from "lucide-react";
+import { Plus, Trash2, Settings, History, Loader2, FileDown, Check, X, LayoutTemplate, Building, Megaphone, List, Save, Eye, RefreshCw } from "lucide-react";
 import Link from "next/link";
-import { InvoiceHtmlPreview } from "@/components/invoice/InvoiceHtmlPreview";
 
 const TEMPLATES = [
   { id: 1, name: "Modern Teal (Default)" },
@@ -22,7 +21,7 @@ const TEMPLATES = [
 ];
 
 const DELIVERABLE_OPTIONS = ["Instagram Reel", "Instagram Story", "YouTube Video", "YouTube Short", "Static Post", "Carousel Post", "Other"];
-const ITEM_TYPES = ["Product", "Reels", "Story"];
+const ITEM_TYPES = ["Product", "Reels", "Story", "Reel + Story"];
 
 export default function InvoiceGenerator() {
   const router = useRouter();
@@ -31,6 +30,8 @@ export default function InvoiceGenerator() {
   const [isGenerating, setIsGenerating] = useState(false);
   
   // Preview State
+  const [previewPdfUrl, setPreviewPdfUrl] = useState<string | null>(null);
+  const [isPreviewLoading, setIsPreviewLoading] = useState(false);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const [creatorSettings, setCreatorSettings] = useState<any>(null);
 
@@ -73,6 +74,14 @@ export default function InvoiceGenerator() {
     });
     return () => unsub();
   }, [router]);
+
+  // Initial render when template changes or loaded for first time
+  useEffect(() => {
+    if (user && !isLoading) {
+      handleGenerate('preview');
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData.templateId, user]);
 
   const fetchCreatorSettings = async (userId: string) => {
     try {
@@ -200,6 +209,7 @@ export default function InvoiceGenerator() {
     if (field === "type") {
       if (value === "Reels") newItems[index].name = "Instagram Reel";
       else if (value === "Story") newItems[index].name = "Instagram Story";
+      else if (value === "Reel + Story") newItems[index].name = "Instagram Reel + Story";
       else newItems[index].name = "";
     }
     
@@ -220,13 +230,16 @@ export default function InvoiceGenerator() {
     setLineItems([{ no: 1, type: "Reels", name: "Instagram Reel", quantity: 1, price: 5000 }]);
     setIsNewBrand(true);
     setSelectedBrandId("");
+    setPreviewPdfUrl(null);
   };
 
-  const handleGenerate = async (mode: 'save' | 'saveAndDownload' = 'save') => {
+  const handleGenerate = async (mode: 'preview' | 'save' | 'saveAndDownload' = 'save') => {
     if (!user) return;
-    if (isSaving || isGenerating) return; // guard against double-submit
+    if (mode !== 'preview' && (isSaving || isGenerating)) return; // guard against double-submit
     
-    if (mode === 'saveAndDownload') {
+    if (mode === 'preview') {
+      setIsPreviewLoading(true);
+    } else if (mode === 'saveAndDownload') {
       setIsGenerating(true);
     } else {
       setIsSaving(true);
@@ -254,7 +267,7 @@ export default function InvoiceGenerator() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userId: user.uid,
-          preview: false,
+          preview: mode === 'preview',
           invoiceData: { 
             ...formData, 
             deliverables: selectedDeliverables.join(", "),
@@ -279,7 +292,9 @@ export default function InvoiceGenerator() {
           finalUrl = data.pdfUrl;
         }
 
-        if (mode === 'saveAndDownload') {
+        if (mode === 'preview') {
+          setPreviewPdfUrl(finalUrl);
+        } else if (mode === 'saveAndDownload') {
           // Trigger download directly for final generation
           if (finalUrl) {
             const a = document.createElement("a");
@@ -295,13 +310,14 @@ export default function InvoiceGenerator() {
           resetForm();
         }
       } else {
-        alert(data.error || "Failed to generate invoice");
+        if (mode !== 'preview') alert(data.error || "Failed to generate invoice");
       }
     } catch (err) {
       console.error(err);
-      alert("Network error generating invoice.");
+      if (mode !== 'preview') alert("Network error generating invoice.");
     } finally {
-      if (mode === 'saveAndDownload') setIsGenerating(false);
+      if (mode === 'preview') setIsPreviewLoading(false);
+      else if (mode === 'saveAndDownload') setIsGenerating(false);
       else setIsSaving(false);
     }
   };
@@ -489,9 +505,9 @@ export default function InvoiceGenerator() {
               </CardHeader>
               <CardContent className="space-y-4 pt-4">
                 {lineItems.map((item, index) => (
-                  <div key={index} className="flex flex-col sm:flex-row gap-3 items-start sm:items-center bg-zinc-50 p-3 rounded-lg border border-zinc-100">
+                  <div key={index} className="flex flex-col sm:flex-row gap-3 items-start sm:items-center bg-zinc-50 p-3 rounded-lg border border-zinc-200/60 shadow-sm transition-all hover:border-zinc-300">
                     <select 
-                      className="h-9 w-full sm:w-28 rounded-md border border-zinc-200 bg-white px-2 text-sm text-zinc-900 focus-visible:outline-none"
+                      className="h-10 w-full sm:w-24 shrink-0 rounded-md border border-zinc-200 bg-white px-2 text-sm font-medium text-zinc-900 focus-visible:outline-none focus:ring-2 focus:ring-indigo-500/20"
                       value={item.type}
                       onChange={(e) => updateLineItem(index, "type", e.target.value)}
                     >
@@ -502,33 +518,33 @@ export default function InvoiceGenerator() {
                       placeholder="Item name" 
                       value={item.name} 
                       onChange={(e) => updateLineItem(index, "name", e.target.value)} 
-                      className="flex-1 bg-white h-9 text-zinc-900"
+                      className="flex-1 bg-white h-10 text-zinc-900 border-zinc-200 focus:ring-2 focus:ring-indigo-500/20"
                       disabled={item.type !== "Product"} // Auto-filled for Reels/Story
                     />
                     
-                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                      <div className="flex items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
                       {/* Quantity Counter */}
-                      <div className="flex items-center border border-zinc-200 rounded-md bg-white overflow-hidden h-9">
+                      <div className="flex items-center border border-zinc-200 rounded-md bg-white overflow-hidden h-10 shrink-0">
                         <button 
                           onClick={() => updateLineItem(index, "quantity", Math.max(1, (item.quantity || 1) - 1))}
-                          className="px-2.5 bg-zinc-50 hover:bg-zinc-100 text-zinc-600 border-r border-zinc-200 h-full"
+                          className="px-3 bg-zinc-50 hover:bg-zinc-100 text-zinc-600 border-r border-zinc-200 h-full transition-colors"
                         >-</button>
                         <input 
                           type="number" 
                           value={item.quantity || 1} 
                           onChange={(e) => updateLineItem(index, "quantity", parseInt(e.target.value) || 1)} 
-                          className="w-12 text-center text-sm outline-none text-zinc-900 [-moz-appearance:_textfield] [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none" 
+                          className="w-10 text-center text-sm font-medium outline-none text-zinc-900 [-moz-appearance:_textfield] [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none" 
                           min={1}
                         />
                         <button 
                           onClick={() => updateLineItem(index, "quantity", (item.quantity || 1) + 1)}
-                          className="px-2.5 bg-zinc-50 hover:bg-zinc-100 text-zinc-600 border-l border-zinc-200 h-full"
+                          className="px-3 bg-zinc-50 hover:bg-zinc-100 text-zinc-600 border-l border-zinc-200 h-full transition-colors"
                         >+</button>
                       </div>
 
                       {/* Price Input */}
-                      <div className="relative flex items-center">
-                        <span className="absolute left-2.5 text-zinc-500 text-sm">
+                      <div className="relative flex items-center shrink-0">
+                        <span className="absolute left-3 text-zinc-500 text-sm font-medium">
                           {formData.currency === 'USD' ? '$' : formData.currency === 'EUR' ? '€' : formData.currency === 'GBP' ? '£' : '₹'}
                         </span>
                         <input 
@@ -536,11 +552,11 @@ export default function InvoiceGenerator() {
                           placeholder="Price" 
                           value={item.price || ''} 
                           onChange={(e) => updateLineItem(index, "price", parseFloat(e.target.value) || 0)} 
-                          className="w-24 h-9 pl-7 pr-2 rounded-md border border-zinc-200 bg-white text-sm text-zinc-900 outline-none focus:ring-2 focus:ring-zinc-950 [-moz-appearance:_textfield] [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none" 
+                          className="w-24 h-10 pl-8 pr-2 rounded-md border border-zinc-200 bg-white text-sm font-medium text-zinc-900 outline-none focus:ring-2 focus:ring-indigo-500/20 [-moz-appearance:_textfield] [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none transition-all" 
                         />
                       </div>
                       
-                      <Button variant="ghost" size="icon" onClick={() => removeLineItem(index)} className="text-red-500 hover:text-red-700 hover:bg-red-50 h-9 w-9 shrink-0"><Trash2 className="size-4" /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => removeLineItem(index)} className="text-red-500 hover:text-red-700 hover:bg-red-50 h-10 w-10 shrink-0 ml-1 transition-colors"><Trash2 className="size-4.5" /></Button>
                     </div>
                   </div>
                 ))}
@@ -558,9 +574,18 @@ export default function InvoiceGenerator() {
             <div className="flex flex-col sm:flex-row gap-3 w-full">
               <Button 
                 size="lg" 
+                onClick={() => handleGenerate('preview')} 
+                disabled={isPreviewLoading || isGenerating || isSaving} 
+                className="w-full sm:w-1/3 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-medium shadow-sm border border-indigo-200 rounded-xl h-12 transition-all"
+              >
+                {isPreviewLoading ? <Loader2 className="animate-spin size-5 mr-2" /> : <RefreshCw className="size-5 mr-2" />} 
+                Render Preview
+              </Button>
+              <Button 
+                size="lg" 
                 onClick={() => handleGenerate('save')} 
                 disabled={isSaving || isGenerating || !formData.brandName} 
-                className="w-full sm:w-1/2 bg-zinc-900 hover:bg-zinc-800 text-white font-medium shadow-md rounded-xl h-12"
+                className="w-full sm:w-1/3 bg-zinc-900 hover:bg-zinc-800 text-white font-medium shadow-md rounded-xl h-12 transition-all"
               >
                 {isSaving ? <Loader2 className="animate-spin size-5 mr-2" /> : <Save className="size-5 mr-2" />} 
                 Save
@@ -569,7 +594,7 @@ export default function InvoiceGenerator() {
                 size="lg" 
                 onClick={() => handleGenerate('saveAndDownload')} 
                 disabled={isGenerating || isSaving || !formData.brandName} 
-                className="w-full sm:w-1/2 bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-md shadow-blue-600/20 rounded-xl h-12"
+                className="w-full sm:w-1/3 bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-md shadow-blue-600/20 rounded-xl h-12 transition-all"
               >
                 {isGenerating ? <Loader2 className="animate-spin size-5 mr-2" /> : <FileDown className="size-5 mr-2" />} 
                 Save & Download
@@ -604,19 +629,23 @@ export default function InvoiceGenerator() {
 
           <div className="hidden lg:flex w-full p-3 items-center justify-between bg-white border-b border-zinc-200 z-10 shrink-0 shadow-sm">
             <h3 className="text-sm font-semibold text-black flex items-center gap-2">
-              Live HTML Preview
+              Live Preview
+              {isPreviewLoading && <Loader2 className="size-3.5 animate-spin text-zinc-500" />}
             </h3>
-            <span className="text-xs text-zinc-500 font-medium bg-zinc-100 px-2 py-1 rounded-md">Instantaneous</span>
+            <span className="text-xs text-zinc-500 font-medium bg-zinc-100 px-2 py-1 rounded-md">Updates on Render</span>
           </div>
           
-          <div className="flex-1 p-4 md:p-8 flex items-center justify-center overflow-auto custom-scrollbar">
-            <div className="w-[794px] min-w-[794px] h-[1123px] min-h-[1123px] bg-white rounded-sm shadow-2xl overflow-hidden border border-zinc-300 relative scale-75 lg:scale-90 xl:scale-100 transform origin-top">
-              <InvoiceHtmlPreview 
-                invoiceData={formData} 
-                lineItems={lineItems} 
-                creatorSettings={creatorSettings} 
-              />
-            </div>
+          <div className="flex-1 p-4 md:p-8 flex items-center justify-center overflow-hidden">
+            {previewPdfUrl ? (
+              <div className="w-full h-full max-w-3xl rounded-lg shadow-xl overflow-hidden border border-zinc-300 bg-white">
+                <iframe src={`${previewPdfUrl}#view=FitH`} className="w-full h-full border-0" />
+              </div>
+            ) : (
+              <div className="text-center text-zinc-400 flex flex-col items-center">
+                <FileDown className="size-12 mb-3 opacity-20" />
+                <p>Click <b>Render Preview</b> to see the PDF</p>
+              </div>
+            )}
           </div>
         </div>
 
