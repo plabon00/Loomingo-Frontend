@@ -605,8 +605,8 @@ export default function InvoiceGeneratorDashboard() {
 
       {/* NEW INVOICE WIZARD MODAL */}
       {isWizardOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white w-full h-auto max-h-[90dvh] sm:max-h-[90vh] max-w-2xl rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 pb-24 sm:pb-4">
+          <div className="bg-white w-full h-auto max-h-[80dvh] sm:max-h-[90vh] max-w-2xl rounded-2xl shadow-2xl flex flex-col overflow-hidden">
             <div className="flex items-center justify-between p-3 sm:p-6 border-b border-zinc-100">
               <div>
                 <h3 className="font-bold text-xl text-zinc-900">Create Invoice</h3>
