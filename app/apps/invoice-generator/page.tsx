@@ -502,22 +502,21 @@ export default function InvoiceGenerator() {
               </CardHeader>
               <CardContent className="p-0">
                 {/* Desktop Header Row */}
-                <div className="hidden sm:grid grid-cols-12 gap-3 px-6 py-3 bg-zinc-50/50 border-b border-zinc-100 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
-                  <div className="col-span-6">Item Details</div>
-                  <div className="col-span-2 text-center">Qty</div>
-                  <div className="col-span-2 text-right">Price</div>
-                  <div className="col-span-2 text-right">Amount</div>
+                <div className="hidden sm:grid grid-cols-12 gap-4 px-6 py-2.5 bg-white border-b border-zinc-100 text-[10px] font-semibold text-zinc-400 uppercase tracking-widest">
+                  <div className="col-span-7">Item Details</div>
+                  <div className="col-span-3 text-right">Price / Qty</div>
+                  <div className="col-span-2 text-right pr-8">Amount</div>
                 </div>
 
                 {/* Rows */}
                 <div className="flex flex-col divide-y divide-zinc-100">
                   {lineItems.map((item, index) => (
-                    <div key={index} className="flex flex-col sm:grid sm:grid-cols-12 gap-4 sm:gap-3 px-4 sm:px-6 py-4 items-start sm:items-center hover:bg-zinc-50/30 transition-colors">
+                    <div key={index} className="group flex flex-col sm:grid sm:grid-cols-12 gap-4 sm:gap-4 px-4 sm:px-6 py-3 items-start sm:items-start hover:bg-zinc-50/50 transition-colors">
                       
                       {/* Item Details (Type & Name) */}
-                      <div className="col-span-6 flex gap-2 w-full">
+                      <div className="col-span-7 flex flex-col w-full pt-1">
                         <select 
-                          className="h-10 w-28 shrink-0 rounded-md border border-zinc-200 bg-white px-2 text-sm font-medium text-zinc-900 focus-visible:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                          className="h-6 w-auto max-w-[140px] text-xs font-medium text-zinc-500 bg-transparent border-none px-0 outline-none focus:ring-0 cursor-pointer appearance-none -ml-1 hover:text-zinc-700"
                           value={item.type}
                           onChange={(e) => updateLineItem(index, "type", e.target.value)}
                         >
@@ -527,31 +526,18 @@ export default function InvoiceGenerator() {
                           placeholder="Item description..." 
                           value={item.name} 
                           onChange={(e) => updateLineItem(index, "name", e.target.value)} 
-                          className="flex-1 bg-white h-10 text-zinc-900 border-zinc-200 focus:ring-2 focus:ring-indigo-500/20"
+                          className="w-full h-8 text-sm font-medium text-zinc-900 bg-transparent border-none px-0 shadow-none outline-none focus-visible:ring-0 placeholder:text-zinc-300 -ml-0.5"
                           disabled={item.type !== "Product"} 
                         />
                       </div>
 
                       {/* Qty & Price row on Mobile, Grid on Desktop */}
-                      <div className="col-span-6 w-full sm:contents flex flex-wrap gap-4 items-center justify-between">
+                      <div className="col-span-5 w-full sm:contents flex flex-wrap gap-4 items-start justify-between pt-1">
                         
-                        {/* Qty */}
-                        <div className="sm:col-span-2 flex items-center sm:justify-center">
-                          <label className="sm:hidden text-xs text-zinc-500 font-medium mr-2">Qty:</label>
-                          <Input 
-                            type="number" 
-                            value={item.quantity || 1} 
-                            onChange={(e) => updateLineItem(index, "quantity", parseInt(e.target.value) || 1)} 
-                            className="w-20 text-center h-10 text-zinc-900 border-zinc-200 focus:ring-2 focus:ring-indigo-500/20 [-moz-appearance:_textfield] [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none" 
-                            min={1}
-                          />
-                        </div>
-
-                        {/* Price */}
-                        <div className="sm:col-span-2 flex items-center sm:justify-end">
-                          <label className="sm:hidden text-xs text-zinc-500 font-medium mr-2">Price:</label>
-                          <div className="relative flex items-center">
-                            <span className="absolute left-3 text-zinc-500 text-sm font-medium">
+                        {/* Price & Qty Stack */}
+                        <div className="sm:col-span-3 flex flex-col items-end justify-start w-full sm:w-auto">
+                          <div className="flex items-center justify-end w-full gap-1 h-8">
+                            <span className="text-zinc-400 text-sm font-medium">
                               {formData.currency === 'USD' ? '$' : formData.currency === 'EUR' ? '€' : formData.currency === 'GBP' ? '£' : '₹'}
                             </span>
                             <Input 
@@ -559,21 +545,43 @@ export default function InvoiceGenerator() {
                               placeholder="0.00" 
                               value={item.price || ''} 
                               onChange={(e) => updateLineItem(index, "price", parseFloat(e.target.value) || 0)} 
-                              className="w-28 h-10 pl-7 pr-3 text-right rounded-md border border-zinc-200 bg-white text-sm font-medium text-zinc-900 outline-none focus:ring-2 focus:ring-indigo-500/20 [-moz-appearance:_textfield] [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none transition-all" 
+                              className="w-24 text-right bg-transparent border-none px-0 text-sm font-medium text-zinc-900 shadow-none outline-none focus-visible:ring-0 [-moz-appearance:_textfield] [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none" 
                             />
+                          </div>
+                          
+                          <div className="flex items-center justify-end text-xs text-zinc-400 mt-1">
+                            <span className="mr-1">Qty:</span>
+                            <select 
+                              className="bg-transparent border-none p-0 text-zinc-500 text-right outline-none focus:ring-0 cursor-pointer font-medium hover:text-zinc-800"
+                              value={item.quantity || 1}
+                              onChange={(e) => updateLineItem(index, "quantity", parseInt(e.target.value) || 1)}
+                            >
+                              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 40, 50, 100].map(n => (
+                                <option key={n} value={n}>{n}</option>
+                              ))}
+                            </select>
                           </div>
                         </div>
 
                         {/* Amount & Trash */}
-                        <div className="sm:col-span-2 flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto mt-2 sm:mt-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-zinc-100">
-                          <div className="flex items-center sm:justify-end">
-                            <label className="sm:hidden text-xs text-zinc-500 font-medium mr-2">Total:</label>
+                        <div className="sm:col-span-2 flex items-start justify-between sm:justify-end gap-2 w-full sm:w-auto mt-2 sm:mt-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-zinc-100 relative sm:pr-8">
+                          <div className="flex items-center sm:justify-end h-8">
+                            <label className="sm:hidden text-xs text-zinc-400 font-medium mr-2">Total:</label>
                             <span className="text-sm font-semibold text-zinc-900">
                               {formData.currency === 'USD' ? '$' : formData.currency === 'EUR' ? '€' : formData.currency === 'GBP' ? '£' : '₹'}
                               {((item.price || 0) * (item.quantity || 1)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </span>
                           </div>
-                          <Button variant="ghost" size="icon" onClick={() => removeLineItem(index)} className="text-zinc-400 hover:text-red-600 hover:bg-red-50 size-8 shrink-0 transition-colors"><Trash2 className="size-4" /></Button>
+                          
+                          {/* Trash button hidden until row hover on desktop */}
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={() => removeLineItem(index)} 
+                            className="text-zinc-300 hover:text-red-500 hover:bg-red-50 size-8 shrink-0 transition-all opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:absolute sm:right-0 sm:-top-0.5"
+                          >
+                            <Trash2 className="size-4" />
+                          </Button>
                         </div>
 
                       </div>
@@ -582,13 +590,13 @@ export default function InvoiceGenerator() {
                 </div>
 
                 {/* Footer / Summary Area */}
-                <div className="p-4 sm:p-6 bg-zinc-50/80 border-t border-zinc-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                  <Button variant="outline" size="sm" onClick={addLineItem} className="h-9 gap-1.5 text-zinc-700 bg-white border-zinc-300 hover:bg-zinc-100 hover:text-zinc-900 font-medium shadow-sm rounded-lg">
+                <div className="p-4 sm:px-6 sm:py-5 bg-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                  <Button variant="ghost" size="sm" onClick={addLineItem} className="h-8 gap-1.5 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 font-medium rounded-md px-2 -ml-2">
                     <Plus className="size-3.5" /> Add Item
                   </Button>
                   
-                  <div className="bg-zinc-900 text-white px-6 py-4 rounded-xl shadow-md flex items-center gap-6 w-full sm:w-auto">
-                    <span className="text-zinc-300 font-medium text-sm uppercase tracking-wider">Total Amount</span>
+                  <div className="bg-zinc-900 text-white px-6 py-3.5 rounded-xl shadow-md flex items-center gap-6 w-full sm:w-auto mt-2 sm:mt-0">
+                    <span className="text-zinc-400 font-semibold text-[10px] uppercase tracking-widest">Total Amount</span>
                     <span className="text-2xl font-bold tracking-tight">
                       {formData.currency === 'USD' ? '$' : formData.currency === 'EUR' ? '€' : formData.currency === 'GBP' ? '£' : '₹'}
                       {lineItems.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 1)), 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
