@@ -4,13 +4,26 @@ import { SignupForm } from "@/components/forms/signup-form";
 import { useState } from 'react';
 import AnimatedButton from "@/components/shadcn-space/radix/button/button-01";
 import { X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useAuthUser } from "@/hooks/use-auth-user";
 
 // Import Radix UI primitives directly to control the background and close button
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 
 export default function CallToAction() {
   const [isSignInOpen, setIsSignInOpen] = useState(false);
-  
+  const router = useRouter();
+  const { user } = useAuthUser();
+
+  // Logged-in users go straight to the dashboard instead of the signup modal
+  const handleGetStarted = () => {
+    if (user) {
+      router.push("/home-page");
+    } else {
+      setIsSignInOpen(true);
+    }
+  };
+
   return (
     // Wrapped in a soft, glassmorphic card to make it pop at the bottom of the page
     <div className="relative w-full max-w-4xl mx-auto text-center px-4 py-16 md:py-24 flex flex-col items-center justify-center bg-white/60 backdrop-blur-md border border-zinc-100 rounded-[2.5rem] shadow-sm mb-8 overflow-hidden">
@@ -38,7 +51,7 @@ export default function CallToAction() {
 
         {/* Button */}
         <div className="flex flex-wrap justify-center gap-4">
-          <AnimatedButton onClick={() => setIsSignInOpen(true)}>
+          <AnimatedButton onClick={handleGetStarted}>
             Get Started for Free
           </AnimatedButton>
         </div>

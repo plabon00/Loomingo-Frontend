@@ -7,6 +7,8 @@ import { SignupForm } from "@/components/forms/signup-form";
 import { useState } from "react";
 import { X } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useAuthUser } from "@/hooks/use-auth-user";
 
 // Import Radix UI primitives directly to control the background and close button
 import * as DialogPrimitive from "@radix-ui/react-dialog";
@@ -27,6 +29,17 @@ type HeroSectionProps = {
 
 function HeroSection({ avatarList }: HeroSectionProps) {
   const [isSignInOpen, setIsSignInOpen] = useState(false);
+  const router = useRouter();
+  const { user } = useAuthUser();
+
+  // Logged-in users go straight to the dashboard instead of the signup modal
+  const handleGetStarted = () => {
+    if (user) {
+      router.push("/home-page");
+    } else {
+      setIsSignInOpen(true);
+    }
+  };
 
   return (
     <LazyMotion features={domAnimation}>
@@ -74,13 +87,23 @@ function HeroSection({ avatarList }: HeroSectionProps) {
                 
                 {/* PERFORMANCE FIX: Using next/image for automatic optimization and LCP priority */}
                 <div className="relative w-full h-[45vh] lg:h-[85vh] xl:h-[90vh] max-w-[320px] sm:max-w-sm md:max-w-md lg:max-w-none mx-auto z-10 flex justify-center">
+                  {/* Mobile Image */}
                   <Image 
-                    src="https://i.ibb.co/h3KPQsH/Gemini-Generated-Image-4v0dha4v0dha4v0d-Photoroom.png" 
-                    alt="Hero Character" 
+                    src="https://i.ibb.co/mVwPqKPK/Gemini-Generated-Image-4v0dha4v0dha4v0d-Photoroom-1.png" 
+                    alt="Hero Character Mobile" 
                     priority
                     fill
                     sizes="(max-width: 1024px) 100vw, 33vw"
-                    className="object-contain object-bottom drop-shadow-2xl"
+                    className="object-contain object-bottom drop-shadow-2xl lg:hidden"
+                  />
+                  {/* Desktop Image */}
+                  <Image 
+                    src="https://i.ibb.co/h3KPQsH/Gemini-Generated-Image-4v0dha4v0dha4v0d-Photoroom.png" 
+                    alt="Hero Character Desktop" 
+                    priority
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 33vw"
+                    className="object-contain object-bottom drop-shadow-2xl hidden lg:block"
                   />
                 </div>
 
@@ -97,7 +120,7 @@ function HeroSection({ avatarList }: HeroSectionProps) {
             >
               <div className="bg-white/10 border border-white/20 backdrop-blur-xl p-6 sm:p-8 rounded-3xl flex flex-col items-center lg:items-start gap-6 shadow-2xl w-full max-w-sm lg:ml-auto">
                 
-                <AnimatedButton onClick={() => setIsSignInOpen(true)}>
+                <AnimatedButton onClick={handleGetStarted}>
                   Get Started
                 </AnimatedButton>
 

@@ -6,15 +6,11 @@ const nextConfig: NextConfig = {
   ],
   output: "standalone",
   images: {
+    qualities: [50, 75, 100],
     remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'i.ibb.co',
-      },
-      {
-        protocol: 'https',
-        hostname: 'images.shadcnspace.com',
-      }
+      { protocol: 'https', hostname: 'i.ibb.co', pathname: '/**' },
+      { protocol: 'https', hostname: 'images.shadcnspace.com', pathname: '/**' },
+      { protocol: 'https', hostname: 'images.unsplash.com', pathname: '/**' },
     ],
   },
   typescript: {

@@ -11,14 +11,14 @@ export default function OtherPagesFooter() {
     ],
     Company: [
       { title: 'About Us', href: '/about', disabled: false },
-      { title: 'Pricing', href: '#', disabled: false },
+      { title: 'Pricing', href: '#', disabled: true, badge: 'Coming Soon' },
       { title: 'Help Center', href: '/help', disabled: false },
       { title: 'Careers', href: '#', disabled: true, badge: 'Hiring' },
     ],
     Legal: [
       { title: 'Privacy Policy', href: '/privacy-policy', disabled: false },
       { title: 'Terms & Conditions', href: '/terms', disabled: false },
-      { title: 'Cookie Policy', href: '#', disabled: false },
+      { title: 'Cookie Policy', href: '/privacy-policy', disabled: false },
     ]
   };
 

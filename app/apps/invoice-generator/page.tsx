@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { DesktopSidebar, MobileNavbar, BottomDock } from "@/components/layout/AppNavigation";
+import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Toaster } from "@/components/ui/sonner";
@@ -452,10 +453,7 @@ export default function InvoiceGeneratorDashboard() {
     setPreviewPdfUrl(null);
   };
 
-  if (isLoading || !user) {
-    return <div className="min-h-[100dvh] flex items-center justify-center bg-zinc-50"><Loader2 className="animate-spin text-indigo-600 size-8" /></div>;
-  }
-
+  // Remove the old full-page loading block, let it render the skeleton below.
   return (
     <div className="flex min-h-[100dvh] bg-zinc-100 font-sans text-zinc-900">
       <Toaster position="top-center" richColors />
@@ -473,14 +471,39 @@ export default function InvoiceGeneratorDashboard() {
             </div>
             <div className="flex flex-wrap gap-3">
               <Link href="/apps/invoice-generator/creator-details">
-                <Button variant="outline" className="rounded-full border-zinc-300 bg-white text-zinc-800 hover:bg-zinc-50 shadow-sm"><Settings className="size-4 mr-2" /> Creator Details</Button>
+                <Button variant="outline" className="rounded-full border-zinc-300 bg-white text-zinc-800 hover:bg-zinc-50 shadow-sm" disabled={isLoading}><Settings className="size-4 mr-2" /> Creator Details</Button>
               </Link>
-              <Button onClick={() => openNewInvoiceWizard()} className="rounded-full bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-600/20"><Plus className="size-4 mr-2" /> New Invoice</Button>
+              <Button onClick={() => openNewInvoiceWizard()} disabled={isLoading} className="rounded-full bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-600/20"><Plus className="size-4 mr-2" /> New Invoice</Button>
             </div>
           </div>
 
-          {/* Mobile Tabs */}
-          <div className="flex sm:hidden p-1 bg-white border border-zinc-200 rounded-full shadow-sm mt-2">
+          {isLoading || !user ? (
+            <div className="space-y-8 animate-pulse mt-8">
+              {/* History Skeleton */}
+              <div className="bg-white border border-zinc-200 rounded-3xl p-4 md:p-6 shadow-sm">
+                <div className="h-6 w-32 bg-zinc-200 rounded-full mb-4"></div>
+                <div className="flex gap-3 overflow-hidden">
+                  <div className="w-full sm:w-48 h-[220px] bg-zinc-100 rounded-2xl shrink-0"></div>
+                  <div className="w-full sm:w-48 h-[220px] bg-zinc-100 rounded-2xl shrink-0"></div>
+                  <div className="w-full sm:w-48 h-[220px] bg-zinc-100 rounded-2xl shrink-0 hidden sm:block"></div>
+                  <div className="w-full sm:w-48 h-[220px] bg-zinc-100 rounded-2xl shrink-0 hidden md:block"></div>
+                </div>
+              </div>
+              
+              {/* Brands Skeleton */}
+              <div className="bg-white border border-zinc-200 rounded-3xl p-4 md:p-6 shadow-sm">
+                <div className="h-6 w-32 bg-zinc-200 rounded-full mb-4"></div>
+                <div className="flex gap-3 overflow-hidden">
+                  <div className="w-full sm:w-64 h-[120px] bg-zinc-100 rounded-2xl shrink-0"></div>
+                  <div className="w-full sm:w-64 h-[120px] bg-zinc-100 rounded-2xl shrink-0"></div>
+                  <div className="w-full sm:w-64 h-[120px] bg-zinc-100 rounded-2xl shrink-0 hidden md:block"></div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* Mobile Tabs */}
+              <div className="flex sm:hidden p-1 bg-white border border-zinc-200 rounded-full shadow-sm mt-2">
             <button onClick={() => setActiveMobileTab("history")} className={`flex-1 py-2 text-xs font-semibold rounded-full transition-colors ${activeMobileTab === "history" ? "bg-zinc-900 text-white shadow-sm" : "text-zinc-600 hover:bg-zinc-100"}`}>History</button>
             <button onClick={() => setActiveMobileTab("brands")} className={`flex-1 py-2 text-xs font-semibold rounded-full transition-colors ${activeMobileTab === "brands" ? "bg-zinc-900 text-white shadow-sm" : "text-zinc-600 hover:bg-zinc-100"}`}>Brands</button>
             <button onClick={() => setActiveMobileTab("templates")} className={`flex-1 py-2 text-xs font-semibold rounded-full transition-colors ${activeMobileTab === "templates" ? "bg-zinc-900 text-white shadow-sm" : "text-zinc-600 hover:bg-zinc-100"}`}>Templates</button>
@@ -600,7 +623,11 @@ export default function InvoiceGeneratorDashboard() {
             </div>
           </section>
 
+            </>
+          )}
+
         </div>
+        <Footer />
       </main>
 
       {/* NEW INVOICE WIZARD MODAL */}

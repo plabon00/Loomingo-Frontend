@@ -195,6 +195,125 @@ export function LogoutConfirmModal({
 }
 
 /* =========================================================
+   PROFILE POPUP MENU (shared by mobile navbar + desktop sidebar)
+========================================================= */
+
+function ProfileMenuItem({
+  icon: Icon,
+  label,
+  onClick,
+  danger = false,
+}: {
+  icon: React.ElementType;
+  label: string;
+  onClick: () => void;
+  danger?: boolean;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        "group w-full flex items-center gap-3 px-2.5 py-2 rounded-xl text-sm text-left transition-all duration-200 active:scale-[0.98]",
+        danger
+          ? "font-semibold text-red-600 hover:bg-red-50"
+          : "font-medium text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900",
+      )}
+    >
+      <span
+        className={cn(
+          "flex items-center justify-center size-8 rounded-lg border transition-all duration-200 group-hover:scale-110 group-hover:-rotate-6",
+          danger
+            ? "bg-red-50 border-red-100 text-red-500 group-hover:bg-red-100"
+            : "bg-zinc-50 border-zinc-100 text-zinc-400 group-hover:bg-red-50 group-hover:border-red-100 group-hover:text-red-600",
+        )}
+      >
+        <Icon className="size-4" />
+      </span>
+      <span className="flex-1">{label}</span>
+      <ChevronRight
+        className={cn(
+          "size-3.5 opacity-0 -translate-x-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0",
+          danger ? "text-red-400" : "text-zinc-300",
+        )}
+      />
+    </button>
+  );
+}
+
+function ProfileMenuPanel({
+  user,
+  customPhoto,
+  className,
+  onManageAccount,
+  onHelp,
+  onSuggest,
+  onSignOut,
+  onSignIn,
+}: {
+  user: User | null;
+  customPhoto: string | null;
+  className?: string;
+  onManageAccount: () => void;
+  onHelp: () => void;
+  onSuggest: () => void;
+  onSignOut: () => void;
+  onSignIn: () => void;
+}) {
+  return (
+    <div
+      className={cn(
+        "w-64 bg-white/95 backdrop-blur-xl border border-zinc-100 shadow-2xl rounded-3xl p-2 flex flex-col z-50",
+        className,
+      )}
+    >
+      {/* User header */}
+      <div className="flex items-center gap-3 p-2.5 mb-1 rounded-2xl bg-zinc-50 border border-zinc-100">
+        <div className="relative shrink-0">
+          {customPhoto ? (
+            <img
+              src={customPhoto}
+              alt="Profile"
+              className="size-9 rounded-full object-cover border border-zinc-200"
+              referrerPolicy="no-referrer"
+            />
+          ) : (
+            <span className="flex items-center justify-center size-9 rounded-full bg-white border border-zinc-200 text-zinc-400">
+              <UserCircle className="size-5" />
+            </span>
+          )}
+          <span
+            className={cn(
+              "absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full border-2 border-zinc-50",
+              user ? "bg-green-500" : "bg-zinc-300",
+            )}
+          />
+        </div>
+        <div className="min-w-0">
+          <p className="text-sm font-semibold text-zinc-900 truncate">
+            {user?.displayName || (user ? "Your account" : "Welcome")}
+          </p>
+          <p className="text-xs text-zinc-400 truncate">
+            {user?.email || "Sign in to get started"}
+          </p>
+        </div>
+      </div>
+
+      <ProfileMenuItem icon={Settings} label="Manage Account" onClick={onManageAccount} />
+      <ProfileMenuItem icon={LifeBuoy} label="Help" onClick={onHelp} />
+      <ProfileMenuItem icon={Lightbulb} label="Suggest us" onClick={onSuggest} />
+
+      <div className="border-t my-1.5 mx-2 border-zinc-100" />
+
+      {user ? (
+        <ProfileMenuItem icon={LogOut} label="Sign out" onClick={onSignOut} danger />
+      ) : (
+        <ProfileMenuItem icon={UserCircle} label="Sign in / Sign up" onClick={onSignIn} />
+      )}
+    </div>
+  );
+}
+
+/* =========================================================
    COMMON AUTH + INSTAGRAM CHECK
 ========================================================= */
 
@@ -317,6 +436,10 @@ export function MobileNavbar() {
 
   const handleProtectedAction = (actionName: string) => {
     setIsProfileOpen(false);
+    if (actionName === "Help") {
+      router.push("/help");
+      return;
+    }
     if (!user) {
       setAuthMessage(`Please sign in first to access ${actionName}.`);
       setShowForm(true);
@@ -378,44 +501,16 @@ export function MobileNavbar() {
           </button>
 
           {isProfileOpen && (
-            <div className="absolute top-10 right-0 w-48 bg-white border border-zinc-100 shadow-2xl rounded-[1.5rem] py-2 flex flex-col z-50 animate-in slide-in-from-top-2 fade-in zoom-in-95">
-              <button
-                onClick={() => handleProtectedAction("Manage Account")}
-                className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 text-left transition-colors"
-              >
-                <Settings className="size-4 text-zinc-400" /> Manage Account
-              </button>
-              <button
-                onClick={() => handleProtectedAction("Help")}
-                className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 text-left transition-colors"
-              >
-                <LifeBuoy className="size-4 text-zinc-400" /> Help
-              </button>
-              <button
-                onClick={() => handleProtectedAction("Suggestions")}
-                className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 text-left transition-colors"
-              >
-                <Lightbulb className="size-4 text-zinc-400" /> Suggest us
-              </button>
-
-              <div className="border-t my-1 border-zinc-100" />
-
-              {user ? (
-                <button
-                  onClick={() => { setIsProfileOpen(false); setShowLogoutConfirm(true); }}
-                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 text-left transition-colors"
-                >
-                  <LogOut className="size-4" /> Sign-out
-                </button>
-              ) : (
-                <button
-                  onClick={() => { setIsProfileOpen(false); setAuthMessage(""); setShowForm(true); setShowAuthModal(true); }}
-                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-red-950 hover:bg-zinc-50 text-left transition-colors"
-                >
-                  <UserCircle className="size-4" /> Sign-in/up
-                </button>
-              )}
-            </div>
+            <ProfileMenuPanel
+              user={user}
+              customPhoto={customPhoto}
+              className="absolute top-10 right-0 animate-in slide-in-from-top-2 fade-in zoom-in-95"
+              onManageAccount={() => handleProtectedAction("Manage Account")}
+              onHelp={() => handleProtectedAction("Help")}
+              onSuggest={() => handleProtectedAction("Suggestions")}
+              onSignOut={() => { setIsProfileOpen(false); setShowLogoutConfirm(true); }}
+              onSignIn={() => { setIsProfileOpen(false); setAuthMessage(""); setShowForm(true); setShowAuthModal(true); }}
+            />
           )}
         </div>
       </div>
@@ -694,6 +789,10 @@ export function DesktopSidebar() {
 
   const handleProtectedAction = (actionName: string) => {
     setIsProfileOpen(false);
+    if (actionName === "Help") {
+      router.push("/help");
+      return;
+    }
     if (!user) {
       setAuthMessage(`Please sign in first to access ${actionName}.`);
       setShowForm(true);
@@ -825,51 +924,19 @@ export function DesktopSidebar() {
             </button>
 
             {isProfileOpen && (
-              <div
+              <ProfileMenuPanel
+                user={user}
+                customPhoto={customPhoto}
                 className={cn(
-                  "absolute bottom-full mb-3 w-56 bg-white border border-zinc-100 shadow-2xl rounded-[1.5rem] py-2 flex flex-col z-50 animate-in fade-in zoom-in-95",
-                  isCollapsed ? "left-14" : "left-4",
+                  "absolute bottom-full mb-3 animate-in fade-in zoom-in-95 slide-in-from-bottom-2",
+                  isCollapsed ? "left-14" : "left-2",
                 )}
-              >
-                <button
-                  onClick={() => handleProtectedAction("Manage Account")}
-                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 text-left transition-colors"
-                >
-                  <Settings className="size-4 text-zinc-400" /> Manage Account
-                </button>
-
-                <button
-                  onClick={() => handleProtectedAction("Help")}
-                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 text-left transition-colors"
-                >
-                  <LifeBuoy className="size-4 text-zinc-400" /> Help
-                </button>
-
-                <button
-                  onClick={() => handleProtectedAction("Suggestions")}
-                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 text-left transition-colors"
-                >
-                  <Lightbulb className="size-4 text-zinc-400" /> Suggest us
-                </button>
-
-                <div className="border-t my-1 border-zinc-100" />
-
-                {user ? (
-                  <button
-                    onClick={() => { setIsProfileOpen(false); setShowLogoutConfirm(true); }}
-                    className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 text-left transition-colors"
-                  >
-                    <LogOut className="size-4" /> Sign-out
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => { setIsProfileOpen(false); setAuthMessage(""); setShowForm(true); setShowAuthModal(true); }}
-                    className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-red-950 hover:bg-zinc-50 text-left transition-colors"
-                  >
-                    <UserCircle className="size-4" /> Sign-in / Up
-                  </button>
-                )}
-              </div>
+                onManageAccount={() => handleProtectedAction("Manage Account")}
+                onHelp={() => handleProtectedAction("Help")}
+                onSuggest={() => handleProtectedAction("Suggestions")}
+                onSignOut={() => { setIsProfileOpen(false); setShowLogoutConfirm(true); }}
+                onSignIn={() => { setIsProfileOpen(false); setAuthMessage(""); setShowForm(true); setShowAuthModal(true); }}
+              />
             )}
           </div>
         </div>

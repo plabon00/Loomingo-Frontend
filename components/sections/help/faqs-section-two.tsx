@@ -66,7 +66,7 @@ export default function FAQs() {
                                 <p className="text-sm font-medium text-red-950">Still have questions?</p>
                                 <p className="text-xs text-zinc-500 mt-0.5">
                                     Reach out to our{' '}
-                                    <Link href="#" className="text-red-600 font-medium hover:underline">
+                                    <Link href="/help" className="text-red-600 font-medium hover:underline">
                                         support team
                                     </Link>
                                 </p>
@@ -103,7 +103,7 @@ export default function FAQs() {
                             <p className="text-sm font-medium text-red-950">Still have questions?</p>
                             <p className="text-xs text-zinc-500 mt-0.5">
                                 Reach out to our{' '}
-                                <Link href="#" className="text-red-600 font-medium hover:underline">
+                                <Link href="/help" className="text-red-600 font-medium hover:underline">
                                     support team
                                 </Link>
                             </p>

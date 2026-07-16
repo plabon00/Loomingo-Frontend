@@ -106,9 +106,12 @@ export default function HelpCenterSection() {
             <p className="text-white/70 leading-relaxed font-medium mb-6">
               I’ve recorded a 2-minute video showing you exactly how I personally set up my automations to handle high-volume comments.
             </p>
-            <button className="bg-white text-red-950 px-8 py-3 rounded-full font-bold hover:scale-105 transition-transform active:scale-95 shadow-lg">
+            <Link
+              href="/help/getting-started"
+              className="inline-block bg-white text-red-950 px-8 py-3 rounded-full font-bold hover:scale-105 transition-transform active:scale-95 shadow-lg"
+            >
               Watch Video Tutorial
-            </button>
+            </Link>
           </div>
           <div className="w-full md:w-1/3 aspect-video md:aspect-square bg-black/40 rounded-3xl border border-white/5 flex items-center justify-center">
              <div className="size-16 rounded-full bg-red-600 flex items-center justify-center text-white shadow-xl">
@@ -120,8 +123,13 @@ export default function HelpCenterSection() {
         {/* Support Footer */}
         <motion.div variants={popUpVariants} className="mt-20 pt-8 border-t border-white/10 w-full text-center">
             <p className="text-white/60 font-medium">
-              Still have questions? I'm iterating daily. <br className="sm:hidden"/> 
-              <span className="text-white font-bold ml-1 cursor-pointer hover:text-red-400 transition-colors underline underline-offset-4">Shoot me an email: support@loomingo.com</span>
+              Still have questions? I&apos;m iterating daily. <br className="sm:hidden"/>
+              <a
+                href="mailto:support@loomingo.com"
+                className="text-white font-bold ml-1 cursor-pointer hover:text-red-400 transition-colors underline underline-offset-4"
+              >
+                Shoot me an email: support@loomingo.com
+              </a>
             </p>
         </motion.div>
 

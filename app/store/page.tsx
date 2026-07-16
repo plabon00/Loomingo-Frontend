@@ -1,63 +1,142 @@
+"use client";
 
-import { Lock, ShoppingBag } from "lucide-react";
-// 👈 IMPORT YOUR LAYOUT COMPONENTS (Adjust paths if needed)
-import { MobileNavbar, BottomDock, DesktopSidebar } from "@/components/layout/AppNavigation"; 
+import { useEffect, useState } from "react";
+import { useAuthUser } from "@/hooks/use-auth-user";
+import { MobileNavbar, BottomDock, DesktopSidebar } from "@/components/layout/AppNavigation";
+import { StoreHeader } from "@/components/features/store/StoreHeader";
+import ProductGrid from "@/components/features/store/ProductGrid";
+import { GridBackground } from "@/components/ui/grid-background";
+import { StoreDetailsModal } from "@/components/modals/store-details-modal";
+import { ProductModal } from "@/components/modals/product-modal";
+import { Store, Product, saveStore, saveProduct, deleteProduct, API_URL, storeFetcher, mapStoreFromDB, emptyStore } from "@/lib/store";
+import { Loader2 } from "lucide-react";
+import useSWR from "swr";
+import { Footer } from "@/components/layout/Footer";
 
-export default function ShopComingSoonPage() {
-  return (
-    // 👈 Wrap in your standard layout container
-    <div className="w-full relative bg-background min-h-screen pt-14 md:pt-0 pb-20 md:pb-0 md:pl-64 overflow-hidden">
+export default function StoreManagerPage() {
+  const { user } = useAuthUser();
+  
+  // Use SWR for highly optimized, cached fetching
+  const { data: rawData, error, mutate, isLoading } = useSWR(
+    user ? `${API_URL}/api/store?userId=${user.uid}` : null,
+    storeFetcher
+  );
+
+  const [isEditingStore, setIsEditingStore] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | undefined>(undefined);
+  const [isAddingProduct, setIsAddingProduct] = useState(false);
+  const [activeCategory, setActiveCategory] = useState("All");
+
+  // Derive store data from SWR cache or fallback to empty
+  const store = rawData?.store 
+    ? mapStoreFromDB(rawData.store) 
+    : user 
+      ? emptyStore(user.uid) 
+      : null;
+
+  if (isLoading || !store || !user) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-white text-zinc-900">
+        <Loader2 className="size-8 animate-spin text-zinc-300" />
+      </div>
+    );
+  }
+
+  const handleSaveStore = async (updated: Store) => {
+    try {
+      const saved = await saveStore(user.uid, updated);
+      // Immediately mutate the SWR cache with new data
+      mutate({ store: saved }, false); 
+      setIsEditingStore(false);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleSaveProduct = async (product: Product) => {
+    try {
+      const saved = await saveProduct(store.id, product);
+      const isExisting = store.products.some(p => p.id === saved.id);
       
-      {/* 👈 INJECT LAYOUT COMPONENTS */}
+      const newProducts = isExisting 
+        ? store.products.map(p => p.id === saved.id ? saved : p)
+        : [...store.products, saved];
+        
+      // Mutate local cache
+      mutate({ store: { ...store, products: newProducts } }, false);
+      setIsAddingProduct(false);
+      setEditingProduct(undefined);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleDeleteProduct = async (productId: string) => {
+    if (!confirm("Are you sure you want to delete this product?")) return;
+    try {
+      await deleteProduct(productId);
+      const newProducts = store.products.filter(p => p.id !== productId);
+      // Mutate local cache
+      mutate({ store: { ...store, products: newProducts } }, false);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const categories = ["All", ...Array.from(new Set(store.products.map(p => p.category).filter(Boolean)))];
+  const filteredProducts = activeCategory === "All" ? store.products : store.products.filter(p => p.category === activeCategory);
+
+  return (
+    <GridBackground themeColor={store.themeColor} className="pt-14 md:pt-0 pb-20 md:pb-0 md:pl-64 bg-zinc-200">
       <MobileNavbar />
       <DesktopSidebar />
       <BottomDock />
 
-      {/* Main Content Area - Centered viewport */}
-      <main className="flex flex-col items-center justify-center px-4 relative min-h-[calc(100vh-8rem)] md:min-h-screen">
-        
-        {/* --- DYNAMIC BACKGROUND GRADIENTS (To show through the blur) --- */}
-        {/* These blobs move slightly in the background */}
-        <div className="absolute top-1/4 left-1/4 size-72 bg-blue-600/30 rounded-full blur-[128px] animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 size-72 bg-primary/20 rounded-full blur-[128px] animate-pulse delay-700" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-96 bg-background rounded-full blur-[64px] z-10" />
-
-        {/* --- CENTRAL GLASS CONTAINER --- */}
-        <div className="relative z-20 p-8 md:p-16 rounded-[32px] border border-border/50 bg-background/30 backdrop-blur-2xl shadow-2xl flex flex-col items-center text-center max-w-2xl w-full border-border/60">
-          
-          {/* Lock Icon Section */}
-          <div className="p-5 bg-muted/60 border rounded-2xl mb-8 shadow-innerrelative">
-            <Lock className="size-10 text-muted-foreground/80" />
-            <div className="absolute inset-0 bg-primary/10 blur-xl rounded-full" />
-          </div>
-
-          {/* Subheading */}
-          <div className="flex items-center gap-2 mb-4 text-primary font-semibold text-sm tracking-widest uppercase bg-primary/10 px-4 py-1 rounded-full border border-primary/20">
-            <ShoppingBag className="size-4" />
-            <span>Loomingo Store</span>
-          </div>
-
-          {/* LARGE "COMING SOON" TEXT */}
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tighter leading-none mb-6">
-            <span className="bg-gradient-to-b from-foreground to-foreground/70 bg-clip-text text-transparent">
-              Coming
-            </span>
-            <br />
-            <span className="bg-gradient-to-b from-foreground to-foreground/70 bg-clip-text text-transparent">
-              Soon
-            </span>
-          </h1>
-
-          {/* Muted Description */}
-          <p className="text-muted-foreground text-sm md:text-base leading-relaxed max-w-md">
-            Our exclusive store for merchandise, account add-ons, and plan upgrades is currently under construction. Stay tuned for launch updates!
-          </p>
-
-          {/* Optional decorative glow line */}
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent shadow-[0_0_15px_3px_rgba(59,130,246,0.5)]" />
+      <StoreHeader store={store} onEdit={() => setIsEditingStore(true)} />
+      
+      <main className="max-w-6xl mx-auto px-4 py-8">
+        <div className="mb-6 flex overflow-x-auto scrollbar-hide gap-2">
+          {categories.map(c => (
+            <button 
+              key={c as string} 
+              onClick={() => setActiveCategory(c as string)}
+              className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition shadow-sm ${activeCategory === c ? "text-white" : "bg-white text-zinc-600 hover:bg-zinc-50 border border-zinc-200"}`}
+              style={activeCategory === c ? { backgroundColor: store.themeColor || '#dc2626' } : undefined}
+            >
+              {c as string}
+            </button>
+          ))}
         </div>
 
+        <ProductGrid 
+          products={filteredProducts} 
+          onEdit={setEditingProduct} 
+          onDelete={handleDeleteProduct}
+          onAddProduct={() => setIsAddingProduct(true)}
+          themeColor={store.themeColor}
+        />
       </main>
-    </div>
+
+      <Footer />
+
+      {isEditingStore && (
+        <StoreDetailsModal
+          store={store}
+          onClose={() => setIsEditingStore(false)}
+          onSave={handleSaveStore}
+        />
+      )}
+
+      {(isAddingProduct || editingProduct) && (
+        <ProductModal
+          product={editingProduct}
+          onClose={() => {
+            setIsAddingProduct(false);
+            setEditingProduct(undefined);
+          }}
+          onSave={handleSaveProduct}
+        />
+      )}
+    </GridBackground>
   );
 }

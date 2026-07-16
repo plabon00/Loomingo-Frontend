@@ -145,13 +145,13 @@ export function ManageProfileModal({ isOpen, onClose, onSuccess, onError }: Mana
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm md:p-4" onClick={onClose}>
       <div 
-        className="bg-background md:border shadow-2xl relative w-full h-full md:h-auto md:max-h-[85vh] md:max-w-3xl flex flex-col animate-in zoom-in-95 fade-in duration-200 overflow-hidden md:rounded-3xl rounded-none" 
+        className="bg-white text-zinc-900 md:border md:border-zinc-200 shadow-2xl relative w-full h-full md:h-auto md:max-h-[85vh] md:max-w-3xl flex flex-col animate-in zoom-in-95 fade-in duration-200 overflow-hidden md:rounded-3xl rounded-none"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex items-center justify-between p-4 md:px-6 border-b">
           <h2 className="text-xl font-bold">Manage Account</h2>
-          <button onClick={onClose} className="p-2 bg-muted rounded-full hover:bg-muted/80 transition-colors">
+          <button onClick={onClose} className="p-2 bg-zinc-100 rounded-full hover:bg-zinc-200 transition-colors">
             <X className="size-5" />
           </button>
         </div>
@@ -160,14 +160,14 @@ export function ManageProfileModal({ isOpen, onClose, onSuccess, onError }: Mana
         <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
           
           {/* Sidebar Tabs */}
-          <div className="w-full md:w-48 border-b md:border-b-0 md:border-r p-4 flex flex-row md:flex-col gap-2 overflow-x-auto bg-muted/10 shrink-0">
+          <div className="w-full md:w-48 border-b md:border-b-0 md:border-r p-4 flex flex-row md:flex-col gap-2 overflow-x-auto bg-zinc-50 shrink-0">
             {(["basic", "notifications", "billing"] as Tab[]).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 className={cn(
                   "px-4 py-2.5 text-sm font-medium rounded-xl text-left capitalize whitespace-nowrap transition-colors",
-                  activeTab === tab ? "bg-primary/10 text-primary font-semibold" : "text-muted-foreground hover:bg-muted"
+                  activeTab === tab ? "bg-primary/10 text-primary font-semibold" : "text-zinc-500 hover:bg-zinc-100"
                 )}
               >
                 {tab}
@@ -193,32 +193,32 @@ export function ManageProfileModal({ isOpen, onClose, onSuccess, onError }: Mana
                           <img 
                             src={photoUrl || "https://i.ibb.co/w04Prt6/c1f64245afb2.gif"} // Fallback placeholder
                             alt="Profile" 
-                            className="size-24 rounded-full object-cover border-4 border-muted shadow-sm"
+                            className="size-24 rounded-full object-cover border-4 border-zinc-100 shadow-sm"
                           />
                           <button 
                             onClick={() => fileInputRef.current?.click()}
-                            className="absolute bottom-0 right-0 bg-primary text-primary-foreground p-2 rounded-full shadow-md hover:bg-primary/90 transition transform hover:scale-105 active:scale-95"
+                            className="absolute bottom-0 right-0 bg-primary text-white p-2 rounded-full shadow-md hover:bg-primary/90 transition transform hover:scale-105 active:scale-95"
                             disabled={isUploading}
                           >
                             {isUploading ? <Loader2 className="size-4 animate-spin" /> : <Camera className="size-4" />}
                           </button>
                           <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageUpload} />
                         </div>
-                        <span className="text-xs text-muted-foreground font-medium">Upload new picture</span>
+                        <span className="text-xs text-zinc-500 font-medium">Upload new picture</span>
                       </div>
 
                       {/* Inputs */}
                       <div className="space-y-5 max-w-md mx-auto w-full">
                         {/* Email (Read Only) */}
                         <div className="space-y-1.5">
-                          <label className="text-sm font-medium text-muted-foreground">Email Address</label>
+                          <label className="text-sm font-medium text-zinc-500">Email Address</label>
                           <div className="relative">
-                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-500" />
                             <input 
                               type="email" 
                               value={email} 
                               disabled
-                              className="w-full pl-10 p-3 rounded-xl border bg-muted/50 text-muted-foreground text-sm outline-none cursor-not-allowed"
+                              className="w-full pl-10 p-3 rounded-xl border bg-zinc-100 text-zinc-500 text-sm outline-none cursor-not-allowed"
                             />
                           </div>
                         </div>
@@ -230,7 +230,7 @@ export function ManageProfileModal({ isOpen, onClose, onSuccess, onError }: Mana
                             type="text" 
                             value={name} 
                             onChange={(e) => setName(e.target.value)}
-                            className="w-full p-3 rounded-xl border bg-background text-sm focus:ring-2 focus:ring-primary outline-none transition-shadow"
+                            className="w-full p-3 rounded-xl border bg-white text-sm focus:ring-2 focus:ring-primary outline-none transition-shadow"
                             placeholder="John Doe"
                           />
                         </div>
@@ -242,7 +242,7 @@ export function ManageProfileModal({ isOpen, onClose, onSuccess, onError }: Mana
                             type="tel" 
                             value={phone} 
                             onChange={(e) => setPhone(e.target.value)}
-                            className="w-full p-3 rounded-xl border bg-background text-sm focus:ring-2 focus:ring-primary outline-none transition-shadow"
+                            className="w-full p-3 rounded-xl border bg-white text-sm focus:ring-2 focus:ring-primary outline-none transition-shadow"
                             placeholder="+1 234 567 890"
                           />
                         </div>
@@ -251,7 +251,7 @@ export function ManageProfileModal({ isOpen, onClose, onSuccess, onError }: Mana
 
                     {/* Developer Note */}
                     <div className="mt-8 pt-6 border-t">
-                      <p className="text-[11px] md:text-xs text-muted-foreground/80 text-center leading-relaxed max-w-sm mx-auto">
+                      <p className="text-[11px] md:text-xs text-zinc-500 text-center leading-relaxed max-w-sm mx-auto">
                         <span className="text-primary font-bold mr-1">*</span> 
                         We are currently in active development mode. Many more features will be rolled out soon! You will be notified when the final product launches, but until then, enjoy early access for free.
                       </p>
@@ -264,11 +264,11 @@ export function ManageProfileModal({ isOpen, onClose, onSuccess, onError }: Mana
                   <div className="space-y-6 max-w-md mx-auto">
                     <h3 className="font-semibold text-lg border-b pb-2">Communication Preferences</h3>
                     <div className="space-y-3">
-                      <label className="flex items-center gap-4 p-4 border rounded-2xl cursor-pointer hover:bg-muted/30 transition shadow-sm">
+                      <label className="flex items-center gap-4 p-4 border rounded-2xl cursor-pointer hover:bg-zinc-100 transition shadow-sm">
                         <input type="checkbox" checked={notifyWhatsapp} onChange={(e) => setNotifyWhatsapp(e.target.checked)} className="size-5 accent-primary" />
                         <span className="text-sm font-medium">Receive updates via WhatsApp</span>
                       </label>
-                      <label className="flex items-center gap-4 p-4 border rounded-2xl cursor-pointer hover:bg-muted/30 transition shadow-sm">
+                      <label className="flex items-center gap-4 p-4 border rounded-2xl cursor-pointer hover:bg-zinc-100 transition shadow-sm">
                         <input type="checkbox" checked={notifyEmail} onChange={(e) => setNotifyEmail(e.target.checked)} className="size-5 accent-primary" />
                         <span className="text-sm font-medium">Receive updates via Email</span>
                       </label>
@@ -283,7 +283,7 @@ export function ManageProfileModal({ isOpen, onClose, onSuccess, onError }: Mana
                       <Info className="size-8" />
                     </div>
                     <h3 className="text-xl font-bold">Beta Mode Active</h3>
-                    <div className="max-w-xs space-y-2 text-sm text-muted-foreground">
+                    <div className="max-w-xs space-y-2 text-sm text-zinc-500">
                       <p>We are currently in beta mode. The subscription model will be introduced soon.</p>
                       <p>You are helping us improve! Feel free to suggest a feature you need via the Suggestion tab.</p>
                     </div>
@@ -295,14 +295,14 @@ export function ManageProfileModal({ isOpen, onClose, onSuccess, onError }: Mana
         </div>
 
         {/* Footer Actions */}
-        <div className="p-4 md:px-6 border-t bg-muted/10 flex justify-end gap-3 shrink-0">
-          <button onClick={onClose} className="px-5 py-2.5 rounded-xl border bg-background text-sm font-semibold hover:bg-muted transition">
+        <div className="p-4 md:px-6 border-t bg-zinc-50 flex justify-end gap-3 shrink-0">
+          <button onClick={onClose} className="px-5 py-2.5 rounded-xl border bg-white text-sm font-semibold hover:bg-zinc-100 transition">
             Cancel
           </button>
           <button 
             onClick={handleSave} 
             disabled={isLoading || activeTab === "billing"} 
-            className="px-6 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition flex items-center gap-2 disabled:opacity-50 shadow-sm"
+            className="px-6 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition flex items-center gap-2 disabled:opacity-50 shadow-sm"
           >
             {isLoading && <Loader2 className="size-4 animate-spin" />}
             Save Changes

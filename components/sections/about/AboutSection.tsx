@@ -2,6 +2,7 @@
 
 import React from "react";
 import { motion } from "motion/react";
+import { ArrowUpRight } from "lucide-react";
 // Safely importing the initialized font from your global layout
 import { instrumentSerif } from "@/app/fonts";
 
@@ -41,7 +42,7 @@ export default function AboutSection() {
           variants={popUpVariants}
           className="inline-flex items-center px-4 py-1.5 rounded-full border border-white/20 bg-white/10 text-white/90 text-xs sm:text-sm font-medium mb-8 backdrop-blur-sm shadow-sm tracking-wider uppercase"
         >
-          The Founder's Note
+          The Founder&apos;s Note
         </motion.div>
 
         {/* Main Heading - Updated to white and light red */}
@@ -59,7 +60,7 @@ export default function AboutSection() {
             variants={popUpVariants}
             className="text-lg md:text-xl text-white/80 leading-relaxed font-medium"
           >
-            Loomingo began with a simple observation: creators are losing thousands of potential sales and leads simply because they can’t be everywhere at once. I’m a backend developer who believes that growth shouldn't be held back by manual tasks.
+            Loomingo began with a simple observation: creators are losing thousands of potential sales and leads simply because they can’t be everywhere at once. I’m a backend developer who believes that growth shouldn&apos;t be held back by manual tasks.
           </motion.p>
 
           <motion.p 
@@ -88,9 +89,9 @@ export default function AboutSection() {
           </motion.p>
 
           {/* Sign-off - Updated colors for dark mode */}
-          <motion.div 
+          <motion.div
             variants={popUpVariants}
-            className="pt-6 border-t border-white/10 mt-4 flex items-center gap-4"
+            className="pt-6 border-t border-white/10 mt-4 flex flex-wrap items-center gap-4"
           >
             <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center border border-white/20 shrink-0">
               <span className="text-white font-bold text-lg">P</span>
@@ -99,6 +100,17 @@ export default function AboutSection() {
               <p className="font-bold text-white text-lg">Plaban</p>
               <p className="text-sm text-white/60 font-medium">Founder & Sole Developer</p>
             </div>
+
+            {/* Connect link to developer portfolio */}
+            <a
+              href="https://plaban-psi.vercel.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group ml-auto inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm text-sm font-semibold text-white hover:bg-white hover:text-red-950 transition-all duration-300 active:scale-[0.97]"
+            >
+              Connect
+              <ArrowUpRight className="size-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            </a>
           </motion.div>
         </div>
       </motion.div>
