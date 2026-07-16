@@ -1,6 +1,6 @@
 import imageCompression from "browser-image-compression";
 
-export const API_URL = process.env.NEXT_PUBLIC_STORE_API_URL || "http://localhost:3002";
+export const API_URL = (process.env.NEXT_PUBLIC_STORE_API_URL || "http://localhost:3002").replace(/\/$/, "");
 
 export type Product = {
   id: string;
