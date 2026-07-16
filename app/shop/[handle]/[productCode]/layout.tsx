@@ -15,13 +15,19 @@ export async function generateMetadata({ params }: { params: Promise<{ handle: s
           openGraph: {
             title: product.name,
             description: product.description || `Buy ${product.name} at ${data.store.name}`,
-            images: product.images && product.images[0] ? [product.images[0]] : ["/icon.png"],
+            images: [
+              {
+                url: product.imageUrls && product.imageUrls[0] ? product.imageUrls[0] : "https://loomingo.vercel.app/icon.png",
+                width: 256,
+                height: 256,
+              }
+            ],
           },
           twitter: {
-            card: "summary", // forces small thumbnail
+            card: "summary",
             title: product.name,
             description: product.description || `Buy ${product.name} at ${data.store.name}`,
-            images: product.images && product.images[0] ? [product.images[0]] : ["/icon.png"],
+            images: [product.imageUrls && product.imageUrls[0] ? product.imageUrls[0] : "https://loomingo.vercel.app/icon.png"],
           }
         };
       }

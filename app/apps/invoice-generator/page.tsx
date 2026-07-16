@@ -461,21 +461,57 @@ export default function InvoiceGeneratorDashboard() {
       <MobileNavbar />
 
       <main className="flex-1 md:ml-20 lg:ml-64 pt-16 md:pt-0 pb-24 md:pb-8 w-full overflow-x-hidden">
-        <div className="max-w-6xl mx-auto px-4 md:px-8 py-6 md:py-10 space-y-8">
+        {/* BRAND CONSISTENT HEADER UI */}
+        <div className="relative w-full bg-white border-b border-zinc-200 pb-24 pt-8 px-4 lg:px-8 overflow-hidden max-md:hidden">
+          <div 
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-red-500 rounded-full opacity-[0.05] blur-[120px] pointer-events-none z-0"
+            aria-hidden="true"
+          />
+          
+          <div className="relative z-10 max-w-7xl mx-auto flex flex-col">
+            <div className="hidden md:flex items-center justify-end w-full gap-4">
+              <Link href="/apps/invoice-generator/creator-details">
+                <Button variant="outline" className="h-10 rounded-full border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900 px-5 shadow-sm transition-colors" disabled={isLoading}>
+                  <Settings className="mr-2 size-4" /> Creator Details
+                </Button>
+              </Link>
 
-          {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <Button onClick={() => openNewInvoiceWizard()} disabled={isLoading} className="rounded-full bg-zinc-900 hover:bg-zinc-800 text-white shadow-md h-10 px-6 text-sm font-medium transition-colors">
+                <Plus className="mr-2 size-4" /> Create Invoice
+              </Button>
+            </div>
+
+            <div className="flex flex-col items-start justify-center mt-12 mb-4 text-left">
+              <div className="inline-flex items-center px-4 py-1.5 rounded-full border border-zinc-200 bg-white text-zinc-900 text-sm font-medium mb-4 shadow-sm">
+                Dashboard
+              </div>
+              <h1 className="text-4xl md:text-5xl font-medium text-zinc-900 mb-3 tracking-tight hidden md:block">
+                Invoice <span className="text-red-600 italic font-serif tracking-tight">generator</span>
+              </h1>
+              <p className="text-sm md:text-lg text-zinc-500 font-normal max-w-xl hidden md:block">
+                Manage brands, track history, and generate stunning invoices effortlessly.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Header */}
+        <div className="md:hidden px-4 pt-6 pb-2">
+          <div className="flex flex-col gap-4">
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-zinc-900">Invoice Dashboard</h1>
-              <p className="text-zinc-600 mt-1 text-sm md:text-base">Manage brands, track history, and generate invoices.</p>
+              <h1 className="text-2xl font-bold tracking-tight text-zinc-900">Invoice Dashboard</h1>
+              <p className="text-zinc-600 mt-1 text-sm">Manage brands, track history, and generate invoices.</p>
             </div>
             <div className="flex flex-wrap gap-3">
               <Link href="/apps/invoice-generator/creator-details">
-                <Button variant="outline" className="rounded-full border-zinc-300 bg-white text-zinc-800 hover:bg-zinc-50 shadow-sm" disabled={isLoading}><Settings className="size-4 mr-2" /> Creator Details</Button>
+                <Button variant="outline" size="sm" className="rounded-full border-zinc-300 bg-white text-zinc-800" disabled={isLoading}><Settings className="size-4 mr-2" /> Creator Details</Button>
               </Link>
-              <Button onClick={() => openNewInvoiceWizard()} disabled={isLoading} className="rounded-full bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-600/20"><Plus className="size-4 mr-2" /> New Invoice</Button>
+              <Button onClick={() => openNewInvoiceWizard()} size="sm" disabled={isLoading} className="rounded-full bg-zinc-900 text-white"><Plus className="size-4 mr-2" /> New Invoice</Button>
             </div>
           </div>
+        </div>
+
+        <div className="max-w-6xl mx-auto px-4 md:px-8 mt-4 md:-mt-12 relative z-20 space-y-8">
 
           {isLoading || !user ? (
             <div className="space-y-8 animate-pulse mt-8">

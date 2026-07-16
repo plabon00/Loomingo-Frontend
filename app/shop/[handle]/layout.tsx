@@ -13,13 +13,19 @@ export async function generateMetadata({ params }: { params: Promise<{ handle: s
         openGraph: {
           title: data.store.name,
           description: data.store.description || `Check out ${data.store.name} on Loomingo!`,
-          images: data.store.logoUrl ? [data.store.logoUrl] : ["/icon.png"],
+          images: [
+            {
+              url: data.store.logoUrl ? data.store.logoUrl : "https://loomingo.vercel.app/icon.png",
+              width: 256,
+              height: 256,
+            }
+          ],
         },
         twitter: {
-          card: "summary", // forces small thumbnail
+          card: "summary",
           title: data.store.name,
           description: data.store.description || `Check out ${data.store.name} on Loomingo!`,
-          images: data.store.logoUrl ? [data.store.logoUrl] : ["/icon.png"],
+          images: [data.store.logoUrl ? data.store.logoUrl : "https://loomingo.vercel.app/icon.png"],
         }
       };
     }

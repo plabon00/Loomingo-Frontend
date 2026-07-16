@@ -168,7 +168,7 @@ export function ProductPreviewModal({
             <div>
               <h2 className="text-2xl font-bold text-zinc-900 pr-8 md:pr-16">{product.name}</h2>
               {product.price != null && (
-                <div className="text-xl font-bold text-green-600 mt-1">${Number(product.price).toFixed(2)}</div>
+                <div className="text-xl font-bold text-green-600 mt-1">₹{Number(product.price).toFixed(2)}</div>
               )}
             </div>
           </div>
@@ -185,7 +185,7 @@ export function ProductPreviewModal({
               onClick={() => {
                 if (product.isWhatsapp && product.whatsappNumber) {
                   const productLink = `${window.location.origin}/shop/${product.storeId}/${product.code || product.id}`;
-                  const msg = encodeURIComponent(`Hi, I would like to purchase ${product.name} for $${Number(product.price).toFixed(2)}.\n\nProduct Link: ${productLink}`);
+                  const msg = encodeURIComponent(`Hi, I would like to purchase ${product.name} for ₹${Number(product.price).toFixed(2)}.\n\nProduct Link: ${productLink}`);
                   window.open(`https://wa.me/${product.whatsappNumber}?text=${msg}`, "_blank");
                 } else {
                   window.open(product.link || "#", "_blank");

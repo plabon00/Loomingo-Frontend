@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { X, Loader2, Plus, Trash2 } from "lucide-react";
+import { X, Loader2, Plus, Trash2, ChevronLeft, ChevronRight, Star } from "lucide-react";
 import { uploadImage, Product, newId } from "@/lib/store";
 import { ImageCropper } from "@/components/ui/image-cropper";
+import { toast } from "sonner";
 
 type ImagePreview = {
   url: string;
@@ -11,7 +12,7 @@ type ImagePreview = {
 };
 
 const AFFILIATE_PLATFORMS = ["Amazon", "Flipkart", "Myntra", "Ajio", "Meesho", "Others"];
-const PREDEFINED_CATEGORIES = ["Apparel", "Electronics", "Beauty", "Home", "Books", "Digital", "Accessories", "Others"];
+const PREDEFINED_CATEGORIES = ["Electronics", "Top Wear", "Bottom Wear", "Dress", "Accessories", "Digital", "Beauty", "Face Care", "Others"];
 
 export function ProductModal({
   product,
@@ -25,7 +26,11 @@ export function ProductModal({
   const [name, setName] = useState(product?.name || "");
   const [price, setPrice] = useState(product?.price?.toString() || "");
   const [description, setDescription] = useState(product?.description || "");
-  const [category, setCategory] = useState(product?.category || "Apparel");
+  
+  const [selectedTags, setSelectedTags] = useState<string[]>(
+    product?.category ? product.category.split(",").map(s => s.trim()).filter(Boolean) : []
+  );
+  const [shakeTags, setShakeTags] = useState(false);
   
   const [isWhatsapp, setIsWhatsapp] = useState(product?.isWhatsapp ?? true); // Default to WA
   const [whatsappNumber, setWhatsappNumber] = useState(product?.whatsappNumber || "");
@@ -69,7 +74,24 @@ export function ProductModal({
     setImages(images.filter((_, i) => i !== index));
   };
 
+  const moveImage = (index: number, direction: 'left' | 'right') => {
+    const newImages = [...images];
+    if (direction === 'left' && index > 0) {
+      [newImages[index - 1], newImages[index]] = [newImages[index], newImages[index - 1]];
+    } else if (direction === 'right' && index < images.length - 1) {
+      [newImages[index + 1], newImages[index]] = [newImages[index], newImages[index + 1]];
+    }
+    setImages(newImages);
+  };
+
   const handleSave = async () => {
+    if (selectedTags.length === 0) {
+      setShakeTags(true);
+      toast.error("Please select at least one tag");
+      setTimeout(() => setShakeTags(false), 500);
+      return;
+    }
+    
     setLoading(true);
     try {
       const finalImageUrls: string[] = [];
@@ -93,7 +115,7 @@ export function ProductModal({
         whatsappNumber: isWhatsapp ? whatsappNumber : "",
         affiliatePlatform: !isWhatsapp ? affiliatePlatform : "",
         description,
-        category,
+        category: selectedTags.join(", "),
         link: !isWhatsapp ? link : "",
         images: finalImageUrls,
       });
@@ -124,22 +146,49 @@ export function ProductModal({
             
             <div>
               <label className="block text-sm font-medium mb-1 text-zinc-700">Product Images (Max 3)</label>
-              <div className="flex flex-wrap gap-2 mb-2">
+              <div className="flex flex-wrap gap-3 mb-2">
                 {images.map((img, i) => (
-                  <div key={i} className="relative w-20 h-20 rounded-xl border border-zinc-200 overflow-hidden group shrink-0">
+                  <div key={i} className="relative w-24 h-24 rounded-xl border-2 overflow-hidden group shrink-0 shadow-sm" style={{ borderColor: i === 0 ? '#10b981' : '#e4e4e7' }}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={img.url} alt="Product" className="w-full h-full object-cover" />
+                    
+                    {/* Main Image Badge */}
+                    {i === 0 && (
+                      <div className="absolute top-0 left-0 right-0 bg-emerald-500 text-white text-[10px] font-bold py-0.5 text-center flex items-center justify-center gap-1">
+                        <Star className="size-3 fill-white" /> Main
+                      </div>
+                    )}
+
+                    {/* Desktop Hover Overlay (Delete) */}
                     <button 
                       onClick={() => removeImage(i)}
-                      className="absolute inset-0 bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute top-1 right-1 size-6 bg-black/60 text-white rounded-full flex items-center justify-center opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
                     >
-                      <Trash2 className="size-4" />
+                      <X className="size-3.5" />
                     </button>
+
+                    {/* Move Left/Right Controls */}
+                    <div className="absolute bottom-0 left-0 right-0 h-8 bg-black/50 backdrop-blur-sm flex items-center justify-between px-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                      <button 
+                        onClick={() => moveImage(i, 'left')}
+                        disabled={i === 0}
+                        className="p-1 text-white disabled:opacity-30 hover:bg-white/20 rounded"
+                      >
+                        <ChevronLeft className="size-4" />
+                      </button>
+                      <button 
+                        onClick={() => moveImage(i, 'right')}
+                        disabled={i === images.length - 1}
+                        className="p-1 text-white disabled:opacity-30 hover:bg-white/20 rounded"
+                      >
+                        <ChevronRight className="size-4" />
+                      </button>
+                    </div>
                   </div>
                 ))}
                 {images.length < 3 && (
                   <div 
-                    className="w-20 h-20 shrink-0 rounded-xl border-2 border-dashed border-zinc-200 bg-zinc-50 flex items-center justify-center cursor-pointer hover:bg-zinc-100 transition"
+                    className="w-24 h-24 shrink-0 rounded-xl border-2 border-dashed border-zinc-200 bg-zinc-50 flex items-center justify-center cursor-pointer hover:bg-zinc-100 transition"
                     onClick={() => fileInputRef.current?.click()}
                   >
                     <Plus className="size-5 text-zinc-400" />
@@ -171,24 +220,45 @@ export function ProductModal({
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-1 text-zinc-700">Category</label>
-              <select 
-                value={category}
-                onChange={e => setCategory(e.target.value)}
-                className="w-full px-4 py-2 rounded-xl border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-red-600/20 focus:border-red-600 bg-white"
-                disabled={loading}
-              >
-                {PREDEFINED_CATEGORIES.map(cat => (
-                  <option key={cat} value={cat}>{cat}</option>
-                ))}
-              </select>
+            <div className={shakeTags ? "animate-shake" : ""}>
+              <label className={`block text-sm font-medium mb-2 ${shakeTags ? "text-red-500" : "text-zinc-700"}`}>
+                Tags (Select 1 to 3) <span className="text-red-500">*</span>
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {PREDEFINED_CATEGORIES.map(tag => {
+                  const isSelected = selectedTags.includes(tag);
+                  return (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => {
+                        if (isSelected) {
+                          setSelectedTags(selectedTags.filter(t => t !== tag));
+                        } else {
+                          if (selectedTags.length >= 3) {
+                            toast.error("You can only select up to 3 tags");
+                            return;
+                          }
+                          setSelectedTags([...selectedTags, tag]);
+                        }
+                      }}
+                      className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                        isSelected 
+                          ? "bg-zinc-900 text-white shadow-sm scale-105" 
+                          : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
+                      }`}
+                    >
+                      {tag}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             <div>
               <label className="block text-sm font-medium mb-1 text-zinc-700">Price (Optional)</label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400">$</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400">₹</span>
                 <input 
                   type="number"
                   value={price} 

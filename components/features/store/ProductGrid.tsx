@@ -115,7 +115,7 @@ export default function ProductGrid({
               <div className="flex justify-between items-start gap-2 mb-1">
                 <h3 className="text-sm font-semibold text-zinc-900 truncate">{p.name}</h3>
                 {p.price != null && (
-                  <span className="text-sm font-bold text-green-600 shrink-0">${Number(p.price).toFixed(2)}</span>
+                  <span className="text-sm font-bold text-green-600 shrink-0">₹{Number(p.price).toFixed(2)}</span>
                 )}
               </div>
               <p className="text-xs text-zinc-500 line-clamp-2 flex-1 mb-3">{p.description}</p>
@@ -125,7 +125,7 @@ export default function ProductGrid({
                   e.stopPropagation(); 
                   if (p.isWhatsapp && p.whatsappNumber) {
                     const productLink = `${window.location.origin}/shop/${p.storeId}/${p.code || p.id}`;
-                    const msg = encodeURIComponent(`Hi, I would like to purchase ${p.name} for $${Number(p.price).toFixed(2)}.\n\nProduct Link: ${productLink}`);
+                    const msg = encodeURIComponent(`Hi, I would like to purchase ${p.name} for ₹${Number(p.price).toFixed(2)}.\n\nProduct Link: ${productLink}`);
                     window.open(`https://wa.me/${p.whatsappNumber}?text=${msg}`, "_blank");
                   } else {
                     window.open(p.link || "#", "_blank"); 

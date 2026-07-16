@@ -46,8 +46,18 @@ export default function StoreDirectLinkPage({ params }: { params: Promise<{ hand
     );
   }
 
-  const categories = ["All", ...Array.from(new Set(store.products.map(p => p.category).filter((p): p is string => Boolean(p))))];
-  const filteredProducts = activeCategory === "All" ? store.products : store.products.filter(p => p.category === activeCategory);
+  const allCategories = store.products.flatMap(p => p.category ? p.category.split(",").map(s => s.trim()) : []);
+  const uniqueCategories = Array.from(new Set(allCategories.filter(Boolean)));
+  const hasOthers = uniqueCategories.includes("Others");
+  const categories = [
+    "All", 
+    ...uniqueCategories.filter(c => c !== "Others"), 
+    ...(hasOthers ? ["Others"] : [])
+  ];
+  
+  const filteredProducts = activeCategory === "All" 
+    ? store.products 
+    : store.products.filter(p => p.category && p.category.split(",").map(s => s.trim()).includes(activeCategory));
 
   return (
     <GridBackground themeColor={store.themeColor} className={`bg-zinc-200 ${inApp ? "pt-14 md:pt-0 pb-20 md:pb-0 md:pl-64" : "pb-0"}`}>

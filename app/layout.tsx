@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/layout/theme-provider";
+import { ServiceWorkerRegister } from "@/components/layout/ServiceWorkerRegister";
 
 // 1. Import your font from the new file
 import { instrumentSerif } from "./fonts"; 
@@ -22,19 +23,26 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Loomingo",
   description: "Smart Instagram Automation",
+  manifest: "/manifest.json",
   icons: {
     icon: "/icon.png",
   },
   openGraph: {
     title: "Loomingo",
     description: "Smart Instagram Automation",
-    images: ["/icon.png"],
+    images: [
+      {
+        url: "https://loomingo.vercel.app/icon.png",
+        width: 256,
+        height: 256,
+      }
+    ],
   },
   twitter: {
     card: "summary",
     title: "Loomingo",
     description: "Smart Instagram Automation",
-    images: ["/icon.png"],
+    images: ["https://loomingo.vercel.app/icon.png"],
   }
 };
 
@@ -73,6 +81,7 @@ export default function RootLayout({
           enableColorScheme={false} 
         >
           {children}
+          <ServiceWorkerRegister />
         </ThemeProvider>
       </body>
     </html>
