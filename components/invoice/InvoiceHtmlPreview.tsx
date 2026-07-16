@@ -3,6 +3,7 @@ import React from 'react';
 type InvoiceData = {
   templateId: number;
   brandName: string;
+  brandEmail?: string;
   billingAddress: string;
   gstin?: string;
   pan?: string;
@@ -32,12 +33,14 @@ type CreatorSettings = {
   address?: string;
   email?: string;
   phone?: string;
+  contactNumber?: string;
   accountName?: string;
   accountNumber?: string;
   ifscCode?: string;
   bankName?: string;
   upiId?: string;
   accountType?: string;
+  signatureUrl?: string;
 };
 
 interface Props {
