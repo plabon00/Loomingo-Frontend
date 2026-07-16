@@ -25,6 +25,17 @@ export const metadata: Metadata = {
   icons: {
     icon: "/icon.png",
   },
+  openGraph: {
+    title: "Loomingo",
+    description: "Smart Instagram Automation",
+    images: ["/icon.png"],
+  },
+  twitter: {
+    card: "summary",
+    title: "Loomingo",
+    description: "Smart Instagram Automation",
+    images: ["/icon.png"],
+  }
 };
 
 export const viewport = {

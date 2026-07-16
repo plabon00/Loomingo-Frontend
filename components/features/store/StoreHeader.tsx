@@ -3,14 +3,28 @@
 import { Store } from "@/lib/store";
 import { Edit, Image as ImageIcon, Share2, Check } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export function StoreHeader({ store, onEdit }: { store: Store, onEdit?: () => void }) {
   const [copied, setCopied] = useState(false);
 
-  const handleShare = () => {
-    navigator.clipboard.writeText(`${window.location.origin}/shop/${store.id}`);
+  const handleShare = async () => {
+    const url = `${window.location.origin}/shop/${store.id}`;
+    navigator.clipboard.writeText(url);
     setCopied(true);
+    toast.success("Store link copied to clipboard!");
     setTimeout(() => setCopied(false), 2000);
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: store.name,
+          url: url
+        });
+      } catch (e) {
+        // user cancelled or error
+      }
+    }
   };
 
   return (

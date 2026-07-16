@@ -12,6 +12,7 @@ import { Store, Product, saveStore, saveProduct, deleteProduct, API_URL, storeFe
 import { Loader2 } from "lucide-react";
 import useSWR from "swr";
 import { Footer } from "@/components/layout/Footer";
+import { Toaster } from "@/components/ui/sonner";
 
 export default function StoreManagerPage() {
   const { user } = useAuthUser();
@@ -26,6 +27,7 @@ export default function StoreManagerPage() {
   const [editingProduct, setEditingProduct] = useState<Product | undefined>(undefined);
   const [isAddingProduct, setIsAddingProduct] = useState(false);
   const [activeCategory, setActiveCategory] = useState("All");
+  const [confirmAction, setConfirmAction] = useState<{ type: 'edit' | 'delete', product: Product } | null>(null);
 
   // Derive store data from SWR cache or fallback to empty
   const store = rawData?.store 
@@ -71,12 +73,10 @@ export default function StoreManagerPage() {
     }
   };
 
-  const handleDeleteProduct = async (productId: string) => {
-    if (!confirm("Are you sure you want to delete this product?")) return;
+  const executeDeleteProduct = async (productId: string) => {
     try {
       await deleteProduct(productId);
       const newProducts = store.products.filter(p => p.id !== productId);
-      // Mutate local cache
       mutate({ store: { ...store, products: newProducts } }, false);
     } catch (e) {
       console.error(e);
@@ -110,14 +110,18 @@ export default function StoreManagerPage() {
 
         <ProductGrid 
           products={filteredProducts} 
-          onEdit={setEditingProduct} 
-          onDelete={handleDeleteProduct}
+          onEdit={(p) => setConfirmAction({ type: 'edit', product: p })} 
+          onDelete={(id) => {
+            const p = store.products.find(x => x.id === id);
+            if (p) setConfirmAction({ type: 'delete', product: p });
+          }}
           onAddProduct={() => setIsAddingProduct(true)}
           themeColor={store.themeColor}
         />
       </main>
 
       <Footer />
+      <Toaster position="bottom-center" />
 
       {isEditingStore && (
         <StoreDetailsModal
@@ -136,6 +140,42 @@ export default function StoreManagerPage() {
           }}
           onSave={handleSaveProduct}
         />
+      )}
+
+      {confirmAction && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-3xl shadow-2xl p-6 max-w-sm w-full animate-in zoom-in-95 fade-in duration-200 text-center">
+            <h3 className="text-xl font-bold text-zinc-900 mb-2">
+              {confirmAction.type === 'delete' ? 'Delete Product?' : 'Edit Product?'}
+            </h3>
+            <p className="text-zinc-500 mb-6 text-sm leading-relaxed">
+              {confirmAction.type === 'delete' 
+                ? 'Are you sure you want to permanently delete this product? This action cannot be undone.' 
+                : 'Are you sure you want to edit the details of this product?'}
+            </p>
+            <div className="flex gap-3">
+              <button 
+                onClick={() => setConfirmAction(null)}
+                className="flex-1 py-2.5 rounded-xl font-semibold text-zinc-600 bg-zinc-100 hover:bg-zinc-200 transition"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={() => {
+                  if (confirmAction.type === 'delete') {
+                    executeDeleteProduct(confirmAction.product.id);
+                  } else {
+                    setEditingProduct(confirmAction.product);
+                  }
+                  setConfirmAction(null);
+                }}
+                className={`flex-1 py-2.5 rounded-xl font-semibold text-white transition shadow-sm ${confirmAction.type === 'delete' ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'}`}
+              >
+                {confirmAction.type === 'delete' ? 'Yes, Delete' : 'Yes, Edit'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </GridBackground>
   );

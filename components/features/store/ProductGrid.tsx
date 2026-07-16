@@ -146,6 +146,8 @@ export default function ProductGrid({
           product={previewProduct} 
           onClose={() => setPreviewProduct(null)} 
           themeColor={themeColor}
+          onEdit={onEdit}
+          onDelete={onDelete}
         />
       )}
     </>

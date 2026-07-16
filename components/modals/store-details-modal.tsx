@@ -92,16 +92,17 @@ export function StoreDetailsModal({
     <>
       <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 text-zinc-900" onClick={!loading ? onClose : undefined}>
         <div 
-          className="bg-white rounded-3xl shadow-2xl relative w-full max-w-lg p-6 animate-in zoom-in-95 fade-in duration-200"
+          className="bg-white rounded-3xl shadow-2xl relative w-full max-w-lg flex flex-col max-h-[90vh] animate-in zoom-in-95 fade-in duration-200"
           onClick={(e) => e.stopPropagation()}
         >
-          <button onClick={onClose} disabled={loading} className="absolute right-4 top-4 p-2 text-zinc-400 hover:text-zinc-600 rounded-full hover:bg-zinc-100 disabled:opacity-50">
-            <X className="size-5" />
-          </button>
-          
-          <h2 className="text-xl font-bold mb-6">Manage Store</h2>
+          <div className="flex-shrink-0 p-5 sm:p-6 pb-4 sm:pb-4 border-b border-zinc-100 flex items-center justify-between">
+            <h2 className="text-xl font-bold">Manage Store</h2>
+            <button onClick={onClose} disabled={loading} className="p-2 text-zinc-400 hover:text-zinc-600 rounded-full hover:bg-zinc-100 disabled:opacity-50 transition-colors">
+              <X className="size-5" />
+            </button>
+          </div>
 
-          <div className="space-y-4">
+          <div className="p-5 sm:p-6 overflow-y-auto space-y-4 custom-scrollbar">
             <div>
               <label className="block text-sm font-medium mb-1 text-zinc-700">Banner Image</label>
               <div className="relative w-full h-32 rounded-xl border-2 border-dashed border-zinc-200 bg-zinc-50 flex flex-col items-center justify-center overflow-hidden group">
@@ -206,7 +207,7 @@ export function StoreDetailsModal({
             </div>
           </div>
 
-          <div className="mt-8 flex justify-end gap-3 border-t border-zinc-100 pt-4">
+          <div className="p-5 sm:p-6 pt-4 flex-shrink-0 flex justify-end gap-3 border-t border-zinc-100">
             <button onClick={onClose} disabled={loading} className="px-5 py-2.5 rounded-xl font-medium text-zinc-600 hover:bg-zinc-100 disabled:opacity-50">
               Cancel
             </button>

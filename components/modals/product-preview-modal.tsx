@@ -1,20 +1,26 @@
 "use client";
 
 import { useState } from "react";
-import { X, ChevronLeft, ChevronRight, Share2, ExternalLink, Check } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Share2, ExternalLink, Check, Edit2, Trash2, MoreVertical } from "lucide-react";
 import { Product } from "@/lib/store";
+import { toast } from "sonner";
 
 export function ProductPreviewModal({
   product,
   onClose,
-  themeColor
+  themeColor,
+  onEdit,
+  onDelete
 }: {
   product: Product;
   onClose: () => void;
   themeColor?: string;
+  onEdit?: (p: Product) => void;
+  onDelete?: (id: string) => void;
 }) {
   const [currentImage, setCurrentImage] = useState(0);
   const [copied, setCopied] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const images = product.images?.length > 0 ? product.images : [""];
   const hasMultipleImages = images.length > 1;
@@ -29,13 +35,26 @@ export function ProductPreviewModal({
     setCurrentImage((prev) => (prev - 1 + images.length) % images.length);
   };
 
-  const handleShare = (e: React.MouseEvent) => {
+  const handleShare = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    // Assuming product.code exists, if not fallback to id
     const code = product.code || product.id;
-    navigator.clipboard.writeText(`${window.location.origin}/shop/${product.storeId}/${code}`);
+    const url = `${window.location.origin}/shop/${product.storeId}/${code}`;
+    
+    navigator.clipboard.writeText(url);
     setCopied(true);
+    toast.success("Product link copied to clipboard!");
     setTimeout(() => setCopied(false), 2000);
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: product.name,
+          url: url
+        });
+      } catch (err) {
+        // ignore
+      }
+    }
   };
 
   return (
@@ -47,7 +66,7 @@ export function ProductPreviewModal({
         className="bg-white rounded-3xl shadow-2xl relative w-full max-w-3xl flex flex-col md:flex-row overflow-hidden animate-in zoom-in-95 fade-in duration-200 max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="absolute right-4 top-4 z-10 flex flex-col md:flex-row gap-2">
+        <div className="absolute right-4 top-4 z-10 flex gap-2">
           <button 
             onClick={handleShare}
             className="p-2.5 bg-white/90 backdrop-blur text-zinc-600 hover:text-zinc-900 rounded-full hover:bg-zinc-100 shadow-sm transition active:scale-95"
@@ -55,6 +74,45 @@ export function ProductPreviewModal({
           >
             {copied ? <Check className="size-4 text-green-600" /> : <Share2 className="size-4" />}
           </button>
+
+          {(onEdit || onDelete) && (
+            <div className="relative">
+              <button 
+                onClick={(e) => { e.stopPropagation(); setMenuOpen(!menuOpen); }}
+                className="p-2.5 bg-white/90 backdrop-blur text-zinc-600 hover:text-zinc-900 rounded-full hover:bg-zinc-100 shadow-sm transition active:scale-95"
+              >
+                <MoreVertical className="size-4" />
+              </button>
+              
+              {menuOpen && (
+                <div className="absolute right-0 top-full mt-2 w-44 bg-white rounded-2xl shadow-xl border border-zinc-100 overflow-hidden py-1 animate-in slide-in-from-top-2 fade-in duration-200">
+                  <div className="flex items-center justify-between px-3 py-2 border-b border-zinc-50 mb-1">
+                    <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Actions</span>
+                    <button onClick={(e) => { e.stopPropagation(); setMenuOpen(false); }} className="p-1 hover:bg-zinc-100 rounded-full text-zinc-400 hover:text-zinc-600">
+                      <X className="size-3" />
+                    </button>
+                  </div>
+                  {onEdit && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setMenuOpen(false); onClose(); onEdit(product); }}
+                      className="w-full text-left px-4 py-2.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50 hover:text-blue-600 flex items-center gap-2.5 transition"
+                    >
+                      <Edit2 className="size-4" /> Edit Product
+                    </button>
+                  )}
+                  {onDelete && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setMenuOpen(false); onClose(); onDelete(product.id); }}
+                      className="w-full text-left px-4 py-2.5 text-sm font-medium text-zinc-700 hover:bg-red-50 hover:text-red-600 flex items-center gap-2.5 transition"
+                    >
+                      <Trash2 className="size-4" /> Delete Product
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
           <button 
             onClick={onClose} 
             className="p-2.5 bg-white/90 backdrop-blur text-zinc-600 hover:text-zinc-900 rounded-full hover:bg-zinc-100 shadow-sm transition active:scale-95"
