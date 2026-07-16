@@ -17,9 +17,7 @@ const nextConfig: NextConfig = {
     // 👈 This will ignore the 'mediaType' error and let Docker finish building
     ignoreBuildErrors: true,
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+
   async rewrites() {
     // BACKEND_URL is a server-side variable read at runtime by Vercel (not baked at build time).
     // For local dev, it defaults to localhost:8080.
