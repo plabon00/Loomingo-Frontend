@@ -33,7 +33,7 @@ export default function InstagramProfileCard() {
   }, []);
 
   const { data: profileData, isLoading } = useSWR(
-    user && activeIgId ? `/api/v1/me/instagram/portfolio` : null,
+    user ? `/api/v1/me/instagram/portfolio` : null,
     fetchWithToken,
     {
       fallbackData: cachedProfile,

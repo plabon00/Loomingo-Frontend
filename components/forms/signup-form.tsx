@@ -21,7 +21,8 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
       const { user } = await signInWithPopup(auth, provider);
       const idToken = await user.getIdToken();
 
-      const response = await fetch("/api/users/sync", {
+      // Fire-and-forget background sync to drastically speed up login
+      fetch("/api/users/sync", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -33,9 +34,7 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
           name: user.displayName,
           profilePicture: user.photoURL
         }),
-      });
-
-      if (!response.ok) throw new Error("Verification failed");
+      }).catch(err => console.error("Background sync error:", err));
       
       toast.success("Welcome back to Loomingo!");
       router.push("/home-page");

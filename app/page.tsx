@@ -32,8 +32,28 @@ const FooterSection = dynamic(() => import('@/components/layout/footer-one'));
 
 export default function Page() {
   return (
-    <main className="relative flex flex-col min-h-screen w-full">
+    <main className="relative flex flex-col min-h-screen w-full bg-white">
+      {/* Graph paper style major/minor grid background with faded corners */}
+      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+        <div 
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `
+              linear-gradient(to right, rgba(156, 163, 175, 0.20) 1px, transparent 1px),
+              linear-gradient(to bottom, rgba(156, 163, 175, 0.20) 1px, transparent 1px),
+              linear-gradient(to right, rgba(156, 163, 175, 0.15) 1px, transparent 1px),
+              linear-gradient(to bottom, rgba(156, 163, 175, 0.15) 1px, transparent 1px)
+            `,
+            backgroundSize: '100px 100px, 100px 100px, 20px 20px, 20px 20px',
+            maskImage: 'radial-gradient(ellipse 75% 75% at 50% 50%, black 10%, transparent 90%)',
+            WebkitMaskImage: 'radial-gradient(ellipse 75% 75% at 50% 50%, black 10%, transparent 90%)'
+          }}
+        ></div>
+      </div>
+      
+      <div className="relative z-10">
         <Navbar />
+      </div>
 
         <div>
           <AgencyHeroSection />

@@ -32,6 +32,7 @@ import { Input } from "@/components/ui/input";
 import AutomationMediaCard from "@/components/ui/automation-card";
 import { auth } from "@/lib/firebase";
 import { InstagramSettingsModal } from "@/components/modals/instagram-settings-modal";
+import InstagramIcon from "@/components/ui/icon/instagram-icon";
 
 import { AutomationHeader } from "./components/AutomationHeader";
 import { AutomationGrid } from "./components/AutomationGrid";
@@ -63,6 +64,9 @@ export default function AutoDMManager() {
 
   const [filterTab, setFilterTab] = useState<"all" | "active" | "inactive">("all");
   const [formData, setFormData] = useState(defaultFormData);
+
+  const [isConnected, setIsConnected] = useState(true); // Default true to avoid flicker
+  const [isConnecting, setIsConnecting] = useState(false);
 
   const loadAutomations = async (userToken: string, businessId: string) => {
     setIsLoadingAutomations(true);
@@ -107,16 +111,63 @@ export default function AutoDMManager() {
         const activeInstagramId = localStorage.getItem("activeInstagramId");
 
         if (activeInstagramId) {
+          setIsConnected(true);
           loadAutomations(token, activeInstagramId);
         } else {
+          setIsConnected(false);
           setIsLoadingAutomations(false);
         }
       } else {
+        setIsConnected(false);
         setIsLoadingAutomations(false);
       }
     });
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.origin !== window.location.origin) return;
+      if (event.data) {
+        if (event.data.type === "INSTAGRAM_AUTH_SUCCESS") {
+          const { userId } = event.data;
+          localStorage.setItem("activeInstagramId", userId); 
+          setIsConnecting(false);
+          setIsConnected(true);
+          
+          if (auth.currentUser) {
+            auth.currentUser.getIdToken().then(token => loadAutomations(token, userId));
+          }
+        } 
+        else if (event.data.type === "INSTAGRAM_AUTH_ERROR") {
+          setIsConnecting(false);
+        }
+      }
+    };
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, []);
+
+  const handleConnect = () => {
+    if (!auth.currentUser) {
+      alert("Please sign in first to connect your Instagram account.");
+      return; 
+    }
+    setIsConnecting(true);
+    const firebaseUid = auth.currentUser.uid;
+    const width = 500, height = 600;
+    const left = window.screen.width / 2 - width / 2;
+    const top = window.screen.height / 2 - height / 2;
+    const backendUrl = "https://jesica-noncommendatory-marjory.ngrok-free.dev";
+    const authUrl = `${backendUrl}/api/instagram/connect_account?uid=${firebaseUid}`;
+    const popup = window.open(authUrl, "Instagram Auth", `width=${width},height=${height},top=${top},left=${left}`);
+    const checkPopupClosed = setInterval(() => {
+      if (!popup || popup.closed || popup.closed === undefined) {
+        clearInterval(checkPopupClosed);
+        setIsConnecting(false);
+      }
+    }, 1000);
+  };
 
   const selectedMediaData = availableMedia.find(
     (m) => m.id === formData.mediaId,
@@ -572,50 +623,80 @@ export default function AutoDMManager() {
 
   
   return (
-    <div className="min-h-screen bg-zinc-50 relative pb-20 md:pb-0">
-      <AutomationHeader 
-        stats={stats}
-        onOpenSettings={() => setIsSettingsModalOpen(true)}
-        onOpenCreationModal={handleOpenModal}
-      />
-      <AutomationGrid 
-        automations={automations}
-        filteredAutomations={filteredAutomations}
-        isLoading={isLoadingAutomations}
-        filterTab={filterTab}
-        setFilterTab={setFilterTab}
-        onOpenCreationModal={handleOpenModal}
-        onOpenSettings={() => setIsSettingsModalOpen(true)}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-        onToggleStatus={handleToggle}
-      />
-      <CreationModal 
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        modalStep={modalStep}
-        setModalStep={setModalStep}
-        isEditing={isEditing}
-        isSubmitting={isSubmitting}
-        availableMedia={availableMedia}
-        isLoadingMedia={isLoadingMedia}
-        formData={formData}
-        setFormData={setFormData}
-        handleSelectMedia={handleSelectMedia}
-        selectedMediaData={selectedMediaData}
-        setIsPreviewOpen={setIsPreviewOpen}
-        handleSubmit={handleSubmit}
-      />
-      <PreviewModal 
-        isOpen={isPreviewOpen}
-        onClose={() => setIsPreviewOpen(false)}
-        formData={formData}
-        selectedMediaData={selectedMediaData}
-      />
-      <InstagramSettingsModal
-        isOpen={isSettingsModalOpen}
-        onClose={() => setIsSettingsModalOpen(false)}
-      />
+    <div className="min-h-screen bg-transparent relative pb-20 md:pb-0 z-10 flex flex-col">
+      
+      {/* LOCKED STATE OVERLAY */}
+      {!isConnected && (
+        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/40 backdrop-blur-md rounded-tl-3xl p-6">
+          <div className="w-24 h-24 bg-white rounded-3xl flex items-center justify-center mb-8 shadow-xl shadow-zinc-200/50 border border-zinc-100 relative">
+            <InstagramIcon className="size-12 text-black relative z-10" />
+            <div className="absolute -top-2 -right-2 bg-zinc-900 rounded-full p-2 border-[3px] border-white shadow-sm">
+              <Lock className="size-4 text-white" />
+            </div>
+          </div>
+          
+          <h3 className="text-2xl md:text-3xl font-semibold text-zinc-900 mb-4 tracking-tight text-center">Oops, it looks like you didn't Connect your Instagram account</h3>
+          
+          <p className="text-sm md:text-base text-zinc-500 mb-10 font-medium text-center max-w-lg">
+            You need to link your Instagram account with Loomingo to start setting up Auto DMs and growth automations.
+          </p>
+          
+          <Button
+            onClick={handleConnect}
+            disabled={isConnecting}
+            className="w-full max-w-sm relative z-10 bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] hover:opacity-90 text-white border-0 rounded-2xl h-14 text-base font-semibold transition-all shadow-lg hover:shadow-xl hover:scale-[1.02]"
+          >
+            <InstagramIcon className="size-5 mr-3" />
+            {isConnecting ? "Connecting..." : "Connect Instagram"}
+          </Button>
+        </div>
+      )}
+
+      <div className={!isConnected ? "blur-[12px] opacity-20 pointer-events-none select-none transition-all duration-700 flex-1" : "transition-all duration-700 flex-1"}>
+        <AutomationHeader 
+          stats={stats}
+          onOpenSettings={() => setIsSettingsModalOpen(true)}
+          onOpenCreationModal={handleOpenModal}
+        />
+        <AutomationGrid 
+          automations={automations}
+          filteredAutomations={filteredAutomations}
+          isLoading={isLoadingAutomations}
+          filterTab={filterTab}
+          setFilterTab={setFilterTab}
+          onOpenCreationModal={handleOpenModal}
+          onOpenSettings={() => setIsSettingsModalOpen(true)}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onToggleStatus={handleToggle}
+        />
+        <CreationModal 
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          modalStep={modalStep}
+          setModalStep={setModalStep}
+          isEditing={isEditing}
+          isSubmitting={isSubmitting}
+          availableMedia={availableMedia}
+          isLoadingMedia={isLoadingMedia}
+          formData={formData}
+          setFormData={setFormData}
+          handleSelectMedia={handleSelectMedia}
+          selectedMediaData={selectedMediaData}
+          setIsPreviewOpen={setIsPreviewOpen}
+          handleSubmit={handleSubmit}
+        />
+        <PreviewModal 
+          isOpen={isPreviewOpen}
+          onClose={() => setIsPreviewOpen(false)}
+          formData={formData}
+          selectedMediaData={selectedMediaData}
+        />
+        <InstagramSettingsModal
+          isOpen={isSettingsModalOpen}
+          onClose={() => setIsSettingsModalOpen(false)}
+        />
+      </div>
     </div>
   );
 }
