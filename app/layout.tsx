@@ -5,6 +5,9 @@ import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/layout/theme-provider";
 import { ServiceWorkerRegister } from "@/components/layout/ServiceWorkerRegister";
 
+import { TransitionProvider } from "@/components/providers/transition-provider";
+import SplashTransition from "@/components/layout/splash-transition";
+
 // 1. Import your font from the new file
 import { instrumentSerif } from "./fonts"; 
 
@@ -80,8 +83,11 @@ export default function RootLayout({
           disableTransitionOnChange
           enableColorScheme={false} 
         >
-          {children}
-          <ServiceWorkerRegister />
+          <TransitionProvider>
+            {children}
+            <ServiceWorkerRegister />
+            <SplashTransition />
+          </TransitionProvider>
         </ThemeProvider>
       </body>
     </html>

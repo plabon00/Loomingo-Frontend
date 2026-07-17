@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { SuggestUsModal } from "@/components/modals/suggest-us-modal";
 import Link from "next/link";
+import { TransitionLink } from "@/components/ui/transition-link";
 import { usePathname, useRouter } from "next/navigation";
 import { ManageProfileModal } from "@/components/modals/manage-profile-modal";
 
@@ -657,46 +658,74 @@ export function BottomDock() {
         <div className="fixed inset-0 z-40" onClick={() => setIsAppsOpen(false)} />
       )}
 
-      <div className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white/80 backdrop-blur-xl border-t border-zinc-100 shadow-[0_-5px_15px_-10px_rgba(0,0,0,0.05)] z-50 flex items-center justify-around px-2 pb-safe">
-        <Link href="/home-page" className={getDockItemClass("/home-page")}>
-          <Home className="size-5" />
-          <span className="text-[10px]">Home</span>
-        </Link>
+      <div className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] h-16 bg-white/20 backdrop-blur-md border border-white/30 shadow-lg z-50 flex items-center justify-around px-2 rounded-full">
+        
+        <TransitionLink 
+          href="/home-page" 
+          className={cn(
+            "relative flex flex-col items-center justify-center w-[4.5rem] h-12 rounded-full transition-all duration-300",
+            pathname === "/home-page" ? "bg-white/40 shadow-sm border border-white/40" : "hover:bg-white/30"
+          )}
+        >
+          <div className="flex flex-col items-center gap-1 text-black">
+            <Home className="size-[1.15rem]" strokeWidth={2.5} />
+            <span className="text-[9px] font-semibold">Home</span>
+          </div>
+        </TransitionLink>
 
-        <Link href="/autodm" onClick={handleAutoDMClick} className={getDockItemClass("/autodm")}>
-          <MessageSquare className="size-5" />
-          <span className="text-[10px]">Auto-DM</span>
-        </Link>
+        <TransitionLink 
+          href="/autodm" 
+          onClick={handleAutoDMClick} 
+          className={cn(
+            "relative flex flex-col items-center justify-center w-[4.5rem] h-12 rounded-full transition-all duration-300",
+            pathname === "/autodm" ? "bg-white/40 shadow-sm border border-white/40" : "hover:bg-white/30"
+          )}
+        >
+          <div className="flex flex-col items-center gap-1 text-black">
+            <MessageSquare className="size-[1.15rem]" strokeWidth={2.5} />
+            <span className="text-[9px] font-semibold">Auto-DM</span>
+          </div>
+        </TransitionLink>
 
-        <Link href="/store" className={getDockItemClass("/store")}>
-          <ShoppingBag className="size-5" />
-          <span className="text-[10px]">Store</span>
-        </Link>
+        <TransitionLink 
+          href="/store" 
+          className={cn(
+            "relative flex flex-col items-center justify-center w-[4.5rem] h-12 rounded-full transition-all duration-300",
+            pathname === "/store" ? "bg-white/40 shadow-sm border border-white/40" : "hover:bg-white/30"
+          )}
+        >
+          <div className="flex flex-col items-center gap-1 text-black">
+            <ShoppingBag className="size-[1.15rem]" strokeWidth={2.5} />
+            <span className="text-[9px] font-semibold">Store</span>
+          </div>
+        </TransitionLink>
 
-        <div className="relative">
+        <div className="relative flex flex-col items-center justify-center">
           <button
             onClick={() => setIsAppsOpen(!isAppsOpen)}
             className={cn(
-              "flex flex-col items-center gap-1 p-2 transition-colors duration-300",
-              (isAppsOpen || pathname.startsWith("/apps")) ? "text-red-600 font-semibold" : "text-zinc-400 hover:text-zinc-900"
+              "relative flex flex-col items-center justify-center w-[4.5rem] h-12 rounded-full transition-all duration-300",
+              (isAppsOpen || pathname.startsWith("/apps")) ? "bg-white/40 shadow-sm border border-white/40" : "hover:bg-white/30"
             )}
           >
-            <LayoutGrid className="size-5" />
-            <span className="text-[10px]">Apps</span>
+            <div className="flex flex-col items-center gap-1 text-black">
+              <LayoutGrid className="size-[1.15rem]" strokeWidth={2.5} />
+              <span className="text-[9px] font-semibold">Apps</span>
+            </div>
           </button>
 
           {isAppsOpen && (
-            <div className="absolute bottom-16 right-0 w-48 bg-white border border-zinc-100 shadow-2xl rounded-[1.5rem] py-2 flex flex-col z-50 animate-in slide-in-from-bottom-2 fade-in zoom-in-95">
-              <Link
+            <div className="absolute bottom-16 right-0 w-48 bg-white/50 backdrop-blur-md border border-white/40 shadow-lg rounded-[1.5rem] py-2 flex flex-col z-50 animate-in slide-in-from-bottom-2 fade-in zoom-in-95">
+              <TransitionLink
                 href="/apps/invoice-generator"
                 onClick={() => setIsAppsOpen(false)}
                 className={cn(
                   "flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-left transition-colors",
-                  pathname.startsWith("/apps/invoice-generator") ? "text-red-600 bg-red-50" : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900"
+                  pathname.startsWith("/apps/invoice-generator") ? "text-black bg-white/40 shadow-sm mx-2 rounded-xl" : "text-black/70 hover:bg-white/40 mx-2 rounded-xl hover:text-black"
                 )}
               >
-                <FileText className={cn("size-4", pathname.startsWith("/apps/invoice-generator") ? "text-red-600" : "text-zinc-400")} /> Invoice Generator
-              </Link>
+                <FileText className="size-4" /> Invoice Generator
+              </TransitionLink>
             </div>
           )}
         </div>

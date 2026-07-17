@@ -1,57 +1,52 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useMemo } from "react";
 import { auth } from "@/lib/firebase";
+import useSWR from "swr";
+import { useAuthUser } from "@/hooks/use-auth-user";
+
+const fetchWithToken = async (url: string) => {
+  if (!auth.currentUser) throw new Error("Not authenticated");
+  const token = await auth.currentUser.getIdToken();
+  const res = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "ngrok-skip-browser-warning": "true",
+    }
+  });
+  if (!res.ok) throw new Error("Fetch failed");
+  return res.json();
+};
 
 export default function InstagramProfileCard() {
-  const [profileData, setProfileData] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { user } = useAuthUser();
+  const activeIgId = typeof window !== "undefined" ? localStorage.getItem("activeInstagramId") : null;
 
-  useEffect(() => {
-    const fetchInstagramProfile = async () => {
-      try {
-        const user = auth.currentUser;
-        if (!user) return;
-        
-        const token = await user.getIdToken();
-        const activeIgId = localStorage.getItem("activeInstagramId");
-        
-        if (!activeIgId) {
-          setIsLoading(false);
-          return;
-        }
-
-        const response = await fetch(`/api/v1/me/instagram/portfolio`, {
-          method: "GET",
-          headers: {
-            "Authorization": `Bearer ${token}`,
-            "ngrok-skip-browser-warning": "true"
-          }
-        });
-
-        if (response.ok && response.headers.get("content-type")?.includes("application/json")) {
-          const data = await response.json();
-          setProfileData(data);
-        } else {
-          console.error("Failed to fetch. Status or content type mismatch. Status:", response.status);
-        }
-      } catch (error) {
-        console.error("Failed to fetch Instagram profile:", error);
-      } finally {
-        setIsLoading(false);
+  const cachedProfile = useMemo(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("dashboard_portfolio");
+      if (stored) {
+        try { return JSON.parse(stored); } catch (e) {}
       }
-    };
-
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      if (user) {
-        fetchInstagramProfile();
-      } else {
-        setIsLoading(false);
-      }
-    });
-
-    return () => unsubscribe();
+    }
+    return null;
   }, []);
+
+  const { data: profileData, isLoading } = useSWR(
+    user && activeIgId ? `/api/v1/me/instagram/portfolio` : null,
+    fetchWithToken,
+    {
+      fallbackData: cachedProfile,
+      onSuccess: (data) => {
+        if (typeof window !== "undefined") {
+          localStorage.setItem("dashboard_portfolio", JSON.stringify(data));
+          if (data?.businessAccountId) {
+            localStorage.setItem("activeInstagramId", data.businessAccountId);
+          }
+        }
+      }
+    }
+  );
 
   const formatNumber = (num: number) => {
     if (!num) return "0";
@@ -61,7 +56,7 @@ export default function InstagramProfileCard() {
   };
 
   // 1. Loading Skeleton State (Styled to match new card)
-  if (isLoading) {
+  if (isLoading && !profileData) {
     return (
       <div className="bg-white border border-zinc-200 rounded-[2rem] p-6 sm:p-8 w-full max-w-sm shadow-sm animate-pulse">
         <div className="h-4 bg-zinc-100 rounded-md w-1/3 mb-6" />

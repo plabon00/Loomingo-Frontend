@@ -32,13 +32,18 @@ const navigationData = [
   { title: "Help Center", href: "/help" },
 ];
 
-const Navbar = () => {
-  const [sticky, setSticky] = useState(false);
+interface NavbarProps {
+  forceSticky?: boolean;
+}
+
+const Navbar = ({ forceSticky = false }: NavbarProps = {}) => {
+  const [isScrolled, setIsScrolled] = useState(false);
+  const sticky = forceSticky || isScrolled;
   const [isSignInOpen, setIsSignInOpen] = useState(false);
   const router = useRouter();
   const { user } = useAuthUser();
 
-  const handleScroll = useCallback(() => setSticky(window.scrollY >= 50), []);
+  const handleScroll = useCallback(() => setIsScrolled(window.scrollY >= 50), []);
   useEffect(() => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);

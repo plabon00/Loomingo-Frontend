@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import InstagramPortfolio from "@/components/features/instagram/instagram-profile";
@@ -13,104 +13,63 @@ import MiniAnalytics from "@/components/sections/dashboard/MiniAnalytics";
 import RecentActivityFeed from "@/components/sections/dashboard/RecentActivityFeed";
 
 import { auth } from "@/lib/firebase"; 
-import { onAuthStateChanged, User } from "firebase/auth"; 
-
 import { AuthModal, TopAlert } from "@/components/layout/AppNavigation"; 
+import { useAuthUser } from "@/hooks/use-auth-user";
+import useSWR from "swr";
+import { TransitionLink } from "@/components/ui/transition-link";
+
+const fetchWithToken = async (url: string) => {
+  if (!auth.currentUser) throw new Error("Not authenticated");
+  const token = await auth.currentUser.getIdToken();
+  const res = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "ngrok-skip-browser-warning": "true",
+    }
+  });
+  if (!res.ok) throw new Error("Fetch failed");
+  return res.json();
+};
 
 export default function DashboardContent() {
-  const [isConnecting, setIsConnecting] = useState(false);
-  const [isConnected, setIsConnected] = useState(false);
-  const [userName, setUserName] = useState("Creator");
-  const [isLoadingStatus, setIsLoadingStatus] = useState(true); 
-  const [planName, setPlanName] = useState("Free"); 
+  const { user, isLoading: isAuthLoading } = useAuthUser();
 
-  const [user, setUser] = useState<User | null>(null);
+  const [isConnecting, setIsConnecting] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [topAlert, setTopAlert] = useState("");
   const [authMessage, setAuthMessage] = useState(""); 
   const [showForm, setShowForm] = useState(true);
 
-  useEffect(() => {
-    const fetchUserData = async (currentUser: User) => {
-      try {
-        const token = await currentUser.getIdToken();
-        
-        const response = await fetch(`/api/v1/me/me`, {
-          method: "GET",
-          headers: {
-            "Authorization": `Bearer ${token}`, 
-            "Content-Type": "application/json",
-            "ngrok-skip-browser-warning": "true"
-          }
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          const isIgConnected = data.instagramConnected ?? data.isInstagramConnected;
-          setIsConnected(isIgConnected); 
-          
-          const fullName = data.fullName || data.name || currentUser.displayName || "Creator";
-          setUserName(fullName.split(" ")[0]);
-          setPlanName(data.planName || "Free"); 
-          
-          if (isIgConnected) {
-            const portfolioResponse = await fetch(`/api/v1/me/instagram/portfolio`, {
-              method: "GET",
-              headers: {
-                "Authorization": `Bearer ${token}`, 
-                "Content-Type": "application/json",
-                "ngrok-skip-browser-warning": "true"
-              }
-            });
-
-            if (portfolioResponse.ok) {
-              const portfolioData = await portfolioResponse.json();
-              if (portfolioData.businessAccountId) {
-                localStorage.setItem("activeInstagramId", portfolioData.businessAccountId);
-              }
-            }
-          } else {
-            localStorage.removeItem("activeInstagramId");
-          }
-          
-        } else {
-          const fallbackName = currentUser.displayName || "Creator";
-          setUserName(fallbackName.split(" ")[0]);
-        }
-      } catch (error) {
-        console.error("Failed to fetch user DB status:", error);
-        const errorName = currentUser.displayName || "Creator";
-        setUserName(errorName.split(" ")[0]);
-      } finally {
-        setIsLoadingStatus(false); 
+  // 1. Persistent Client Cache (LocalStorage) for instant load
+  const cachedMe = useMemo(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("dashboard_me");
+      if (stored) {
+        try { return JSON.parse(stored); } catch (e) {}
       }
-    };
-
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser); 
-      if (currentUser) {
-        sessionStorage.setItem("userId", currentUser.uid);
-        await fetchUserData(currentUser);
-      } else {
-        sessionStorage.removeItem("userId");
-        localStorage.removeItem("activeInstagramId"); 
-        setIsConnected(false);
-        setIsLoadingStatus(false);
-      }
-    });
-
-    const handleProfileUpdate = () => {
-      if (auth.currentUser) {
-        fetchUserData(auth.currentUser);
-      }
-    };
-    window.addEventListener("userProfileUpdated", handleProfileUpdate);
-
-    return () => {
-      unsubscribe();
-      window.removeEventListener("userProfileUpdated", handleProfileUpdate);
-    };
+    }
+    return null;
   }, []);
+
+  // 2. SWR for background fetching and deduplication
+  const { data: meData, error: meError, isLoading: isMeLoading } = useSWR(
+    user ? `/api/v1/me/me` : null,
+    fetchWithToken,
+    {
+      fallbackData: cachedMe,
+      onSuccess: (data) => {
+        if (typeof window !== "undefined") {
+          localStorage.setItem("dashboard_me", JSON.stringify(data));
+        }
+      }
+    }
+  );
+
+  // Derived State
+  const isConnected = meData?.instagramConnected ?? meData?.isInstagramConnected ?? false;
+  const userName = meData?.fullName?.split(" ")[0] || meData?.name?.split(" ")[0] || user?.displayName?.split(" ")[0] || "Creator";
+  const planName = meData?.planName || "Free";
+  const isLoadingStatus = isAuthLoading || (isMeLoading && !meData);
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
@@ -120,9 +79,12 @@ export default function DashboardContent() {
         if (event.data.type === "INSTAGRAM_AUTH_SUCCESS") {
           const { userId } = event.data;
           localStorage.setItem("activeInstagramId", userId); 
-          setIsConnected(true);
           setIsConnecting(false);
           setTopAlert("Instagram account connected successfully! 🎉"); 
+          // Force SWR to revalidate so isConnected becomes true
+          if (typeof window !== "undefined") {
+            window.dispatchEvent(new Event("userProfileUpdated"));
+          }
         } 
         else if (event.data.type === "INSTAGRAM_AUTH_ERROR") {
           setIsConnecting(false);
@@ -144,12 +106,11 @@ export default function DashboardContent() {
     }
 
     setIsConnecting(true);
-    const firebaseUid = sessionStorage.getItem("userId");
+    const firebaseUid = user.uid;
     const width = 500, height = 600;
     const left = window.screen.width / 2 - width / 2;
     const top = window.screen.height / 2 - height / 2;
     
-    // Updated to point directly to your ngrok backend
     const backendUrl = "https://jesica-noncommendatory-marjory.ngrok-free.dev";
     const authUrl = `${backendUrl}/api/instagram/connect_account?uid=${firebaseUid}`;
     
@@ -185,11 +146,11 @@ export default function DashboardContent() {
         </p>
 
         {isConnected && (
-          <Link href="/autodm" className="mt-3">
+          <TransitionLink href="/autodm" className="mt-3">
             <Button className="rounded-full bg-zinc-900 hover:bg-zinc-800 text-white shadow-md h-11 px-6 text-sm font-medium transition-colors">
               <Plus className="mr-2 size-4" /> New Automation
             </Button>
-          </Link>
+          </TransitionLink>
         )}
       </div>
 
