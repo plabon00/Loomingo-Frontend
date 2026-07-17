@@ -31,7 +31,7 @@ export function AutomationGrid({
   return (
     <>
       {/* Mobile Actions */}
-      <div className="mt-6 flex gap-3 md:hidden w-full items-center">
+      <div className="mt-6 flex gap-3 md:hidden w-full items-center px-4 sm:px-6">
         <Button
           onClick={onOpenCreationModal}
           className="flex-1 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white h-11 px-4 text-sm font-semibold shadow-md transition-colors"

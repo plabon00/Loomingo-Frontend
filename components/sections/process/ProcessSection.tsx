@@ -52,7 +52,7 @@ const ProcessSection: React.FC = () => {
   });
 
   return (
-    <section ref={containerRef} className="relative w-full h-[400vh] bg-white">
+    <section ref={containerRef} className="relative w-full h-[400vh] bg-transparent">
       {/* FIX: Comment moved safely inside the section tag */}
       
       {/* STICKY CONTAINER */}
@@ -74,7 +74,7 @@ const ProcessSection: React.FC = () => {
 
             <h2 className="text-4xl sm:text-5xl md:text-6xl font-medium text-red-950 leading-[1.1] mb-5 tracking-tight">
               Launch in under <br className="hidden sm:block" />
-              <span className="text-red-600 italic font-serif tracking-tight drop-shadow-sm">
+              <span className="font-editorial text-red-600 tracking-tight drop-shadow-sm">
                 2 minutes
               </span>
             </h2>

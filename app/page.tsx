@@ -7,9 +7,13 @@ import AgencyHeroSection from '@/components/shadcn-space/blocks/hero-01';
 // Scroll Indicator
 import ScrollIndicator from '@/components/ui/ScrollIndicator';
 
+// GSAP ScrollTrigger effects (client components)
+import { ScrollProgressBar, MarqueeBand, StatementDivider } from '@/components/home/home-scroll-fx';
+import { SectionReveal } from '@/components/home/section-reveal';
+
 // DYNAMIC IMPORTS (Below the fold)
 const SuperchargeSection = dynamic(() => import('@/components/sections/marketing/SuperchargeSection'), {
-  loading: () => <div className="min-h-[200vh] w-full bg-white" /> 
+  loading: () => <div className="min-h-[200vh] w-full bg-transparent" />
 });
 
 const PotentialSection = dynamic(() => import('@/components/sections/marketing/PotentialSection'), {
@@ -32,17 +36,17 @@ const FooterSection = dynamic(() => import('@/components/layout/footer-one'));
 
 export default function Page() {
   return (
-    <main className="relative flex flex-col min-h-screen w-full bg-white">
-      {/* Graph paper style major/minor grid background with faded corners */}
+    <main className="relative flex flex-col min-h-screen w-full bg-[#faf7f2]">
+      {/* Warm graph-paper grid — crimson-tinted lines on ivory, faded corners */}
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-        <div 
+        <div
           className="absolute inset-0"
           style={{
             backgroundImage: `
-              linear-gradient(to right, rgba(156, 163, 175, 0.20) 1px, transparent 1px),
-              linear-gradient(to bottom, rgba(156, 163, 175, 0.20) 1px, transparent 1px),
-              linear-gradient(to right, rgba(156, 163, 175, 0.15) 1px, transparent 1px),
-              linear-gradient(to bottom, rgba(156, 163, 175, 0.15) 1px, transparent 1px)
+              linear-gradient(to right, rgba(153, 27, 27, 0.10) 1px, transparent 1px),
+              linear-gradient(to bottom, rgba(153, 27, 27, 0.10) 1px, transparent 1px),
+              linear-gradient(to right, rgba(153, 27, 27, 0.05) 1px, transparent 1px),
+              linear-gradient(to bottom, rgba(153, 27, 27, 0.05) 1px, transparent 1px)
             `,
             backgroundSize: '100px 100px, 100px 100px, 20px 20px, 20px 20px',
             maskImage: 'radial-gradient(ellipse 75% 75% at 50% 50%, black 10%, transparent 90%)',
@@ -50,41 +54,51 @@ export default function Page() {
           }}
         ></div>
       </div>
-      
-      <div className="relative z-10">
+
+      {/* GSAP scroll progress bar */}
+      <ScrollProgressBar />
+
+      <div className="relative z-[100]">
         <Navbar />
       </div>
 
-        <div>
-          <AgencyHeroSection />
-        </div>
+      <div>
+        <AgencyHeroSection />
+      </div>
 
-        <div>
-          <SuperchargeSection />
-        </div>
+      {/* Tilted counter-scrolling marquee — bridges hero into the page */}
+      <MarqueeBand />
 
-        <div>
-          <PotentialSection />
-        </div>
+      {/* Sticky-pinned section: manages its own scroll, don't transform it */}
+      <SectionReveal still>
+        <SuperchargeSection />
+      </SectionReveal>
 
-        <div>
-          <ProcessSection />
-        </div>
+      {/* Editorial statement with word-by-word ink reveal + count-up stats */}
+      <StatementDivider />
 
-        <div>
-          <TestimonialSection />
-        </div>
+      <SectionReveal still>
+        <PotentialSection />
+      </SectionReveal>
 
-        <div className='Question Section'>
-          <FAQs />
-        </div>
+      <SectionReveal still>
+        <ProcessSection />
+      </SectionReveal>
 
-        <footer>
-          <FooterSection />
-        </footer>
+      <SectionReveal>
+        <TestimonialSection />
+      </SectionReveal>
 
-        {/* GLOBAL SCROLL INDICATOR */}
-        <ScrollIndicator />
+      <SectionReveal>
+        <FAQs />
+      </SectionReveal>
+
+      <footer>
+        <FooterSection />
+      </footer>
+
+      {/* GLOBAL SCROLL INDICATOR */}
+      <ScrollIndicator />
 
     </main>
   );

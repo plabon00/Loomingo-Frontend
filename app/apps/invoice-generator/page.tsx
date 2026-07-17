@@ -10,8 +10,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
-import { Plus, Trash2, Settings, Loader2, FileDown, Check, X, Building, Megaphone, List, ChevronDown, Calendar, Edit3, ArrowRight, ArrowLeft, Save, FileText, Search } from "lucide-react";
+import { Plus, Trash2, Settings, Loader2, FileDown, Check, X, Building, Megaphone, List, ChevronDown, Calendar, Edit3, ArrowRight, ArrowLeft, Save, FileText, Search, Receipt, Landmark } from "lucide-react";
 import Link from "next/link";
+import { motion, AnimatePresence } from "motion/react";
 import { InvoiceHtmlPreview } from "@/components/invoice/InvoiceHtmlPreview";
 import { ScaledA4, TemplateThumbnail, buildInvoicePreviewData } from "@/components/invoice/ScaledInvoicePreview";
 
@@ -32,10 +33,25 @@ const YEARS = ["2024", "2025", "2026", "2027", "2028"];
 
 const getCurrencySymbol = (c: string) => (c === "USD" ? "$" : c === "EUR" ? "€" : c === "GBP" ? "£" : "₹");
 
+// ————— Ledger design tokens —————
+// Ink navy for primary actions, emerald for "money" moments, warm paper surfaces.
+const INK = "#152436";        // deep navy ink
+const INK_HOVER = "#1f3450";
+const MONEY = "#0b7a55";      // paid-green
+const PAPER = "#f6f4ef";      // warm ivory page
+
 // Shared control styles: explicit colors so inputs stay readable
 // regardless of the system dark-mode preference (page is light-locked).
-const inputCls = "h-9 sm:h-11 rounded-lg sm:rounded-xl border-zinc-300 bg-white text-zinc-900 text-base sm:text-sm placeholder:text-zinc-400 shadow-sm";
-const selectCls = "w-full rounded-lg sm:rounded-xl border border-zinc-300 bg-white text-zinc-900 text-base sm:text-sm outline-none focus:border-indigo-500 appearance-none shadow-sm h-9 sm:h-11";
+const inputCls = "h-10 sm:h-11 rounded-xl border-[#ddd8cd] bg-white text-zinc-900 text-base sm:text-sm placeholder:text-zinc-400 shadow-sm focus-visible:ring-2 focus-visible:ring-[#152436]/15 focus-visible:border-[#152436] transition-all duration-200";
+const selectCls = "w-full rounded-xl border border-[#ddd8cd] bg-white text-zinc-900 text-base sm:text-sm outline-none focus:border-[#152436] appearance-none shadow-sm h-10 sm:h-11 transition-colors";
+const cardCls = "bg-white border border-[#e6e1d6] rounded-2xl shadow-[0_1px_2px_rgb(21,36,54,0.04),0_12px_28px_-16px_rgb(21,36,54,0.10)]";
+const kickerCls = "text-[10px] font-bold uppercase tracking-[0.18em] text-[#0b7a55]";
+
+const sectionReveal = {
+  initial: { opacity: 0, y: 16 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] as const },
+};
 
 export default function InvoiceGeneratorDashboard() {
   const router = useRouter();
@@ -82,7 +98,7 @@ export default function InvoiceGeneratorDashboard() {
     billingAddress: "",
     gstin: "",
     pan: "",
-    contact: "", 
+    contact: "",
     brandEmail: "",
     contactNumber: "",
     bankHolderName: "",
@@ -255,11 +271,11 @@ export default function InvoiceGeneratorDashboard() {
         a.download = `Invoice_${selectedInvoiceNumber || Date.now()}.pdf`;
         a.click();
       } else {
-        alert("Could not prepare the PDF. Please try again.");
+        toast.error("Could not prepare the PDF. Please try again.");
       }
     } catch (e) {
       console.error(e);
-      alert("Network error preparing the PDF.");
+      toast.error("Network error preparing the PDF.");
     } finally {
       setIsDownloading(false);
     }
@@ -292,7 +308,7 @@ export default function InvoiceGeneratorDashboard() {
     setSelectedDeliverables(prev => {
       if (prev.includes(deliv)) return prev.filter(d => d !== deliv);
       if (prev.length >= 5) {
-        alert("You can select a maximum of 5 deliverables.");
+        toast.error("You can select a maximum of 5 deliverables.");
         return prev;
       }
       return [...prev, deliv];
@@ -306,7 +322,7 @@ export default function InvoiceGeneratorDashboard() {
       if (val !== '') {
         if (!selectedDeliverables.includes(val)) {
           if (selectedDeliverables.length >= 5) {
-            alert("You can select a maximum of 5 deliverables.");
+            toast.error("You can select a maximum of 5 deliverables.");
             return;
           }
           setSelectedDeliverables([...selectedDeliverables, val]);
@@ -453,212 +469,307 @@ export default function InvoiceGeneratorDashboard() {
     setPreviewPdfUrl(null);
   };
 
-  // Remove the old full-page loading block, let it render the skeleton below.
   return (
-    <div className="flex min-h-[100dvh] bg-zinc-100 font-sans text-zinc-900">
+    <div className="flex min-h-[100dvh] font-sans text-zinc-900" style={{ backgroundColor: PAPER }}>
       <Toaster position="top-center" richColors />
       <DesktopSidebar />
       <MobileNavbar />
 
       <main className="flex-1 md:ml-20 lg:ml-64 pt-16 md:pt-0 pb-24 md:pb-8 w-full overflow-x-hidden">
-        {/* BRAND CONSISTENT HEADER UI */}
-        <div className="relative w-full bg-white border-b border-zinc-200 pb-24 pt-8 px-4 lg:px-8 overflow-hidden max-md:hidden">
-          <div 
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-red-500 rounded-full opacity-[0.05] blur-[120px] pointer-events-none z-0"
+
+        {/* ————— DESKTOP HEADER: navy ledger masthead ————— */}
+        <div className="relative w-full pb-28 pt-8 px-4 lg:px-8 overflow-hidden max-md:hidden" style={{ backgroundColor: INK }}>
+          {/* Fine ruled-paper lines, like a ledger book */}
+          <div
+            className="absolute inset-0 opacity-[0.06] pointer-events-none"
+            style={{ backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 27px, #fff 27px, #fff 28px)" }}
             aria-hidden="true"
           />
-          
+          {/* Emerald money-glow */}
+          <div
+            className="absolute -top-24 right-[10%] w-[500px] h-[300px] rounded-full opacity-[0.14] blur-[100px] pointer-events-none"
+            style={{ backgroundColor: MONEY }}
+            aria-hidden="true"
+          />
+
           <div className="relative z-10 max-w-7xl mx-auto flex flex-col">
-            <div className="hidden md:flex items-center justify-end w-full gap-4">
+            <div className="hidden md:flex items-center justify-end w-full gap-3">
               <Link href="/apps/invoice-generator/creator-details">
-                <Button variant="outline" className="h-10 rounded-full border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900 px-5 shadow-sm transition-colors" disabled={isLoading}>
+                <Button variant="outline" className="h-10 rounded-full border-white/20 bg-white/5 text-white hover:bg-white/15 hover:text-white px-5 backdrop-blur transition-colors" disabled={isLoading}>
                   <Settings className="mr-2 size-4" /> Creator Details
                 </Button>
               </Link>
 
-              <Button onClick={() => openNewInvoiceWizard()} disabled={isLoading} className="rounded-full bg-zinc-900 hover:bg-zinc-800 text-white shadow-md h-10 px-6 text-sm font-medium transition-colors">
+              <Button onClick={() => openNewInvoiceWizard()} disabled={isLoading} className="rounded-full text-white shadow-lg h-10 px-6 text-sm font-semibold transition-all hover:brightness-110" style={{ backgroundColor: MONEY }}>
                 <Plus className="mr-2 size-4" /> Create Invoice
               </Button>
             </div>
 
-            <div className="flex flex-col items-start justify-center mt-12 mb-4 text-left">
-              <div className="inline-flex items-center px-4 py-1.5 rounded-full border border-zinc-200 bg-white text-zinc-900 text-sm font-medium mb-4 shadow-sm">
-                Dashboard
-              </div>
-              <h1 className="text-4xl md:text-5xl font-medium text-zinc-900 mb-3 tracking-tight hidden md:block">
-                Invoice <span className="text-red-600 italic font-serif tracking-tight">generator</span>
-              </h1>
-              <p className="text-sm md:text-lg text-zinc-500 font-normal max-w-xl hidden md:block">
-                Manage brands, track history, and generate stunning invoices effortlessly.
+            <motion.div {...sectionReveal} className="flex flex-col items-start justify-center mt-10 mb-2 text-left">
+              <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em] mb-4" style={{ color: "#7fd6b5" }}>
+                <Receipt className="size-3.5" /> Creator Billing Desk
               </p>
-            </div>
+              <h1 className="text-4xl md:text-5xl font-semibold text-white mb-3 tracking-tight">
+                Get paid <span className="font-editorial font-normal" style={{ color: "#9ae2c4" }}>properly.</span>
+              </h1>
+              <p className="text-sm md:text-base text-white/60 font-normal max-w-xl">
+                Brand-deal invoices that look as professional as your content — drafted, previewed, and delivered in minutes.
+              </p>
+
+              {/* Ledger stats strip */}
+              <div className="flex items-center gap-6 mt-7 text-white/80">
+                <div>
+                  <p className="text-2xl font-bold text-white tabular-nums">{isLoading ? "—" : invoices.length}</p>
+                  <p className="text-[11px] uppercase tracking-wider text-white/50 font-semibold">Invoices raised</p>
+                </div>
+                <div className="w-px h-9 bg-white/15" aria-hidden="true" />
+                <div>
+                  <p className="text-2xl font-bold text-white tabular-nums">{isLoading ? "—" : brands.length}</p>
+                  <p className="text-[11px] uppercase tracking-wider text-white/50 font-semibold">Brands on file</p>
+                </div>
+                <div className="w-px h-9 bg-white/15" aria-hidden="true" />
+                <div>
+                  <p className="text-2xl font-bold text-white tabular-nums">{TEMPLATES.length}</p>
+                  <p className="text-[11px] uppercase tracking-wider text-white/50 font-semibold">Templates</p>
+                </div>
+              </div>
+            </motion.div>
           </div>
         </div>
 
-        {/* Mobile Header */}
+        {/* ————— MOBILE HEADER ————— */}
         <div className="md:hidden px-4 pt-6 pb-2">
           <div className="flex flex-col gap-4">
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-zinc-900">Invoice Dashboard</h1>
-              <p className="text-zinc-600 mt-1 text-sm">Manage brands, track history, and generate invoices.</p>
+              <p className={kickerCls}>Creator Billing Desk</p>
+              <h1 className="text-2xl font-bold tracking-tight text-zinc-950 mt-1.5">
+                Get paid <span className="font-editorial font-normal" style={{ color: MONEY }}>properly.</span>
+              </h1>
+              <p className="text-zinc-500 mt-1 text-sm">Brand-deal invoices, drafted and delivered in minutes.</p>
             </div>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-2.5">
+              <Button onClick={() => openNewInvoiceWizard()} size="sm" disabled={isLoading} className="rounded-full text-white h-10 px-5 font-semibold shadow-md" style={{ backgroundColor: MONEY }}>
+                <Plus className="size-4 mr-1.5" /> New Invoice
+              </Button>
               <Link href="/apps/invoice-generator/creator-details">
-                <Button variant="outline" size="sm" className="rounded-full border-zinc-300 bg-white text-zinc-800" disabled={isLoading}><Settings className="size-4 mr-2" /> Creator Details</Button>
+                <Button variant="outline" size="sm" className="rounded-full border-[#ddd8cd] bg-white text-zinc-800 h-10 px-4" disabled={isLoading}>
+                  <Settings className="size-4 mr-1.5" /> Creator Details
+                </Button>
               </Link>
-              <Button onClick={() => openNewInvoiceWizard()} size="sm" disabled={isLoading} className="rounded-full bg-zinc-900 text-white"><Plus className="size-4 mr-2" /> New Invoice</Button>
             </div>
           </div>
         </div>
 
-        <div className="max-w-6xl mx-auto px-4 md:px-8 mt-4 md:-mt-12 relative z-20 space-y-8">
+        <div className="max-w-6xl mx-auto px-4 md:px-8 mt-4 md:-mt-14 relative z-20 space-y-6 md:space-y-8">
 
           {isLoading || !user ? (
-            <div className="space-y-8 animate-pulse mt-8">
+            <div className="space-y-6 animate-pulse mt-8">
               {/* History Skeleton */}
-              <div className="bg-white border border-zinc-200 rounded-3xl p-4 md:p-6 shadow-sm">
-                <div className="h-6 w-32 bg-zinc-200 rounded-full mb-4"></div>
+              <div className={`${cardCls} p-4 md:p-6`}>
+                <div className="h-6 w-32 bg-[#ece8df] rounded-full mb-4"></div>
                 <div className="flex gap-3 overflow-hidden">
-                  <div className="w-full sm:w-48 h-[220px] bg-zinc-100 rounded-2xl shrink-0"></div>
-                  <div className="w-full sm:w-48 h-[220px] bg-zinc-100 rounded-2xl shrink-0"></div>
-                  <div className="w-full sm:w-48 h-[220px] bg-zinc-100 rounded-2xl shrink-0 hidden sm:block"></div>
-                  <div className="w-full sm:w-48 h-[220px] bg-zinc-100 rounded-2xl shrink-0 hidden md:block"></div>
+                  <div className="w-full sm:w-48 h-[220px] bg-[#f1eee6] rounded-2xl shrink-0"></div>
+                  <div className="w-full sm:w-48 h-[220px] bg-[#f1eee6] rounded-2xl shrink-0"></div>
+                  <div className="w-full sm:w-48 h-[220px] bg-[#f1eee6] rounded-2xl shrink-0 hidden sm:block"></div>
+                  <div className="w-full sm:w-48 h-[220px] bg-[#f1eee6] rounded-2xl shrink-0 hidden md:block"></div>
                 </div>
               </div>
-              
+
               {/* Brands Skeleton */}
-              <div className="bg-white border border-zinc-200 rounded-3xl p-4 md:p-6 shadow-sm">
-                <div className="h-6 w-32 bg-zinc-200 rounded-full mb-4"></div>
+              <div className={`${cardCls} p-4 md:p-6`}>
+                <div className="h-6 w-32 bg-[#ece8df] rounded-full mb-4"></div>
                 <div className="flex gap-3 overflow-hidden">
-                  <div className="w-full sm:w-64 h-[120px] bg-zinc-100 rounded-2xl shrink-0"></div>
-                  <div className="w-full sm:w-64 h-[120px] bg-zinc-100 rounded-2xl shrink-0"></div>
-                  <div className="w-full sm:w-64 h-[120px] bg-zinc-100 rounded-2xl shrink-0 hidden md:block"></div>
+                  <div className="w-full sm:w-64 h-[120px] bg-[#f1eee6] rounded-2xl shrink-0"></div>
+                  <div className="w-full sm:w-64 h-[120px] bg-[#f1eee6] rounded-2xl shrink-0"></div>
+                  <div className="w-full sm:w-64 h-[120px] bg-[#f1eee6] rounded-2xl shrink-0 hidden md:block"></div>
                 </div>
               </div>
             </div>
           ) : (
             <>
-              {/* Mobile Tabs */}
-              <div className="flex sm:hidden p-1 bg-white border border-zinc-200 rounded-full shadow-sm mt-2">
-            <button onClick={() => setActiveMobileTab("history")} className={`flex-1 py-2 text-xs font-semibold rounded-full transition-colors ${activeMobileTab === "history" ? "bg-zinc-900 text-white shadow-sm" : "text-zinc-600 hover:bg-zinc-100"}`}>History</button>
-            <button onClick={() => setActiveMobileTab("brands")} className={`flex-1 py-2 text-xs font-semibold rounded-full transition-colors ${activeMobileTab === "brands" ? "bg-zinc-900 text-white shadow-sm" : "text-zinc-600 hover:bg-zinc-100"}`}>Brands</button>
-            <button onClick={() => setActiveMobileTab("templates")} className={`flex-1 py-2 text-xs font-semibold rounded-full transition-colors ${activeMobileTab === "templates" ? "bg-zinc-900 text-white shadow-sm" : "text-zinc-600 hover:bg-zinc-100"}`}>Templates</button>
-          </div>
-
-          {/* History Section */}
-          <section className={`bg-white border border-zinc-200 rounded-3xl p-4 md:p-6 shadow-sm ${activeMobileTab === "history" ? "block" : "hidden sm:block"}`}>
-            <div className="flex items-center justify-between mb-4 gap-3">
-              <h2 className="text-lg font-semibold text-zinc-900">Recent History</h2>
-              <div className="flex items-center gap-3">
-                <Link href="/apps/invoice-generator/history"><span className="text-sm font-medium text-indigo-600 hover:underline whitespace-nowrap">View All</span></Link>
-                <Button onClick={() => openNewInvoiceWizard()} size="sm" className="rounded-full bg-zinc-900 hover:bg-zinc-800 text-white shadow-sm hidden sm:flex">
-                  <Plus className="size-4 mr-1" /> Create New
-                </Button>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3 sm:flex sm:overflow-x-auto sm:gap-4 sm:pb-2 sm:snap-x sm:snap-mandatory sm:scrollbar-hide">
-              {/* Create New Invoice card at the front */}
-              <button
-                onClick={() => openNewInvoiceWizard()}
-                className="w-full sm:w-48 sm:snap-start shrink-0 rounded-2xl border-2 border-dashed border-indigo-300 bg-indigo-50/60 hover:bg-indigo-50 hover:border-indigo-400 transition-colors flex flex-col items-center justify-center gap-2 min-h-[180px] sm:min-h-[220px]"
-              >
-                <span className="size-10 rounded-full bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-600/30"><Plus className="size-5" /></span>
-                <span className="text-sm font-semibold text-indigo-700">Create New Invoice</span>
-              </button>
-
-              {invoices.length === 0 ? (
-                <div className="flex flex-col justify-center text-sm text-zinc-500 px-4">No invoices yet. Create one to see history here.</div>
-              ) : (
-                invoices.slice(0, 10).map((inv, i) => {
-                  const thumb = buildInvoicePreviewData(inv);
-                  return (
-                    <div key={inv.id || i} className="w-full sm:w-48 sm:snap-start shrink-0 rounded-2xl border border-zinc-200 bg-white shadow-sm hover:shadow-md hover:border-zinc-300 transition-all overflow-hidden group">
-                      {/* Exact invoice preview (top of the document) */}
-                      <div onClick={() => openPreviewFromHistory(inv)} className="relative h-28 sm:h-36 overflow-hidden cursor-pointer bg-zinc-50 border-b border-zinc-200">
-                        {thumb ? (
-                          <ScaledA4 className="pointer-events-none select-none">
-                            <InvoiceHtmlPreview invoiceData={thumb.invoiceData} lineItems={thumb.lineItems} creatorSettings={creatorSettings} />
-                          </ScaledA4>
-                        ) : (
-                          <div className="h-full flex items-center justify-center">
-                            <FileText className="size-10 text-zinc-300" />
-                          </div>
-                        )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-white/70 via-transparent to-transparent" />
-                      </div>
-                      <div className="p-3">
-                        <div className="flex items-center justify-between gap-2 mb-1">
-                          <span className="text-[10px] font-semibold px-1.5 py-0.5 bg-zinc-100 rounded text-zinc-700 truncate">{inv.invoiceNumber}</span>
-                          <button
-                            onClick={(e) => { e.stopPropagation(); openEditDate(inv); }}
-                            title="Edit invoice date"
-                            className="shrink-0 p-1.5 rounded-full bg-zinc-100 text-zinc-600 hover:bg-indigo-100 hover:text-indigo-700 transition-colors"
-                          >
-                            <Edit3 className="size-3" />
-                          </button>
-                        </div>
-                        <h3 onClick={() => openPreviewFromHistory(inv)} className="font-bold text-sm text-zinc-900 truncate cursor-pointer">{inv.brandName}</h3>
-                        <p className="text-[11px] text-zinc-500 truncate">{inv.campaignName || 'No Campaign Name'}</p>
-                        <p className="text-[10px] text-zinc-500 mt-1.5 font-medium">{new Date(inv.createdAt).toLocaleDateString()}</p>
-                      </div>
-                    </div>
-                  );
-                })
-              )}
-            </div>
-          </section>
-
-          {/* Saved Brands Section */}
-          <section className={`bg-white border border-zinc-200 rounded-3xl p-4 md:p-6 shadow-sm ${activeMobileTab === "brands" ? "block" : "hidden sm:block"}`}>
-            <h2 className="text-lg font-semibold text-zinc-900 mb-4">Saved Brands</h2>
-            <div className="grid grid-cols-2 gap-3 sm:flex sm:overflow-x-auto sm:gap-4 sm:pb-2 sm:snap-x sm:snap-mandatory sm:scrollbar-hide">
-              <div
-                onClick={() => { setEditingBrand({ name: "", address: "", gstin: "", pan: "", contact: "", email: "" }); setIsBrandModalOpen(true); }}
-                className="w-full sm:w-64 sm:snap-start shrink-0 p-3 sm:p-4 rounded-2xl border-2 border-dashed border-zinc-300 bg-zinc-50 flex flex-col items-center justify-center cursor-pointer hover:bg-zinc-100 hover:border-zinc-400 transition-colors h-[120px]"
-              >
-                <Plus className="size-6 text-zinc-500 mb-2" />
-                <span className="text-sm font-medium text-zinc-700">Add New Brand</span>
-              </div>
-              {brands.map((b, i) => (
-                <div key={b.id || i} className="w-full sm:w-64 sm:snap-start shrink-0 p-3 sm:p-4 rounded-2xl border border-zinc-200 bg-white shadow-sm flex flex-col justify-between h-[120px] relative">
-                  <div>
-                    <h3 className="font-bold text-zinc-900 truncate pr-8">{b.name}</h3>
-                    <p className="text-xs text-zinc-500 truncate mt-0.5">{b.address || 'No Address'}</p>
-                    {(b.gstin || b.pan) && <p className="text-[10px] text-zinc-500 mt-2 font-medium">Tax ID attached</p>}
-                  </div>
-                  <button onClick={() => { setEditingBrand(b); setIsBrandModalOpen(true); }} className="absolute top-3 right-3 bg-zinc-100 p-2 rounded-full hover:bg-zinc-200 transition-colors" title="Edit brand">
-                    <Edit3 className="size-3.5 text-zinc-600" />
+              {/* Mobile Tabs — sliding ink pill */}
+              <div className="flex sm:hidden p-1 bg-white border border-[#e6e1d6] rounded-full shadow-sm mt-2">
+                {([["history", "History"], ["brands", "Brands"], ["templates", "Templates"]] as const).map(([key, label]) => (
+                  <button
+                    key={key}
+                    onClick={() => setActiveMobileTab(key)}
+                    className={`relative flex-1 py-2.5 text-xs font-bold rounded-full transition-colors duration-200 cursor-pointer ${activeMobileTab === key ? "text-white" : "text-zinc-600"}`}
+                  >
+                    {activeMobileTab === key && (
+                      <motion.span
+                        layoutId="mobile-tab-pill"
+                        transition={{ type: "spring", stiffness: 400, damping: 32 }}
+                        className="absolute inset-0 rounded-full shadow-sm"
+                        style={{ backgroundColor: INK }}
+                      />
+                    )}
+                    <span className="relative z-10">{label}</span>
                   </button>
+                ))}
+              </div>
+
+              {/* ————— HISTORY: The Paper Trail ————— */}
+              <motion.section {...sectionReveal} className={`${cardCls} p-4 md:p-6 ${activeMobileTab === "history" ? "block" : "hidden sm:block"}`}>
+                <div className="flex items-center justify-between mb-4 gap-3">
+                  <div>
+                    <p className={kickerCls}>The paper trail</p>
+                    <h2 className="text-lg font-bold text-zinc-950 mt-0.5">Recent Invoices</h2>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Link href="/apps/invoice-generator/history">
+                      <span className="text-sm font-semibold whitespace-nowrap hover:underline underline-offset-4" style={{ color: MONEY }}>View All</span>
+                    </Link>
+                    <Button onClick={() => openNewInvoiceWizard()} size="sm" className="rounded-full text-white shadow-sm hidden sm:flex hover:brightness-110 transition-all" style={{ backgroundColor: INK }}>
+                      <Plus className="size-4 mr-1" /> Create New
+                    </Button>
+                  </div>
                 </div>
-              ))}
-            </div>
-          </section>
+                <div className="grid grid-cols-2 gap-3 sm:flex sm:overflow-x-auto sm:gap-4 sm:pb-2 sm:snap-x sm:snap-mandatory sm:scrollbar-hide">
+                  {/* Create New Invoice card at the front */}
+                  <motion.button
+                    whileHover={{ y: -3 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => openNewInvoiceWizard()}
+                    className="w-full sm:w-48 sm:snap-start shrink-0 rounded-2xl border-2 border-dashed border-[#0b7a55]/35 bg-[#0b7a55]/[0.04] hover:bg-[#0b7a55]/[0.08] hover:border-[#0b7a55]/60 transition-colors flex flex-col items-center justify-center gap-2.5 min-h-[180px] sm:min-h-[220px] cursor-pointer group"
+                  >
+                    <span className="size-11 rounded-full text-white flex items-center justify-center shadow-md transition-transform duration-300 group-hover:rotate-90" style={{ backgroundColor: MONEY }}>
+                      <Plus className="size-5" />
+                    </span>
+                    <span className="text-sm font-bold" style={{ color: MONEY }}>New Invoice</span>
+                    <span className="font-editorial text-sm text-zinc-500 -mt-1">bill the next deal</span>
+                  </motion.button>
 
-          {/* Templates Section: exact live previews */}
-          <section className={`bg-white border border-zinc-200 rounded-3xl p-4 md:p-6 shadow-sm ${activeMobileTab === "templates" ? "block" : "hidden sm:block"}`}>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-zinc-900">Templates</h2>
-              <p className="text-xs text-zinc-500 hidden sm:block">Tap a template to start an invoice with it</p>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4 pb-2">
-              {TEMPLATES.map(t => (
-                <button
-                  key={t.id}
-                  onClick={() => openNewInvoiceWizard(t.id)}
-                  className="w-full text-left rounded-2xl border border-zinc-200 bg-white overflow-hidden shadow-sm hover:shadow-md hover:border-indigo-300 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
-                >
-                  <div className="border-b border-zinc-100">
-                    <TemplateThumbnail templateId={t.id} />
-                  </div>
-                  <div className="px-3 py-2 flex items-center justify-between gap-1">
-                    <span className="text-xs font-semibold text-zinc-800 truncate">{t.name}</span>
-                    <ArrowRight className="size-3.5 text-zinc-400 group-hover:text-indigo-600 shrink-0 transition-colors" />
-                  </div>
-                </button>
-              ))}
-            </div>
-          </section>
+                  {invoices.length === 0 ? (
+                    <div className="flex flex-col justify-center px-4">
+                      <p className="font-editorial text-lg text-zinc-500">A blank ledger, for now.</p>
+                      <p className="text-xs text-zinc-400 mt-1">Your saved invoices will appear here.</p>
+                    </div>
+                  ) : (
+                    invoices.slice(0, 10).map((inv, i) => {
+                      const thumb = buildInvoicePreviewData(inv);
+                      return (
+                        <motion.div
+                          key={inv.id || i}
+                          initial={{ opacity: 0, y: 14 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: Math.min(i * 0.05, 0.35), duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                          className="w-full sm:w-48 sm:snap-start shrink-0 rounded-2xl border border-[#e6e1d6] bg-white shadow-sm hover:shadow-[0_14px_28px_-14px_rgb(21,36,54,0.25)] hover:border-[#152436]/25 hover:-translate-y-0.5 transition-all duration-300 overflow-hidden group"
+                        >
+                          {/* Exact invoice preview (top of the document) */}
+                          <div onClick={() => openPreviewFromHistory(inv)} className="relative h-28 sm:h-36 overflow-hidden cursor-pointer bg-[#faf9f5] border-b border-[#eee9df]">
+                            {thumb ? (
+                              <ScaledA4 className="pointer-events-none select-none">
+                                <InvoiceHtmlPreview invoiceData={thumb.invoiceData} lineItems={thumb.lineItems} creatorSettings={creatorSettings} />
+                              </ScaledA4>
+                            ) : (
+                              <div className="h-full flex items-center justify-center">
+                                <FileText className="size-10 text-zinc-300" />
+                              </div>
+                            )}
+                            <div className="absolute inset-0 bg-gradient-to-t from-white/70 via-transparent to-transparent" />
+                          </div>
+                          <div className="p-3">
+                            <div className="flex items-center justify-between gap-2 mb-1">
+                              <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded truncate" style={{ backgroundColor: "#1524360d", color: INK }}>{inv.invoiceNumber}</span>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); openEditDate(inv); }}
+                                title="Edit invoice date"
+                                className="shrink-0 p-1.5 rounded-full bg-[#f1eee6] text-zinc-600 hover:text-white transition-colors cursor-pointer"
+                                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = INK)}
+                                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "")}
+                              >
+                                <Edit3 className="size-3" />
+                              </button>
+                            </div>
+                            <h3 onClick={() => openPreviewFromHistory(inv)} className="font-bold text-sm text-zinc-950 truncate cursor-pointer">{inv.brandName}</h3>
+                            <p className="text-[11px] text-zinc-500 truncate">{inv.campaignName || 'No Campaign Name'}</p>
+                            <p className="text-[10px] text-zinc-400 mt-1.5 font-medium tabular-nums">{new Date(inv.createdAt).toLocaleDateString()}</p>
+                          </div>
+                        </motion.div>
+                      );
+                    })
+                  )}
+                </div>
+              </motion.section>
 
+              {/* ————— SAVED BRANDS: The Rolodex ————— */}
+              <motion.section {...sectionReveal} className={`${cardCls} p-4 md:p-6 ${activeMobileTab === "brands" ? "block" : "hidden sm:block"}`}>
+                <div className="mb-4">
+                  <p className={kickerCls}>The rolodex</p>
+                  <h2 className="text-lg font-bold text-zinc-950 mt-0.5">Saved Brands</h2>
+                </div>
+                <div className="grid grid-cols-2 gap-3 sm:flex sm:overflow-x-auto sm:gap-4 sm:pb-2 sm:snap-x sm:snap-mandatory sm:scrollbar-hide">
+                  <motion.div
+                    whileHover={{ y: -2 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => { setEditingBrand({ name: "", address: "", gstin: "", pan: "", contact: "", email: "" }); setIsBrandModalOpen(true); }}
+                    className="w-full sm:w-64 sm:snap-start shrink-0 p-3 sm:p-4 rounded-2xl border-2 border-dashed border-[#d8d2c4] bg-[#faf9f5] flex flex-col items-center justify-center cursor-pointer hover:border-[#152436]/50 transition-colors h-[120px] group"
+                  >
+                    <Plus className="size-6 text-zinc-400 mb-2 transition-transform duration-300 group-hover:rotate-90" />
+                    <span className="text-sm font-semibold text-zinc-700">Add New Brand</span>
+                  </motion.div>
+                  {brands.map((b, i) => (
+                    <motion.div
+                      key={b.id || i}
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: Math.min(i * 0.04, 0.3), duration: 0.3 }}
+                      className="w-full sm:w-64 sm:snap-start shrink-0 p-3 sm:p-4 rounded-2xl border border-[#e6e1d6] bg-white shadow-sm hover:shadow-md hover:border-[#152436]/20 transition-all duration-300 flex flex-col justify-between h-[120px] relative"
+                    >
+                      <div>
+                        {/* Brand monogram */}
+                        <div className="flex items-center gap-2.5 mb-1.5">
+                          <span className="size-7 rounded-lg text-white text-[11px] font-bold flex items-center justify-center shrink-0" style={{ backgroundColor: INK }}>
+                            {(b.name || "?").charAt(0).toUpperCase()}
+                          </span>
+                          <h3 className="font-bold text-zinc-950 truncate pr-8">{b.name}</h3>
+                        </div>
+                        <p className="text-xs text-zinc-500 truncate">{b.address || 'No Address'}</p>
+                        {(b.gstin || b.pan) && (
+                          <p className="text-[10px] font-semibold mt-2 flex items-center gap-1" style={{ color: MONEY }}>
+                            <Check className="size-3" /> Tax ID attached
+                          </p>
+                        )}
+                      </div>
+                      <button onClick={() => { setEditingBrand(b); setIsBrandModalOpen(true); }} className="absolute top-3 right-3 bg-[#f1eee6] p-2 rounded-full hover:bg-[#e6e1d6] transition-colors cursor-pointer" title="Edit brand">
+                        <Edit3 className="size-3.5 text-zinc-600" />
+                      </button>
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.section>
+
+              {/* ————— TEMPLATES: The Stationery Drawer ————— */}
+              <motion.section {...sectionReveal} className={`${cardCls} p-4 md:p-6 ${activeMobileTab === "templates" ? "block" : "hidden sm:block"}`}>
+                <div className="flex items-end justify-between mb-4">
+                  <div>
+                    <p className={kickerCls}>The stationery drawer</p>
+                    <h2 className="text-lg font-bold text-zinc-950 mt-0.5">Templates</h2>
+                  </div>
+                  <p className="font-editorial text-sm text-zinc-400 hidden sm:block">pick one, start billing</p>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4 pb-2">
+                  {TEMPLATES.map((t, i) => (
+                    <motion.button
+                      key={t.id}
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: Math.min(i * 0.04, 0.25), duration: 0.3 }}
+                      whileHover={{ y: -3 }}
+                      onClick={() => openNewInvoiceWizard(t.id)}
+                      className="w-full text-left rounded-2xl border border-[#e6e1d6] bg-white overflow-hidden shadow-sm hover:shadow-[0_14px_28px_-14px_rgb(21,36,54,0.3)] hover:border-[#152436]/30 transition-all duration-300 cursor-pointer group focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#152436]"
+                    >
+                      <div className="border-b border-[#eee9df]">
+                        <TemplateThumbnail templateId={t.id} />
+                      </div>
+                      <div className="px-3 py-2 flex items-center justify-between gap-1">
+                        <span className="text-xs font-bold text-zinc-800 truncate">{t.name}</span>
+                        <ArrowRight className="size-3.5 text-zinc-300 group-hover:translate-x-0.5 shrink-0 transition-all duration-200" style={{}} />
+                      </div>
+                    </motion.button>
+                  ))}
+                </div>
+              </motion.section>
             </>
           )}
 
@@ -666,432 +777,607 @@ export default function InvoiceGeneratorDashboard() {
         <Footer />
       </main>
 
-      {/* NEW INVOICE WIZARD MODAL */}
-      {isWizardOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 pb-24 sm:pb-4">
-          <div className="bg-white w-full h-auto max-h-[80dvh] sm:max-h-[90vh] max-w-2xl rounded-2xl shadow-2xl flex flex-col overflow-hidden">
-            <div className="flex items-center justify-between p-3 sm:p-6 border-b border-zinc-100">
-              <div>
-                <h3 className="font-bold text-xl text-zinc-900">Create Invoice</h3>
-                <p className="text-sm text-zinc-500 font-medium">Step {wizardStep} of 2</p>
-              </div>
-              <Button variant="ghost" size="icon" onClick={() => setIsWizardOpen(false)} className="rounded-full text-zinc-600 hover:bg-zinc-100"><X className="size-5" /></Button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-3 sm:p-6 custom-scrollbar bg-zinc-50/50">
-
-              {/* STEP 1: Campaign Details */}
-              {wizardStep === 1 && (
-                <div className="space-y-4 sm:space-y-6 animate-in slide-in-from-right-4 duration-300">
-                  <div className="space-y-3 sm:space-y-4">
-                    <div className="flex items-center justify-between">
-                      <h4 className="text-sm font-bold text-zinc-800 flex items-center gap-2"><Building className="size-4 text-indigo-500" /> Client Information</h4>
-                      {isBrandSearchOpen ? (
-                        <div className="flex items-center gap-2 relative w-32 sm:w-48 animate-in fade-in slide-in-from-right-4 duration-300">
-                          <Input 
-                            autoFocus
-                            placeholder="Search..." 
-                            className="h-8 text-xs pr-8"
-                            value={brandSearchQuery}
-                            onChange={(e) => setBrandSearchQuery(e.target.value)}
-                          />
-                          <button onClick={() => { setIsBrandSearchOpen(false); setBrandSearchQuery(""); }} className="absolute right-2 top-2 text-zinc-400 hover:text-zinc-600">
-                            <X className="size-3.5" />
-                          </button>
-                        </div>
-                      ) : (
-                        <button onClick={() => setIsBrandSearchOpen(true)} className="p-1.5 text-zinc-400 hover:bg-zinc-100 rounded-full transition-colors">
-                          <Search className="size-4" />
-                        </button>
-                      )}
-                    </div>
-                    
-                    {brands.length === 0 ? (
-                      <div className="p-4 border border-dashed border-zinc-300 rounded-xl text-center text-sm text-zinc-500">
-                        No saved brands found. You can add them from the Dashboard.
-                      </div>
-                    ) : (
-                      <div className="flex overflow-x-auto gap-3 pb-2 snap-x snap-mandatory scrollbar-hide -mx-3 px-3 sm:mx-0 sm:px-0">
-                        {brands
-                          .filter(b => b.name.toLowerCase().includes(brandSearchQuery.toLowerCase()))
-                          .map(b => {
-                            const isSelected = formData.brandName === b.name;
-                            return (
-                              <button
-                                key={b.id}
-                                onClick={() => {
-                                  setFormData({...formData, brandName: b.name, billingAddress: b.address || "", gstin: b.gstin || "", pan: b.pan || "", contact: b.contact || "", brandEmail: b.email || ""});
-                                }}
-                                className={`snap-start shrink-0 w-40 sm:w-48 text-left p-3 rounded-xl border transition-all ${isSelected ? 'bg-indigo-50 border-indigo-500 shadow-sm' : 'bg-white border-zinc-200 hover:border-indigo-300 hover:bg-zinc-50 shadow-sm'}`}
-                              >
-                                <h5 className={`font-bold text-sm truncate ${isSelected ? 'text-indigo-900' : 'text-zinc-900'}`}>{b.name}</h5>
-                                <p className={`text-[10px] mt-1 truncate ${isSelected ? 'text-indigo-700/80' : 'text-zinc-500'}`}>{b.address || 'No Address'}</p>
-                              </button>
-                            );
-                        })}
-                        {brands.filter(b => b.name.toLowerCase().includes(brandSearchQuery.toLowerCase())).length === 0 && (
-                          <div className="text-xs text-zinc-500 italic p-2">No brands match your search.</div>
-                        )}
-                      </div>
-                    )}
+      {/* ————— NEW INVOICE WIZARD ————— */}
+      <AnimatePresence>
+        {isWizardOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-50 bg-[#152436]/70 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4 pb-20 sm:pb-4"
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 30 }}
+              transition={{ type: "spring", stiffness: 340, damping: 32 }}
+              className="bg-white w-full h-auto max-h-[82dvh] sm:max-h-[90vh] max-w-2xl rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+            >
+              {/* Header with step progress */}
+              <div className="p-4 sm:p-6 pb-0 sm:pb-0 border-b border-[#eee9df]">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-bold text-xl text-zinc-950 tracking-tight">New Invoice</h3>
+                    <p className="font-editorial text-sm text-zinc-400 mt-0.5">
+                      {wizardStep === 1 ? "who's paying, and for what" : "name your price"}
+                    </p>
                   </div>
-
-                  <div className="space-y-3 sm:space-y-4">
-                    <h4 className="text-sm font-bold text-zinc-800 flex items-center gap-2"><Megaphone className="size-4 text-purple-500" /> Campaign Specifics</h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                      <div>
-                        <label className="text-xs font-semibold text-zinc-600 mb-1.5 block">Campaign Name <span className="text-zinc-400 font-normal ml-1">(Optional)</span></label>
-                        <Input placeholder="Summer Sale 2026" className={inputCls} value={formData.campaignName} onChange={(e) => setFormData({...formData, campaignName: e.target.value})} />
-                      </div>
-                      <div>
-                        <label className="text-xs font-semibold text-zinc-600 mb-1.5 block">Live Date <span className="text-red-500">*</span></label>
-                        <div className="relative">
-                          <Input type="date" className={`${inputCls} pr-10`} value={formData.liveDate} onChange={(e) => setFormData({...formData, liveDate: e.target.value})} />
-                          <Calendar className="absolute right-3 top-3.5 size-4 text-zinc-500 pointer-events-none" />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3 sm:space-y-4">
-                    <h4 className="text-sm font-bold text-zinc-800 flex items-center gap-2"><List className="size-4 text-orange-500" /> Deliverables</h4>
-                    
-                    {selectedDeliverables.length > 0 && (
-                      <div className="mb-4">
-                        <span className="text-xs font-semibold text-zinc-500 mb-2 block">Selected ({selectedDeliverables.length}/5)</span>
-                        <div className="flex flex-wrap gap-2">
-                          {selectedDeliverables.map(deliv => (
-                            <button key={deliv} onClick={() => toggleDeliverable(deliv)} className="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-semibold bg-indigo-600 text-white border border-indigo-600 shadow-sm flex items-center group">
-                              {deliv} <X className="size-3 ml-1 text-indigo-200 group-hover:text-white transition-colors" />
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="flex flex-wrap gap-2">
-                      {DELIVERABLE_OPTIONS.filter(opt => opt !== "Other").map(opt => (
-                        <button
-                          key={opt}
-                          onClick={() => toggleDeliverable(opt)}
-                          className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all ${selectedDeliverables.includes(opt) ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' : 'bg-white text-zinc-700 border-zinc-300 hover:bg-zinc-50'}`}
-                        >
-                          {selectedDeliverables.includes(opt) ? <Check className="size-3 inline mr-1" /> : <Plus className="size-3 inline mr-1" />}
-                          {opt}
-                        </button>
-                      ))}
-                      <button
-                        onClick={() => setShowOtherDeliverableInput(!showOtherDeliverableInput)}
-                        className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all ${showOtherDeliverableInput ? 'bg-zinc-100 text-zinc-900 border-zinc-300' : 'bg-white text-zinc-700 border-zinc-300 hover:bg-zinc-50'}`}
-                      >
-                        {showOtherDeliverableInput ? <X className="size-3 inline mr-1" /> : <Plus className="size-3 inline mr-1" />}
-                        Other
-                      </button>
-                    </div>
-                    {showOtherDeliverableInput && (
-                      <Input 
-                        placeholder="Specify other deliverable and press Enter..." 
-                        className={`${inputCls} mt-2 text-sm`} 
-                        value={otherDeliverable} 
-                        onChange={(e) => setOtherDeliverable(e.target.value)}
-                        onKeyDown={handleAddCustomDeliverable}
-                        autoFocus
-                      />
-                    )}
-                  </div>
-
+                  <Button variant="ghost" size="icon" onClick={() => setIsWizardOpen(false)} className="rounded-full text-zinc-500 hover:bg-[#f1eee6] cursor-pointer"><X className="size-5" /></Button>
                 </div>
-              )}
-
-              {/* STEP 2: Line Items */}
-              {wizardStep === 2 && (
-                <div className="space-y-4 sm:space-y-6 animate-in slide-in-from-right-4 duration-300">
-                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-zinc-50/50 p-3 sm:p-4 rounded-xl border border-zinc-100 gap-3 mb-4">
-                    <div className="w-full sm:flex-1 sm:mr-4">
-                      <label className="text-xs font-semibold text-zinc-600 mb-1.5 block">Template</label>
-                      <div className="relative">
-                        <select className={`${selectCls} h-10 pl-4 pr-10 w-full bg-white border-zinc-200 font-medium text-indigo-900 shadow-sm transition-all focus:ring-2 focus:ring-indigo-500/20`} value={formData.templateId} onChange={(e) => setFormData({...formData, templateId: parseInt(e.target.value)})}>
-                          {TEMPLATES.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
-                        </select>
-                        <ChevronDown className="absolute right-3 top-3 size-4 text-zinc-400 pointer-events-none" />
-                      </div>
-                    </div>
-                    <div className="w-full sm:w-28 flex-shrink-0 flex items-center justify-between sm:block">
-                      <label className="text-xs font-semibold text-zinc-600 mb-0 sm:mb-1.5 block sm:text-right">Currency</label>
-                      <div className="relative flex sm:justify-end">
-                        <select className="bg-zinc-100 hover:bg-zinc-200 border border-zinc-200 outline-none rounded-full px-3 py-1.5 text-xs font-semibold cursor-pointer appearance-none pr-8 transition-colors text-zinc-800 w-28 text-center shadow-sm" value={formData.currency} onChange={(e) => setFormData({...formData, currency: e.target.value})}>
-                          <option value="INR">🇮🇳 INR</option>
-                          <option value="USD">🇺🇸 USD</option>
-                          <option value="EUR">🇪🇺 EUR</option>
-                          <option value="AED">🇦🇪 AED</option>
-                        </select>
-                        <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 size-3 text-zinc-500 pointer-events-none" />
-                      </div>
-                    </div>
+                {/* Progress rail */}
+                <div className="flex gap-1.5 mt-4 mb-4">
+                  <div className="h-1 flex-1 rounded-full overflow-hidden bg-[#ece8df]">
+                    <motion.div className="h-full rounded-full" style={{ backgroundColor: MONEY }} initial={false} animate={{ width: "100%" }} />
                   </div>
+                  <div className="h-1 flex-1 rounded-full overflow-hidden bg-[#ece8df]">
+                    <motion.div className="h-full rounded-full" style={{ backgroundColor: MONEY }} initial={false} animate={{ width: wizardStep === 2 ? "100%" : "0%" }} transition={{ duration: 0.35, ease: "easeOut" }} />
+                  </div>
+                </div>
+              </div>
 
-                  <div className="space-y-3">
-                    {lineItems.map((item, index) => (
-                      <div key={index} className="p-3 sm:p-4 pt-10 rounded-xl border border-zinc-200 bg-white shadow-sm space-y-3 relative group">
-                        {/* Delete Button on top right */}
-                        <Button variant="ghost" size="icon" onClick={() => removeLineItem(index)} className="absolute top-2 right-2 size-7 rounded-md text-red-500 hover:bg-red-50 hover:text-red-600 opacity-80 hover:opacity-100 transition-opacity bg-red-50/50"><Trash2 className="size-3.5" /></Button>
+              <div className="flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar bg-[#faf9f5]">
 
-                        {/* Row 1: Type & Name side by side */}
-                        <div className="flex flex-col sm:flex-row gap-2">
-                          {/* Type */}
-                          <div className="relative shrink-0 w-full sm:w-36">
-                            <select
-                              className="w-full h-9 pl-3 pr-8 rounded-xl border border-zinc-300 bg-zinc-50 text-zinc-900 text-sm font-semibold outline-none appearance-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-all shadow-sm"
-                              value={item.type}
-                              onChange={(e) => updateLineItem(index, "type", e.target.value)}
-                            >
-                              {ITEM_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-                            </select>
-                            <ChevronDown className="absolute right-2.5 top-2.5 size-4 text-zinc-500 pointer-events-none" />
-                          </div>
-                          
-                          {/* Name */}
-                          <div className="flex-1 min-w-0">
-                            {item.type === "Ad Rights" ? (
-                              <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-indigo-50/60 border border-indigo-100 h-9 px-2 shadow-sm">
-                                <div className="relative">
-                                  <select 
-                                    className="h-6 pl-1.5 pr-5 rounded-md border-none bg-white/60 text-indigo-900 text-xs font-semibold outline-none appearance-none cursor-pointer hover:bg-white transition-colors text-center w-[60px]" 
-                                    value={item.adRightsFrom || ""} 
-                                    onChange={(e) => updateLineItem(index, "adRightsFrom", e.target.value)}
-                                  >
-                                    <option value="" disabled>Mon</option>
-                                    {MONTHS.map(m => <option key={m} value={m}>{m}</option>)}
-                                  </select>
-                                  <ChevronDown className="absolute right-1 top-1.5 size-3 text-indigo-400 pointer-events-none" />
-                                </div>
-                                <span className="text-indigo-300 font-bold text-xs">-</span>
-                                <div className="relative">
-                                  <select 
-                                    className="h-6 pl-1.5 pr-5 rounded-md border-none bg-white/60 text-indigo-900 text-xs font-semibold outline-none appearance-none cursor-pointer hover:bg-white transition-colors text-center w-[60px]" 
-                                    value={item.adRightsTo || ""} 
-                                    onChange={(e) => updateLineItem(index, "adRightsTo", e.target.value)}
-                                  >
-                                    <option value="" disabled>Mon</option>
-                                    {MONTHS.map(m => <option key={m} value={m}>{m}</option>)}
-                                  </select>
-                                  <ChevronDown className="absolute right-1 top-1.5 size-3 text-indigo-400 pointer-events-none" />
-                                </div>
-                                <div className="relative ml-auto">
-                                  <select 
-                                    className="h-6 pl-1.5 pr-5 rounded-md border-none bg-white/60 text-indigo-900 text-xs font-semibold outline-none appearance-none cursor-pointer hover:bg-white transition-colors text-center w-[55px]" 
-                                    value={item.adRightsYear || new Date().getFullYear().toString()} 
-                                    onChange={(e) => updateLineItem(index, "adRightsYear", e.target.value)}
-                                  >
-                                    {Array.from({length: 21}, (_, i) => (new Date().getFullYear() + i).toString()).map(y => <option key={y} value={y}>{y}</option>)}
-                                  </select>
-                                  <ChevronDown className="absolute right-1 top-1.5 size-3 text-indigo-400 pointer-events-none" />
-                                </div>
-                              </div>
-                            ) : (
+                <AnimatePresence mode="wait" initial={false}>
+                  {/* STEP 1: Campaign Details */}
+                  {wizardStep === 1 && (
+                    <motion.div
+                      key="step1"
+                      initial={{ opacity: 0, x: -16 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -16 }}
+                      transition={{ duration: 0.2 }}
+                      className="space-y-5 sm:space-y-6"
+                    >
+                      <div className="space-y-3 sm:space-y-4">
+                        <div className="flex items-center justify-between">
+                          <h4 className="text-sm font-bold text-zinc-900 flex items-center gap-2">
+                            <span className="size-6 rounded-lg flex items-center justify-center text-white" style={{ backgroundColor: INK }}><Building className="size-3.5" /></span>
+                            Client Information
+                          </h4>
+                          {isBrandSearchOpen ? (
+                            <div className="flex items-center gap-2 relative w-32 sm:w-48">
                               <Input
-                                value={item.name}
-                                onChange={(e) => updateLineItem(index, "name", e.target.value)}
-                                disabled={item.type !== "Others"}
-                                placeholder="Item description..."
-                                className="h-9 w-full rounded-xl border-zinc-300 text-sm bg-white text-zinc-900 placeholder:text-zinc-400 disabled:bg-zinc-100 disabled:text-zinc-500 shadow-sm focus-visible:ring-indigo-500"
+                                autoFocus
+                                placeholder="Search..."
+                                className="h-8 text-xs pr-8 rounded-lg border-[#ddd8cd]"
+                                value={brandSearchQuery}
+                                onChange={(e) => setBrandSearchQuery(e.target.value)}
                               />
+                              <button onClick={() => { setIsBrandSearchOpen(false); setBrandSearchQuery(""); }} className="absolute right-2 top-2 text-zinc-400 hover:text-zinc-600 cursor-pointer">
+                                <X className="size-3.5" />
+                              </button>
+                            </div>
+                          ) : (
+                            <button onClick={() => setIsBrandSearchOpen(true)} className="p-1.5 text-zinc-400 hover:bg-[#f1eee6] rounded-full transition-colors cursor-pointer" aria-label="Search brands">
+                              <Search className="size-4" />
+                            </button>
+                          )}
+                        </div>
+
+                        {brands.length === 0 ? (
+                          <div className="p-4 border border-dashed border-[#d8d2c4] rounded-xl text-center text-sm text-zinc-500 bg-white">
+                            No saved brands found. You can add them from the Dashboard.
+                          </div>
+                        ) : (
+                          <div className="flex overflow-x-auto gap-3 pb-2 snap-x snap-mandatory scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
+                            {brands
+                              .filter(b => b.name.toLowerCase().includes(brandSearchQuery.toLowerCase()))
+                              .map(b => {
+                                const isSelected = formData.brandName === b.name;
+                                return (
+                                  <button
+                                    key={b.id}
+                                    onClick={() => {
+                                      setFormData({...formData, brandName: b.name, billingAddress: b.address || "", gstin: b.gstin || "", pan: b.pan || "", contact: b.contact || "", brandEmail: b.email || ""});
+                                    }}
+                                    className={`snap-start shrink-0 w-40 sm:w-48 text-left p-3 rounded-xl border-2 transition-all duration-200 cursor-pointer relative ${isSelected ? 'bg-white shadow-md' : 'bg-white border-[#e6e1d6] hover:border-[#152436]/30 shadow-sm'}`}
+                                    style={isSelected ? { borderColor: MONEY } : undefined}
+                                  >
+                                    {isSelected && (
+                                      <span className="absolute -top-2 -right-2 size-5 rounded-full flex items-center justify-center text-white shadow-sm" style={{ backgroundColor: MONEY }}>
+                                        <Check className="size-3" />
+                                      </span>
+                                    )}
+                                    <h5 className="font-bold text-sm truncate text-zinc-950">{b.name}</h5>
+                                    <p className="text-[10px] mt-1 truncate text-zinc-500">{b.address || 'No Address'}</p>
+                                  </button>
+                                );
+                            })}
+                            {brands.filter(b => b.name.toLowerCase().includes(brandSearchQuery.toLowerCase())).length === 0 && (
+                              <div className="text-xs text-zinc-500 italic p-2">No brands match your search.</div>
                             )}
                           </div>
-                        </div>
+                        )}
+                      </div>
 
-                        {/* Row 2: Qty and Price side by side, aligned to the right */}
-                        <div className="flex justify-end gap-2 mt-2 pt-2 border-t border-zinc-50/80">
-                          {/* Quantity */}
-                          <div className="flex items-center gap-1.5 bg-zinc-50 rounded-full px-2 py-1 border border-zinc-200">
-                            <span className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider ml-1">Qty</span>
-                            <div className="relative">
-                              <select className="h-7 pl-2 pr-6 rounded-full border-none bg-white text-zinc-900 text-xs outline-none appearance-none font-bold shadow-sm cursor-pointer hover:bg-zinc-100 transition-colors" value={item.quantity || 1} onChange={(e) => updateLineItem(index, "quantity", parseInt(e.target.value) || 1)}>
-                                {[1,2,3,4,5,6,7,8,9,10,15,20].map(n => <option key={n} value={n}>{n}</option>)}
-                              </select>
-                              <ChevronDown className="absolute right-1.5 top-1/2 -translate-y-1/2 size-3 text-zinc-400 pointer-events-none" />
-                            </div>
+                      <div className="space-y-3 sm:space-y-4">
+                        <h4 className="text-sm font-bold text-zinc-900 flex items-center gap-2">
+                          <span className="size-6 rounded-lg flex items-center justify-center text-white" style={{ backgroundColor: INK }}><Megaphone className="size-3.5" /></span>
+                          Campaign Specifics
+                        </h4>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                          <div>
+                            <label className="text-xs font-semibold text-zinc-600 mb-1.5 block">Campaign Name <span className="text-zinc-400 font-normal ml-1">(Optional)</span></label>
+                            <Input placeholder="Summer Sale 2026" className={inputCls} value={formData.campaignName} onChange={(e) => setFormData({...formData, campaignName: e.target.value})} />
                           </div>
-
-                          {/* Price */}
-                          <div className="flex items-center border border-zinc-300 rounded-full px-3 h-9 bg-white w-28 sm:w-32 shadow-sm focus-within:ring-1 focus-within:ring-indigo-500 focus-within:border-indigo-500 transition-all">
-                            <span className="text-zinc-500 text-sm font-bold mr-1.5">{getCurrencySymbol(formData.currency)}</span>
-                            <Input
-                              type="number"
-                              inputMode="decimal"
-                              placeholder="0.00"
-                              value={item.price || ''}
-                              onChange={(e) => updateLineItem(index, "price", parseFloat(e.target.value) || 0)}
-                              className="h-full bg-transparent border-none px-0 text-sm font-bold text-zinc-900 placeholder:text-zinc-400 shadow-none focus-visible:ring-0 [-moz-appearance:_textfield] [&::-webkit-inner-spin-button]:m-0"
-                            />
+                          <div>
+                            <label className="text-xs font-semibold text-zinc-600 mb-1.5 block">Live Date <span className="text-red-500">*</span></label>
+                            <div className="relative">
+                              <Input type="date" className={`${inputCls} pr-10`} value={formData.liveDate} onChange={(e) => setFormData({...formData, liveDate: e.target.value})} />
+                              <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-zinc-500 pointer-events-none" />
+                            </div>
                           </div>
                         </div>
                       </div>
-                    ))}
 
-                                        <Button variant="outline" onClick={addLineItem} className="w-full border-dashed border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50 rounded-xl h-10"><Plus className="size-4 mr-2" /> Add Another Item</Button>
+                      <div className="space-y-3 sm:space-y-4">
+                        <h4 className="text-sm font-bold text-zinc-900 flex items-center gap-2">
+                          <span className="size-6 rounded-lg flex items-center justify-center text-white" style={{ backgroundColor: INK }}><List className="size-3.5" /></span>
+                          Deliverables
+                        </h4>
+
+                        {selectedDeliverables.length > 0 && (
+                          <div className="mb-4">
+                            <span className="text-xs font-semibold text-zinc-500 mb-2 block">Selected ({selectedDeliverables.length}/5)</span>
+                            <div className="flex flex-wrap gap-2">
+                              <AnimatePresence>
+                                {selectedDeliverables.map(deliv => (
+                                  <motion.button
+                                    key={deliv}
+                                    initial={{ opacity: 0, scale: 0.8 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.8 }}
+                                    transition={{ type: "spring", stiffness: 500, damping: 28 }}
+                                    onClick={() => toggleDeliverable(deliv)}
+                                    className="px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-bold text-white shadow-sm flex items-center group cursor-pointer"
+                                    style={{ backgroundColor: MONEY }}
+                                  >
+                                    {deliv} <X className="size-3 ml-1.5 opacity-70 group-hover:opacity-100 transition-opacity" />
+                                  </motion.button>
+                                ))}
+                              </AnimatePresence>
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="flex flex-wrap gap-2">
+                          {DELIVERABLE_OPTIONS.filter(opt => opt !== "Other").map(opt => (
+                            <button
+                              key={opt}
+                              onClick={() => toggleDeliverable(opt)}
+                              className={`px-3 py-1.5 rounded-full text-[11px] font-semibold border transition-all duration-200 cursor-pointer active:scale-95 ${selectedDeliverables.includes(opt) ? 'text-white shadow-sm' : 'bg-white text-zinc-700 border-[#ddd8cd] hover:border-[#152436]/40'}`}
+                              style={selectedDeliverables.includes(opt) ? { backgroundColor: MONEY, borderColor: MONEY } : undefined}
+                            >
+                              {selectedDeliverables.includes(opt) ? <Check className="size-3 inline mr-1" /> : <Plus className="size-3 inline mr-1" />}
+                              {opt}
+                            </button>
+                          ))}
+                          <button
+                            onClick={() => setShowOtherDeliverableInput(!showOtherDeliverableInput)}
+                            className={`px-3 py-1.5 rounded-full text-[11px] font-semibold border transition-all duration-200 cursor-pointer active:scale-95 ${showOtherDeliverableInput ? 'bg-[#f1eee6] text-zinc-900 border-[#d8d2c4]' : 'bg-white text-zinc-700 border-[#ddd8cd] hover:border-[#152436]/40'}`}
+                          >
+                            {showOtherDeliverableInput ? <X className="size-3 inline mr-1" /> : <Plus className="size-3 inline mr-1" />}
+                            Other
+                          </button>
+                        </div>
+                        <AnimatePresence>
+                          {showOtherDeliverableInput && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: "auto" }}
+                              exit={{ opacity: 0, height: 0 }}
+                              transition={{ duration: 0.2 }}
+                            >
+                              <Input
+                                placeholder="Specify other deliverable and press Enter..."
+                                className={`${inputCls} mt-1 text-sm`}
+                                value={otherDeliverable}
+                                onChange={(e) => setOtherDeliverable(e.target.value)}
+                                onKeyDown={handleAddCustomDeliverable}
+                                autoFocus
+                              />
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+
+                    </motion.div>
+                  )}
+
+                  {/* STEP 2: Line Items */}
+                  {wizardStep === 2 && (
+                    <motion.div
+                      key="step2"
+                      initial={{ opacity: 0, x: 16 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 16 }}
+                      transition={{ duration: 0.2 }}
+                      className="space-y-4 sm:space-y-6"
+                    >
+                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-3 sm:p-4 rounded-xl border border-[#e6e1d6] gap-3 mb-4 shadow-sm">
+                        <div className="w-full sm:flex-1 sm:mr-4">
+                          <label className="text-xs font-semibold text-zinc-600 mb-1.5 block">Template</label>
+                          <div className="relative">
+                            <select className={`${selectCls} h-10 pl-4 pr-10 w-full font-semibold`} style={{ color: INK }} value={formData.templateId} onChange={(e) => setFormData({...formData, templateId: parseInt(e.target.value)})}>
+                              {TEMPLATES.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                            </select>
+                            <ChevronDown className="absolute right-3 top-3 size-4 text-zinc-400 pointer-events-none" />
+                          </div>
+                        </div>
+                        <div className="w-full sm:w-28 flex-shrink-0 flex items-center justify-between sm:block">
+                          <label className="text-xs font-semibold text-zinc-600 mb-0 sm:mb-1.5 block sm:text-right">Currency</label>
+                          <div className="relative flex sm:justify-end">
+                            <select className="bg-[#f1eee6] hover:bg-[#ece8df] border border-[#e6e1d6] outline-none rounded-full px-3 py-1.5 text-xs font-bold cursor-pointer appearance-none pr-8 transition-colors text-zinc-800 w-28 text-center shadow-sm" value={formData.currency} onChange={(e) => setFormData({...formData, currency: e.target.value})}>
+                              <option value="INR">🇮🇳 INR</option>
+                              <option value="USD">🇺🇸 USD</option>
+                              <option value="EUR">🇪🇺 EUR</option>
+                              <option value="AED">🇦🇪 AED</option>
+                            </select>
+                            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 size-3 text-zinc-500 pointer-events-none" />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-3">
+                        <AnimatePresence initial={false}>
+                          {lineItems.map((item, index) => (
+                            <motion.div
+                              key={index}
+                              layout
+                              initial={{ opacity: 0, y: 12, scale: 0.98 }}
+                              animate={{ opacity: 1, y: 0, scale: 1 }}
+                              exit={{ opacity: 0, scale: 0.96, transition: { duration: 0.15 } }}
+                              transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                              className="p-3 sm:p-4 rounded-xl border border-[#e6e1d6] bg-white shadow-sm space-y-3 relative group"
+                            >
+                              {/* Item number stamp + delete */}
+                              <div className="flex items-center justify-between">
+                                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md" style={{ backgroundColor: "#15243610", color: INK }}>
+                                  ITEM {String(index + 1).padStart(2, "0")}
+                                </span>
+                                <Button variant="ghost" size="icon" onClick={() => removeLineItem(index)} className="size-7 rounded-md text-red-500 hover:bg-red-50 hover:text-red-600 cursor-pointer"><Trash2 className="size-3.5" /></Button>
+                              </div>
+
+                              {/* Row 1: Type & Name side by side */}
+                              <div className="flex flex-col sm:flex-row gap-2">
+                                {/* Type */}
+                                <div className="relative shrink-0 w-full sm:w-36">
+                                  <select
+                                    className="w-full h-10 pl-3 pr-8 rounded-xl border border-[#ddd8cd] bg-[#faf9f5] text-zinc-900 text-sm font-semibold outline-none appearance-none focus:border-[#152436] transition-all shadow-sm cursor-pointer"
+                                    value={item.type}
+                                    onChange={(e) => updateLineItem(index, "type", e.target.value)}
+                                  >
+                                    {ITEM_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                                  </select>
+                                  <ChevronDown className="absolute right-2.5 top-3 size-4 text-zinc-500 pointer-events-none" />
+                                </div>
+
+                                {/* Name */}
+                                <div className="flex-1 min-w-0">
+                                  {item.type === "Ad Rights" ? (
+                                    <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl border h-10 px-2 shadow-sm" style={{ backgroundColor: "#0b7a5508", borderColor: "#0b7a5530" }}>
+                                      <div className="relative">
+                                        <select
+                                          className="h-7 pl-1.5 pr-5 rounded-md border-none bg-white/80 text-xs font-semibold outline-none appearance-none cursor-pointer hover:bg-white transition-colors text-center w-[60px]"
+                                          style={{ color: MONEY }}
+                                          value={item.adRightsFrom || ""}
+                                          onChange={(e) => updateLineItem(index, "adRightsFrom", e.target.value)}
+                                        >
+                                          <option value="" disabled>Mon</option>
+                                          {MONTHS.map(m => <option key={m} value={m}>{m}</option>)}
+                                        </select>
+                                        <ChevronDown className="absolute right-1 top-2 size-3 pointer-events-none" style={{ color: "#0b7a5570" }} />
+                                      </div>
+                                      <span className="font-bold text-xs" style={{ color: "#0b7a5550" }}>–</span>
+                                      <div className="relative">
+                                        <select
+                                          className="h-7 pl-1.5 pr-5 rounded-md border-none bg-white/80 text-xs font-semibold outline-none appearance-none cursor-pointer hover:bg-white transition-colors text-center w-[60px]"
+                                          style={{ color: MONEY }}
+                                          value={item.adRightsTo || ""}
+                                          onChange={(e) => updateLineItem(index, "adRightsTo", e.target.value)}
+                                        >
+                                          <option value="" disabled>Mon</option>
+                                          {MONTHS.map(m => <option key={m} value={m}>{m}</option>)}
+                                        </select>
+                                        <ChevronDown className="absolute right-1 top-2 size-3 pointer-events-none" style={{ color: "#0b7a5570" }} />
+                                      </div>
+                                      <div className="relative ml-auto">
+                                        <select
+                                          className="h-7 pl-1.5 pr-5 rounded-md border-none bg-white/80 text-xs font-semibold outline-none appearance-none cursor-pointer hover:bg-white transition-colors text-center w-[58px]"
+                                          style={{ color: MONEY }}
+                                          value={item.adRightsYear || new Date().getFullYear().toString()}
+                                          onChange={(e) => updateLineItem(index, "adRightsYear", e.target.value)}
+                                        >
+                                          {Array.from({length: 21}, (_, i) => (new Date().getFullYear() + i).toString()).map(y => <option key={y} value={y}>{y}</option>)}
+                                        </select>
+                                        <ChevronDown className="absolute right-1 top-2 size-3 pointer-events-none" style={{ color: "#0b7a5570" }} />
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <Input
+                                      value={item.name}
+                                      onChange={(e) => updateLineItem(index, "name", e.target.value)}
+                                      disabled={item.type !== "Others"}
+                                      placeholder="Item description..."
+                                      className="h-10 w-full rounded-xl border-[#ddd8cd] text-sm bg-white text-zinc-900 placeholder:text-zinc-400 disabled:bg-[#faf9f5] disabled:text-zinc-500 shadow-sm focus-visible:ring-[#152436]/15"
+                                    />
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Row 2: Qty and Price side by side, aligned to the right */}
+                              <div className="flex justify-end gap-2 mt-2 pt-2 border-t border-[#f1eee6]">
+                                {/* Quantity */}
+                                <div className="flex items-center gap-1.5 bg-[#faf9f5] rounded-full px-2 py-1 border border-[#e6e1d6]">
+                                  <span className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider ml-1">Qty</span>
+                                  <div className="relative">
+                                    <select className="h-7 pl-2 pr-6 rounded-full border-none bg-white text-zinc-900 text-xs outline-none appearance-none font-bold shadow-sm cursor-pointer hover:bg-[#f1eee6] transition-colors" value={item.quantity || 1} onChange={(e) => updateLineItem(index, "quantity", parseInt(e.target.value) || 1)}>
+                                      {[1,2,3,4,5,6,7,8,9,10,15,20].map(n => <option key={n} value={n}>{n}</option>)}
+                                    </select>
+                                    <ChevronDown className="absolute right-1.5 top-1/2 -translate-y-1/2 size-3 text-zinc-400 pointer-events-none" />
+                                  </div>
+                                </div>
+
+                                {/* Price */}
+                                <div className="flex items-center border rounded-full px-3 h-9 bg-white w-28 sm:w-32 shadow-sm focus-within:ring-2 focus-within:ring-[#0b7a55]/25 transition-all" style={{ borderColor: "#0b7a5540" }}>
+                                  <span className="text-sm font-bold mr-1.5" style={{ color: MONEY }}>{getCurrencySymbol(formData.currency)}</span>
+                                  <Input
+                                    type="number"
+                                    inputMode="decimal"
+                                    placeholder="0.00"
+                                    value={item.price || ''}
+                                    onChange={(e) => updateLineItem(index, "price", parseFloat(e.target.value) || 0)}
+                                    className="h-full bg-transparent border-none px-0 text-sm font-bold text-zinc-900 placeholder:text-zinc-400 shadow-none focus-visible:ring-0 [-moz-appearance:_textfield] [&::-webkit-inner-spin-button]:m-0 tabular-nums"
+                                  />
+                                </div>
+                              </div>
+                            </motion.div>
+                          ))}
+                        </AnimatePresence>
+
+                        <Button variant="outline" onClick={addLineItem} className="w-full border-dashed border-[#d8d2c4] bg-white text-zinc-700 hover:border-[#152436]/40 hover:bg-[#faf9f5] rounded-xl h-11 cursor-pointer transition-colors">
+                          <Plus className="size-4 mr-2" /> Add Another Item
+                        </Button>
+
+                        {/* Running total — the money moment */}
+                        <div className="flex items-center justify-between rounded-xl px-4 py-3 mt-2" style={{ backgroundColor: INK }}>
+                          <span className="text-xs font-bold uppercase tracking-wider text-white/60">Invoice total</span>
+                          <span className="text-lg font-bold text-white tabular-nums">
+                            {getCurrencySymbol(formData.currency)}{lineItems.reduce((sum, it) => sum + (it.price || 0) * (it.quantity || 1), 0).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+                          </span>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              <div className="p-4 sm:p-6 border-t border-[#eee9df] flex items-center justify-between gap-2 bg-white">
+                {wizardStep === 1 ? (
+                  <>
+                    <Button variant="ghost" onClick={() => setIsWizardOpen(false)} className="rounded-full text-zinc-600 hover:bg-[#f1eee6] cursor-pointer h-11">Cancel</Button>
+                    <Button onClick={() => setWizardStep(2)} disabled={!formData.brandName} className="rounded-full text-white shadow-md h-11 px-6 font-semibold hover:brightness-110 transition-all cursor-pointer" style={{ backgroundColor: INK }}>
+                      Next Step <ArrowRight className="size-4 ml-2" />
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button variant="ghost" onClick={() => setWizardStep(1)} className="rounded-full text-zinc-600 hover:bg-[#f1eee6] cursor-pointer h-11"><ArrowLeft className="size-4 mr-2" /> Back</Button>
+                    <div className="flex gap-2">
+                      <Button variant="outline" onClick={handleGenerate} className="rounded-full font-semibold shadow-sm h-11 cursor-pointer border-[#15243630] hover:bg-[#f1eee6] transition-colors" style={{ color: INK }}>Preview</Button>
+                      <Button onClick={handleSaveInvoice} disabled={isSaving} className="rounded-full text-white shadow-md h-11 px-6 font-semibold hover:brightness-110 transition-all cursor-pointer" style={{ backgroundColor: MONEY }}>
+                        {isSaving ? <Loader2 className="size-4 animate-spin mr-2" /> : <Save className="size-4 mr-2" />} Save
+                      </Button>
+                    </div>
+                  </>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ————— BRAND EDIT MODAL ————— */}
+      <AnimatePresence>
+        {isBrandModalOpen && editingBrand && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+            className="fixed inset-0 z-50 bg-[#152436]/70 backdrop-blur-sm flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96, y: 8 }}
+              transition={{ type: "spring", stiffness: 380, damping: 30 }}
+              className="bg-white w-full max-w-md rounded-2xl shadow-2xl p-5 sm:p-6 max-h-[90dvh] overflow-y-auto border border-[#e6e1d6]"
+            >
+              <h3 className="font-bold text-lg text-zinc-950 tracking-tight">{editingBrand.id ? 'Edit Brand' : 'Add Brand'}</h3>
+              <p className="font-editorial text-sm text-zinc-400 mb-4">{editingBrand.id ? 'keep the rolodex current' : 'a new name for the rolodex'}</p>
+              <div className="space-y-3 sm:space-y-4">
+                <div>
+                  <label className="text-xs font-semibold text-zinc-600 block mb-1.5">Brand Name <span className="text-red-500">*</span></label>
+                  <Input className={`${inputCls} h-10`} value={editingBrand.name || ""} onChange={e => setEditingBrand({...editingBrand, name: e.target.value})} />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-zinc-600 block mb-1.5">Billing Address <span className="text-red-500">*</span></label>
+                  <Input className={`${inputCls} h-10`} value={editingBrand.address || ""} onChange={e => setEditingBrand({...editingBrand, address: e.target.value})} />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-semibold text-zinc-600 block mb-1.5">GSTIN <span className="text-zinc-400 font-normal ml-1">(Optional)</span></label>
+                    <Input className={`${inputCls} h-10`} value={editingBrand.gstin || ""} onChange={e => setEditingBrand({...editingBrand, gstin: e.target.value})} />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-zinc-600 block mb-1.5">PAN <span className="text-zinc-400 font-normal ml-1">(Optional)</span></label>
+                    <Input className={`${inputCls} h-10`} value={editingBrand.pan || ""} onChange={e => setEditingBrand({...editingBrand, pan: e.target.value})} />
                   </div>
                 </div>
-              )}
-            </div>
-
-            <div className="p-3 sm:p-6 border-t border-zinc-100 flex items-center justify-between gap-2 bg-white">
-              {wizardStep === 1 ? (
-                <>
-                  <Button variant="ghost" onClick={() => setIsWizardOpen(false)} className="rounded-full text-zinc-600 hover:bg-zinc-100">Cancel</Button>
-                  <Button onClick={() => setWizardStep(2)} disabled={!formData.brandName} className="rounded-full bg-zinc-900 hover:bg-zinc-800 text-white shadow-md">Next Step <ArrowRight className="size-4 ml-2" /></Button>
-                </>
-              ) : (
-                <>
-                  <Button variant="ghost" onClick={() => setWizardStep(1)} className="rounded-full text-zinc-600 hover:bg-zinc-100"><ArrowLeft className="size-4 mr-2" /> Back</Button>
-                  <div className="flex gap-2">
-                    <Button variant="outline" onClick={handleGenerate} className="rounded-full border-indigo-200 text-indigo-700 bg-indigo-50 hover:bg-indigo-100 font-semibold shadow-sm">Preview</Button>
-                    <Button onClick={handleSaveInvoice} disabled={isSaving} className="rounded-full bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-600/20">{isSaving ? <Loader2 className="size-4 animate-spin mr-2" /> : <Save className="size-4 mr-2" />} Save</Button>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-semibold text-zinc-600 block mb-1.5">Contact Number <span className="text-zinc-400 font-normal ml-1">(Optional)</span></label>
+                    <Input className={`${inputCls} h-10`} value={editingBrand.contact || ""} onChange={e => setEditingBrand({...editingBrand, contact: e.target.value})} />
                   </div>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+                  <div>
+                    <label className="text-xs font-semibold text-zinc-600 block mb-1.5">Email <span className="text-zinc-400 font-normal ml-1">(Optional)</span></label>
+                    <Input type="email" className={`${inputCls} h-10`} value={editingBrand.email || ""} onChange={e => setEditingBrand({...editingBrand, email: e.target.value})} />
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-2 justify-between mt-6">
+                {editingBrand.id ? (
+                  <Button disabled={isDeletingBrand || isSavingBrand} variant="ghost" className="rounded-full text-red-600 hover:bg-red-50 hover:text-red-700 cursor-pointer" onClick={() => setShowDeleteConfirm(true)}>
+                    <Trash2 className="size-4 mr-2" /> Delete
+                  </Button>
+                ) : (
+                  <div />
+                )}
+                <div className="flex gap-2">
+                  <Button disabled={isDeletingBrand || isSavingBrand} variant="ghost" className="rounded-full text-zinc-600 hover:bg-[#f1eee6] cursor-pointer" onClick={() => setIsBrandModalOpen(false)}>Cancel</Button>
+                  <Button disabled={isSavingBrand || isDeletingBrand} onClick={handleBrandSave} className="rounded-full text-white cursor-pointer hover:brightness-110 transition-all font-semibold" style={{ backgroundColor: INK }}>
+                    {isSavingBrand ? <Loader2 className="size-4 mr-2 animate-spin" /> : null} Save Brand
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* BRAND EDIT MODAL */}
-      {isBrandModalOpen && editingBrand && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl p-4 sm:p-6 max-h-[90dvh] overflow-y-auto">
-            <h3 className="font-bold text-lg text-zinc-900 mb-3 sm:mb-4">{editingBrand.id ? 'Edit Brand' : 'Add Brand'}</h3>
-            <div className="space-y-3 sm:space-y-4">
-              <div>
-                <label className="text-xs font-semibold text-zinc-600 block mb-1">Brand Name <span className="text-red-500">*</span></label>
-                <Input className={`${inputCls} h-10`} value={editingBrand.name || ""} onChange={e => setEditingBrand({...editingBrand, name: e.target.value})} />
+      {/* ————— DELETE CONFIRMATION MODAL ————— */}
+      <AnimatePresence>
+        {showDeleteConfirm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="fixed inset-0 z-[80] bg-[#152436]/70 backdrop-blur-sm flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.94 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.96 }}
+              transition={{ type: "spring", stiffness: 400, damping: 28 }}
+              className="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 border border-[#e6e1d6]"
+            >
+              <div className="flex items-center gap-3 mb-4 text-red-600">
+                <div className="p-2 bg-red-100 rounded-full">
+                  <Trash2 className="size-5" />
+                </div>
+                <h3 className="font-bold text-lg text-zinc-950">Delete Brand?</h3>
               </div>
-              <div>
-                <label className="text-xs font-semibold text-zinc-600 block mb-1">Billing Address <span className="text-red-500">*</span></label>
-                <Input className={`${inputCls} h-10`} value={editingBrand.address || ""} onChange={e => setEditingBrand({...editingBrand, address: e.target.value})} />
+              <p className="text-sm text-zinc-600 mb-6">Are you sure you want to permanently delete <strong>{editingBrand?.name}</strong>? This action cannot be undone and will remove it from your saved list.</p>
+              <div className="flex gap-2 justify-end">
+                <Button disabled={isDeletingBrand} variant="ghost" className="rounded-full text-zinc-600 hover:bg-[#f1eee6] cursor-pointer" onClick={() => setShowDeleteConfirm(false)}>Cancel</Button>
+                <Button disabled={isDeletingBrand} onClick={handleBrandDelete} className="rounded-full bg-red-600 hover:bg-red-700 text-white cursor-pointer">
+                  {isDeletingBrand ? <Loader2 className="size-4 animate-spin mr-2" /> : <Trash2 className="size-4 mr-2" />} Yes, Delete
+                </Button>
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-semibold text-zinc-600 block mb-1">GSTIN <span className="text-zinc-400 font-normal ml-1">(Optional)</span></label>
-                  <Input className={`${inputCls} h-10`} value={editingBrand.gstin || ""} onChange={e => setEditingBrand({...editingBrand, gstin: e.target.value})} />
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-zinc-600 block mb-1">PAN <span className="text-zinc-400 font-normal ml-1">(Optional)</span></label>
-                  <Input className={`${inputCls} h-10`} value={editingBrand.pan || ""} onChange={e => setEditingBrand({...editingBrand, pan: e.target.value})} />
-                </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ————— EDIT INVOICE DATE MODAL ————— */}
+      <AnimatePresence>
+        {editingInvoice && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="fixed inset-0 z-[70] bg-[#152436]/70 backdrop-blur-sm flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96 }}
+              transition={{ type: "spring", stiffness: 400, damping: 28 }}
+              className="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 border border-[#e6e1d6]"
+            >
+              <h3 className="font-bold text-lg text-zinc-950 tracking-tight">Edit Invoice</h3>
+              <p className="text-sm text-zinc-500 mb-4 font-mono">{editingInvoice.invoiceNumber} · {editingInvoice.brandName}</p>
+
+              <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800 font-medium mb-4">
+                Note: You can change only the Date. All other invoice details are locked after creation.
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-semibold text-zinc-600 block mb-1">Contact Number <span className="text-zinc-400 font-normal ml-1">(Optional)</span></label>
-                  <Input className={`${inputCls} h-10`} value={editingBrand.contact || ""} onChange={e => setEditingBrand({...editingBrand, contact: e.target.value})} />
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-zinc-600 block mb-1">Email <span className="text-zinc-400 font-normal ml-1">(Optional)</span></label>
-                  <Input type="email" className={`${inputCls} h-10`} value={editingBrand.email || ""} onChange={e => setEditingBrand({...editingBrand, email: e.target.value})} />
-                </div>
+
+              <label className="text-xs font-semibold text-zinc-600 block mb-1.5">Invoice Creation Date</label>
+              <div className="relative">
+                <Input type="date" className={`${inputCls} h-10 pr-10`} value={editDate} onChange={(e) => setEditDate(e.target.value)} />
+                <Calendar className="absolute right-3 top-3 size-4 text-zinc-500 pointer-events-none" />
+              </div>
+
+              <div className="flex gap-2 justify-end mt-6">
+                <Button variant="ghost" className="rounded-full text-zinc-600 hover:bg-[#f1eee6] cursor-pointer" onClick={() => setEditingInvoice(null)}>Cancel</Button>
+                <Button onClick={handleUpdateInvoiceDate} disabled={isSavingDate || !editDate} className="rounded-full text-white cursor-pointer hover:brightness-110 transition-all font-semibold" style={{ backgroundColor: INK }}>
+                  {isSavingDate ? <Loader2 className="size-4 animate-spin mr-2" /> : <Save className="size-4 mr-2" />} Save Date
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ————— PREVIEW MODAL ————— */}
+      <AnimatePresence>
+        {isPreviewModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-[60] backdrop-blur-sm flex flex-col p-3 sm:p-6"
+            style={{ backgroundColor: "#152436f0" }}
+          >
+            <div className="flex items-center justify-between mb-3 sm:mb-4 gap-2">
+              <h3 className="text-white font-bold text-base sm:text-xl truncate">
+                Preview {selectedInvoiceNumber && <span className="font-mono font-medium text-white/60 text-sm sm:text-base">· {selectedInvoiceNumber}</span>}
+              </h3>
+              <div className="flex gap-2 shrink-0">
+                {previewInvoice && (
+                  <Button onClick={() => openEditDate(previewInvoice)} variant="outline" className="rounded-full bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white cursor-pointer">
+                    <Edit3 className="size-4 sm:mr-2" /><span className="hidden sm:inline">Edit</span>
+                  </Button>
+                )}
+                <Button onClick={handleDownloadPreview} disabled={isDownloading || (isPreviewLoading && !previewData)} className="rounded-full text-white cursor-pointer hover:brightness-110 transition-all font-semibold" style={{ backgroundColor: MONEY }}>
+                  {isDownloading ? <Loader2 className="size-4 animate-spin sm:mr-2" /> : <FileDown className="size-4 sm:mr-2" />}<span className="hidden sm:inline">Download</span>
+                </Button>
+                <Button variant="ghost" size="icon" onClick={closePreviewModal} className="rounded-full bg-white/10 text-white hover:bg-white/20 hover:text-white cursor-pointer"><X className="size-5" /></Button>
               </div>
             </div>
-            <div className="flex gap-2 justify-between mt-6">
-              {editingBrand.id ? (
-                <Button disabled={isDeletingBrand || isSavingBrand} variant="ghost" className="rounded-full text-red-600 hover:bg-red-50 hover:text-red-700" onClick={() => setShowDeleteConfirm(true)}>
-                  <Trash2 className="size-4 mr-2" /> Delete
-                </Button>
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.08, duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+              className="flex-1 rounded-2xl overflow-y-auto shadow-2xl custom-scrollbar"
+              style={{ backgroundColor: PAPER }}
+            >
+              {previewData ? (
+                // Client-side render: always fits the screen width (no PDF zoom issues on mobile)
+                <div className="w-full max-w-3xl mx-auto p-2 sm:p-6">
+                  <ScaledA4 className="shadow-xl rounded-md">
+                    <InvoiceHtmlPreview invoiceData={previewData.invoiceData} lineItems={previewData.lineItems} creatorSettings={creatorSettings} />
+                  </ScaledA4>
+                </div>
+              ) : isPreviewLoading ? (
+                <div className="h-full flex flex-col items-center justify-center text-zinc-500">
+                  <Loader2 className="size-10 animate-spin mb-4" />
+                  <p className="font-editorial text-lg">preparing your paperwork…</p>
+                </div>
+              ) : previewPdfUrl ? (
+                <iframe src={`${previewPdfUrl}#view=FitH`} className="w-full h-full border-0" />
               ) : (
-                <div />
+                <div className="h-full flex items-center justify-center"><p className="text-zinc-500">Failed to load preview.</p></div>
               )}
-              <div className="flex gap-2">
-                <Button disabled={isDeletingBrand || isSavingBrand} variant="ghost" className="rounded-full text-zinc-600 hover:bg-zinc-100" onClick={() => setIsBrandModalOpen(false)}>Cancel</Button>
-                <Button disabled={isSavingBrand || isDeletingBrand} onClick={handleBrandSave} className="rounded-full bg-zinc-900 hover:bg-zinc-800 text-white">
-                  {isSavingBrand ? <Loader2 className="size-4 mr-2 animate-spin" /> : null} Save Brand
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* DELETE CONFIRMATION MODAL */}
-      {showDeleteConfirm && (
-        <div className="fixed inset-0 z-[80] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6">
-            <div className="flex items-center gap-3 mb-4 text-red-600">
-              <div className="p-2 bg-red-100 rounded-full">
-                <Trash2 className="size-5" />
-              </div>
-              <h3 className="font-bold text-lg text-zinc-900">Delete Brand?</h3>
-            </div>
-            <p className="text-sm text-zinc-600 mb-6">Are you sure you want to permanently delete <strong>{editingBrand?.name}</strong>? This action cannot be undone and will remove it from your saved list.</p>
-            <div className="flex gap-2 justify-end">
-              <Button disabled={isDeletingBrand} variant="ghost" className="rounded-full text-zinc-600 hover:bg-zinc-100" onClick={() => setShowDeleteConfirm(false)}>Cancel</Button>
-              <Button disabled={isDeletingBrand} onClick={handleBrandDelete} className="rounded-full bg-red-600 hover:bg-red-700 text-white">
-                {isDeletingBrand ? <Loader2 className="size-4 animate-spin mr-2" /> : <Trash2 className="size-4 mr-2" />} Yes, Delete
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* EDIT INVOICE DATE MODAL */}
-      {editingInvoice && (
-        <div className="fixed inset-0 z-[70] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6">
-            <h3 className="font-bold text-lg text-zinc-900">Edit Invoice</h3>
-            <p className="text-sm text-zinc-500 mb-4">{editingInvoice.invoiceNumber} · {editingInvoice.brandName}</p>
-
-            <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800 font-medium mb-4">
-              Note: You can change only the Date. All other invoice details are locked after creation.
-            </div>
-
-            <label className="text-xs font-semibold text-zinc-600 block mb-1.5">Invoice Creation Date</label>
-            <div className="relative">
-              <Input type="date" className={`${inputCls} h-10 pr-10`} value={editDate} onChange={(e) => setEditDate(e.target.value)} />
-              <Calendar className="absolute right-3 top-3 size-4 text-zinc-500 pointer-events-none" />
-            </div>
-
-            <div className="flex gap-2 justify-end mt-6">
-              <Button variant="ghost" className="rounded-full text-zinc-600 hover:bg-zinc-100" onClick={() => setEditingInvoice(null)}>Cancel</Button>
-              <Button onClick={handleUpdateInvoiceDate} disabled={isSavingDate || !editDate} className="rounded-full bg-indigo-600 hover:bg-indigo-700 text-white">
-                {isSavingDate ? <Loader2 className="size-4 animate-spin mr-2" /> : <Save className="size-4 mr-2" />} Save Date
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* PREVIEW MODAL */}
-      {isPreviewModalOpen && (
-        <div className="fixed inset-0 z-[60] bg-zinc-900/90 backdrop-blur-sm flex flex-col p-3 sm:p-6">
-          <div className="flex items-center justify-between mb-3 sm:mb-4 gap-2">
-            <h3 className="text-white font-bold text-base sm:text-xl truncate">Preview {selectedInvoiceNumber && `· ${selectedInvoiceNumber}`}</h3>
-            <div className="flex gap-2 shrink-0">
-              {previewInvoice && (
-                <Button onClick={() => openEditDate(previewInvoice)} variant="outline" className="rounded-full bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white">
-                  <Edit3 className="size-4 sm:mr-2" /><span className="hidden sm:inline">Edit</span>
-                </Button>
-              )}
-              <Button onClick={handleDownloadPreview} disabled={isDownloading || (isPreviewLoading && !previewData)} className="rounded-full bg-blue-600 hover:bg-blue-700 text-white">
-                {isDownloading ? <Loader2 className="size-4 animate-spin sm:mr-2" /> : <FileDown className="size-4 sm:mr-2" />}<span className="hidden sm:inline">Download</span>
-              </Button>
-              <Button variant="ghost" size="icon" onClick={closePreviewModal} className="rounded-full bg-white/10 text-white hover:bg-white/20 hover:text-white"><X className="size-5" /></Button>
-            </div>
-          </div>
-          <div className="flex-1 bg-zinc-200 rounded-2xl overflow-y-auto shadow-2xl custom-scrollbar">
-            {previewData ? (
-              // Client-side render: always fits the screen width (no PDF zoom issues on mobile)
-              <div className="w-full max-w-3xl mx-auto p-2 sm:p-6">
-                <ScaledA4 className="shadow-xl rounded-md">
-                  <InvoiceHtmlPreview invoiceData={previewData.invoiceData} lineItems={previewData.lineItems} creatorSettings={creatorSettings} />
-                </ScaledA4>
-              </div>
-            ) : isPreviewLoading ? (
-              <div className="h-full flex flex-col items-center justify-center text-zinc-500"><Loader2 className="size-10 animate-spin mb-4" /><p>Loading preview...</p></div>
-            ) : previewPdfUrl ? (
-              <iframe src={`${previewPdfUrl}#view=FitH`} className="w-full h-full border-0" />
-            ) : (
-              <div className="h-full flex items-center justify-center"><p className="text-zinc-500">Failed to load preview.</p></div>
-            )}
-          </div>
-        </div>
-      )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <BottomDock />
     </div>

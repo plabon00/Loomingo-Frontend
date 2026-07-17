@@ -78,7 +78,7 @@ export default function TestimonialSection() {
   };
 
   return (
-    <section className="relative py-12 md:py-24 bg-white w-full overflow-hidden flex flex-col items-center justify-center min-h-[100dvh] snap-center shrink-0">
+    <section className="relative py-12 md:py-24 bg-transparent w-full overflow-hidden flex flex-col items-center justify-center min-h-[100dvh] snap-center shrink-0">
       
       {/* Background Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] md:w-[800px] h-[300px] md:h-[400px] bg-red-400 rounded-full opacity-35 blur-[120px] md:blur-[160px] pointer-events-none z-0" />
@@ -90,7 +90,7 @@ export default function TestimonialSection() {
         </div>
         <h2 className="text-3xl md:text-6xl font-medium text-red-950 tracking-tight">
           Used by 60K+ <br className="hidden sm:block" /> 
-          <span className="text-red-600 italic font-serif">creators & brands</span>
+          <span className="font-editorial text-red-600">creators & brands</span>
         </h2>
       </div>
 

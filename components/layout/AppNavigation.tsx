@@ -658,16 +658,16 @@ export function BottomDock() {
         <div className="fixed inset-0 z-40" onClick={() => setIsAppsOpen(false)} />
       )}
 
-      <div className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] h-16 bg-white/20 backdrop-blur-md border border-white/30 shadow-lg z-50 flex items-center justify-around px-2 rounded-full">
+      <div className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] h-16 bg-white/75 backdrop-blur-[32px] saturate-[1.8] border border-white/60 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] z-50 flex items-center justify-around px-2 rounded-[32px]">
         
         <TransitionLink 
           href="/home-page" 
           className={cn(
             "relative flex flex-col items-center justify-center w-[4.5rem] h-12 rounded-full transition-all duration-300",
-            pathname === "/home-page" ? "bg-white/40 shadow-sm border border-white/40" : "hover:bg-white/30"
+            pathname === "/home-page" ? "bg-white shadow-md border border-black/5 scale-105" : "hover:bg-white/40"
           )}
         >
-          <div className="flex flex-col items-center gap-1 text-black">
+          <div className="flex flex-col items-center gap-1 text-zinc-900">
             <Home className="size-[1.15rem]" strokeWidth={2.5} />
             <span className="text-[9px] font-semibold">Home</span>
           </div>
@@ -678,10 +678,10 @@ export function BottomDock() {
           onClick={handleAutoDMClick} 
           className={cn(
             "relative flex flex-col items-center justify-center w-[4.5rem] h-12 rounded-full transition-all duration-300",
-            pathname === "/autodm" ? "bg-white/40 shadow-sm border border-white/40" : "hover:bg-white/30"
+            pathname === "/autodm" ? "bg-white shadow-md border border-black/5 scale-105" : "hover:bg-white/40"
           )}
         >
-          <div className="flex flex-col items-center gap-1 text-black">
+          <div className="flex flex-col items-center gap-1 text-zinc-900">
             <MessageSquare className="size-[1.15rem]" strokeWidth={2.5} />
             <span className="text-[9px] font-semibold">Auto-DM</span>
           </div>
@@ -691,10 +691,10 @@ export function BottomDock() {
           href="/store" 
           className={cn(
             "relative flex flex-col items-center justify-center w-[4.5rem] h-12 rounded-full transition-all duration-300",
-            pathname === "/store" ? "bg-white/40 shadow-sm border border-white/40" : "hover:bg-white/30"
+            pathname === "/store" ? "bg-white shadow-md border border-black/5 scale-105" : "hover:bg-white/40"
           )}
         >
-          <div className="flex flex-col items-center gap-1 text-black">
+          <div className="flex flex-col items-center gap-1 text-zinc-900">
             <ShoppingBag className="size-[1.15rem]" strokeWidth={2.5} />
             <span className="text-[9px] font-semibold">Store</span>
           </div>
@@ -705,17 +705,17 @@ export function BottomDock() {
             onClick={() => setIsAppsOpen(!isAppsOpen)}
             className={cn(
               "relative flex flex-col items-center justify-center w-[4.5rem] h-12 rounded-full transition-all duration-300",
-              (isAppsOpen || pathname.startsWith("/apps")) ? "bg-white/40 shadow-sm border border-white/40" : "hover:bg-white/30"
+              (isAppsOpen || pathname.startsWith("/apps")) ? "bg-white shadow-md border border-black/5 scale-105" : "hover:bg-white/40"
             )}
           >
-            <div className="flex flex-col items-center gap-1 text-black">
+            <div className="flex flex-col items-center gap-1 text-zinc-900">
               <LayoutGrid className="size-[1.15rem]" strokeWidth={2.5} />
               <span className="text-[9px] font-semibold">Apps</span>
             </div>
           </button>
 
           {isAppsOpen && (
-            <div className="absolute bottom-16 right-0 w-48 bg-white/50 backdrop-blur-md border border-white/40 shadow-lg rounded-[1.5rem] py-2 flex flex-col z-50 animate-in slide-in-from-bottom-2 fade-in zoom-in-95">
+            <div className="absolute bottom-16 right-0 w-48 bg-white/95 backdrop-blur-xl border border-zinc-200 shadow-2xl rounded-[1.5rem] py-2 flex flex-col z-50 animate-in slide-in-from-bottom-2 fade-in zoom-in-95">
               <TransitionLink
                 href="/apps/invoice-generator"
                 onClick={() => setIsAppsOpen(false)}

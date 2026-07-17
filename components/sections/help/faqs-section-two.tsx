@@ -33,7 +33,7 @@ export default function FAQs() {
     ]
 
     return (
-        <section className="relative py-16 md:py-32 bg-white overflow-hidden w-full flex justify-center">
+        <section className="relative py-16 md:py-32 bg-transparent overflow-hidden w-full flex justify-center">
             
             {/* Background Glow Effect */}
             <div 
@@ -53,7 +53,7 @@ export default function FAQs() {
                         
                         <h2 className="text-4xl sm:text-5xl md:text-6xl font-medium text-red-950 leading-[1.1] tracking-tight">
                             Common <br className="hidden md:block" />
-                            <span className="text-red-600 italic font-serif">questions</span>
+                            <span className="font-editorial text-red-600">questions</span>
                         </h2>
                         
                         <p className="text-sm md:text-lg text-red-950/70 mt-4 md:mt-6 max-w-xs md:max-w-sm">

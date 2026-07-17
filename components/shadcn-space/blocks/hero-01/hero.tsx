@@ -60,7 +60,11 @@ function HeroSection({ avatarList }: HeroSectionProps) {
               transition={{ duration: 1, ease: "easeInOut" }}
               className="lg:col-span-4 flex flex-col text-center lg:text-left items-center lg:items-start justify-center gap-4 lg:gap-6 order-1 relative z-20 h-full pt-10 lg:pt-0"
             >
-              <h1 className="text-4xl sm:text-5xl md:text-6xl xl:text-7xl font-medium leading-[1.1] text-white">
+              <p className="flex items-center gap-2 text-[10px] sm:text-xs font-bold uppercase tracking-[0.25em] text-red-300">
+                <span className="w-6 h-px bg-red-400/60 hidden lg:block" aria-hidden="true" />
+                Instagram automation for creators
+              </p>
+              <h1 className="text-4xl sm:text-5xl md:text-6xl xl:text-7xl font-medium leading-[1.08] tracking-tight text-white">
                 Built for real{" "}
                 <span className={`${instrumentSerif.className} tracking-tight text-red-200`}>
                   Growth
@@ -121,7 +125,7 @@ function HeroSection({ avatarList }: HeroSectionProps) {
               <div className="bg-white/10 border border-white/20 backdrop-blur-xl p-6 sm:p-8 rounded-3xl flex flex-col items-center lg:items-start gap-6 shadow-2xl w-full max-w-sm lg:ml-auto">
                 
                 <AnimatedButton onClick={handleGetStarted}>
-                  Get Started
+                  {user ? "Visit Dashboard" : "Get Started"}
                 </AnimatedButton>
 
                 <div className="flex flex-col items-center lg:items-start gap-3 mt-2">
@@ -166,8 +170,9 @@ function HeroSection({ avatarList }: HeroSectionProps) {
         <DialogPrimitive.Root open={isSignInOpen} onOpenChange={setIsSignInOpen}>
           <DialogPrimitive.Portal>
             
+            <DialogPrimitive.Overlay className="fixed inset-0 z-[100] bg-zinc-900/40 backdrop-blur-md animate-in fade-in duration-700" />
             <DialogPrimitive.Content 
-              className="fixed left-[50%] top-[50%] z-50 translate-x-[-50%] translate-y-[-50%] p-0 border-none rounded-[2rem] shadow-2xl bg-white outline-none w-full max-w-sm"
+              className="fixed left-[50%] top-[50%] z-[100] translate-x-[-50%] translate-y-[-50%] p-0 border-none rounded-[32px] outline-none w-full max-w-sm animate-in fade-in slide-in-from-bottom-24 zoom-in-[0.95] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
             >
               <DialogPrimitive.Title className="sr-only">Sign In to Loomingo</DialogPrimitive.Title>
               <DialogPrimitive.Description className="sr-only">Fill out the form below to get started.</DialogPrimitive.Description>

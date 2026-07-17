@@ -1,9 +1,15 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { X, Upload, Loader2, Edit2 } from "lucide-react";
+import { X, Upload, Loader2, Edit2, ImageIcon, Check } from "lucide-react";
 import { uploadImage, Store } from "@/lib/store";
 import { ImageCropper } from "@/components/ui/image-cropper";
+import { toast } from "sonner";
+import { motion, AnimatePresence } from "motion/react";
+
+const inputBase = "w-full h-11 px-4 rounded-xl border bg-white text-base sm:text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 transition-all duration-200";
+const inputOk = "border-zinc-200 focus:ring-zinc-950/10 focus:border-zinc-950";
+const inputErr = "border-red-400 focus:ring-red-500/15 focus:border-red-500";
 
 export function StoreDetailsModal({
   store,
@@ -18,15 +24,16 @@ export function StoreDetailsModal({
   const [description, setDescription] = useState(store.description || "");
   const [creator, setCreator] = useState(store.creator || "");
   const [themeColor, setThemeColor] = useState(store.themeColor || "#dc2626");
-  
+  const [nameError, setNameError] = useState<string | undefined>(undefined);
+
   const [bannerPreview, setBannerPreview] = useState(store.banner || store.bannerUrl || "");
   const [pendingBannerFile, setPendingBannerFile] = useState<File | null>(null);
-  
+
   const [logoPreview, setLogoPreview] = useState(store.logoUrl || "");
   const [pendingLogoFile, setPendingLogoFile] = useState<File | null>(null);
-  
+
   const [croppingImage, setCroppingImage] = useState<{ url: string, type: 'banner' | 'logo' } | null>(null);
-  
+
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
@@ -57,32 +64,37 @@ export function StoreDetailsModal({
   };
 
   const handleSave = async () => {
+    if (!name.trim()) {
+      setNameError("Your store needs a name.");
+      toast.error("Please fix the highlighted fields");
+      return;
+    }
+
     setLoading(true);
     try {
       let finalBannerUrl = bannerPreview;
       let finalLogoUrl = logoPreview;
-      
-      // Only upload if the user actually cropped a new image
+
       if (pendingBannerFile) {
-        finalBannerUrl = await uploadImage(pendingBannerFile, 0.4); // Compress to 400KB
+        finalBannerUrl = await uploadImage(pendingBannerFile, 0.4);
       }
       if (pendingLogoFile) {
-        finalLogoUrl = await uploadImage(pendingLogoFile, 0.2); // Compress to 200KB
+        finalLogoUrl = await uploadImage(pendingLogoFile, 0.2);
       }
-      
-      onSave({ 
-        ...store, 
-        name, 
-        description, 
-        creator, 
-        banner: finalBannerUrl, 
+
+      onSave({
+        ...store,
+        name,
+        description,
+        creator,
+        banner: finalBannerUrl,
         bannerUrl: finalBannerUrl,
         logoUrl: finalLogoUrl,
         themeColor
       });
     } catch (err) {
       console.error(err);
-      alert("Failed to save store details. Image upload might have failed.");
+      toast.error("Failed to save store details. Image upload might have failed.");
     } finally {
       setLoading(false);
     }
@@ -90,137 +102,218 @@ export function StoreDetailsModal({
 
   return (
     <>
-      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 text-zinc-900" onClick={!loading ? onClose : undefined}>
-        <div 
-          className="bg-white rounded-3xl shadow-2xl relative w-full max-w-lg flex flex-col max-h-[90vh] animate-in zoom-in-95 fade-in duration-200"
+      <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/50 sm:backdrop-blur-sm transition-all duration-300" onClick={!loading ? onClose : undefined}>
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: "spring", stiffness: 340, damping: 32 }}
+          className="bg-zinc-50 text-zinc-900 rounded-t-2xl sm:rounded-2xl shadow-[0_24px_60px_-16px_rgb(0,0,0,0.35)] relative w-full h-[90vh] sm:h-auto sm:max-h-[90vh] max-w-2xl flex flex-col overflow-hidden sm:border sm:border-zinc-950/10"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="flex-shrink-0 p-5 sm:p-6 pb-4 sm:pb-4 border-b border-zinc-100 flex items-center justify-between">
-            <h2 className="text-xl font-bold">Manage Store</h2>
-            <button onClick={onClose} disabled={loading} className="p-2 text-zinc-400 hover:text-zinc-600 rounded-full hover:bg-zinc-100 disabled:opacity-50 transition-colors">
+          {/* Header */}
+          <div className="flex-shrink-0 px-6 py-4 border-b border-zinc-200 bg-white flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-bold tracking-tight">Store Settings</h2>
+              <p className="font-editorial text-sm text-zinc-400 mt-0.5">make it feel like yours</p>
+            </div>
+            <button onClick={onClose} disabled={loading} className="p-2 text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 rounded-full transition-colors active:scale-95 disabled:opacity-50 cursor-pointer" aria-label="Close">
               <X className="size-5" />
             </button>
           </div>
 
-          <div className="p-5 sm:p-6 overflow-y-auto space-y-4 custom-scrollbar">
-            <div>
-              <label className="block text-sm font-medium mb-1 text-zinc-700">Banner Image</label>
-              <div className="relative w-full h-32 rounded-xl border-2 border-dashed border-zinc-200 bg-zinc-50 flex flex-col items-center justify-center overflow-hidden group">
-                {bannerPreview ? (
-                  <>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={bannerPreview} alt="Banner" className="w-full h-full object-cover" />
-                    <button 
-                      onClick={() => fileInputRef.current?.click()}
-                      className="absolute inset-0 bg-black/50 text-white flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <Edit2 className="size-5 mb-1" />
-                      <span className="text-sm font-medium">Change Banner</span>
-                    </button>
-                  </>
-                ) : (
-                  <div 
-                    className="absolute inset-0 flex flex-col items-center justify-center cursor-pointer hover:bg-zinc-100 transition"
-                    onClick={() => fileInputRef.current?.click()}
-                  >
-                    <Upload className="size-6 mb-2 text-zinc-400" />
-                    <span className="text-sm text-zinc-500">Click to upload banner</span>
-                  </div>
-                )}
-              </div>
-              <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleBannerSelect} />
-            </div>
+          <div className="p-4 sm:p-6 overflow-y-auto space-y-6 custom-scrollbar">
 
-            <div>
-              <label className="block text-sm font-medium mb-1 text-zinc-700">Store Logo</label>
-              <div className="relative w-24 h-24 rounded-full border-2 border-dashed border-zinc-200 bg-zinc-50 flex flex-col items-center justify-center overflow-hidden group">
-                {logoPreview ? (
-                  <>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={logoPreview} alt="Logo" className="w-full h-full object-cover" />
-                    <button 
-                      onClick={() => logoInputRef.current?.click()}
-                      className="absolute inset-0 bg-black/50 text-white flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <Edit2 className="size-5" />
-                    </button>
-                  </>
-                ) : (
-                  <div 
-                    className="absolute inset-0 flex flex-col items-center justify-center cursor-pointer hover:bg-zinc-100 transition"
+            {/* BRANDING SECTION */}
+            <div className="bg-white border border-zinc-950/10 rounded-2xl shadow-sm overflow-hidden p-5 sm:p-6 space-y-6">
+              <h3 className="text-sm font-bold text-zinc-950 pb-2 border-b border-zinc-100 uppercase tracking-wide text-[11px]">Branding</h3>
+
+              <div className="space-y-3">
+                <label className="block text-sm font-medium text-zinc-700">Banner Image</label>
+                <motion.div
+                  whileHover={{ scale: 1.005 }}
+                  whileTap={{ scale: 0.995 }}
+                  className="relative w-full h-40 rounded-xl border-2 border-dashed border-zinc-300 bg-zinc-50 hover:border-zinc-950 transition-colors cursor-pointer flex flex-col items-center justify-center overflow-hidden group"
+                  onClick={() => fileInputRef.current?.click()}
+                  role="button"
+                  aria-label="Upload banner image"
+                >
+                  {bannerPreview ? (
+                    <>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={bannerPreview} alt="Banner" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                      <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-[2px]">
+                        <Edit2 className="size-6 text-white mb-2" />
+                        <span className="text-sm font-medium text-white">Replace Banner</span>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center text-center p-4">
+                      <div className="size-12 rounded-full bg-white shadow-sm border border-zinc-200 flex items-center justify-center mb-3 group-hover:shadow-md transition-shadow">
+                        <ImageIcon className="size-5 text-zinc-400" />
+                      </div>
+                      <span className="text-sm font-medium text-zinc-900">Click to upload banner</span>
+                      <span className="text-xs text-zinc-500 mt-1">Recommended 1200x400px (3:1 aspect ratio)</span>
+                    </div>
+                  )}
+                </motion.div>
+                <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleBannerSelect} />
+              </div>
+
+              <div className="space-y-3">
+                <label className="block text-sm font-medium text-zinc-700">Store Logo</label>
+                <div className="flex items-center gap-5">
+                  <motion.div
+                    whileHover={{ scale: 1.04 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="relative size-24 sm:size-28 rounded-full border-2 border-dashed border-zinc-300 bg-zinc-50 hover:border-zinc-950 transition-colors cursor-pointer flex flex-col items-center justify-center overflow-hidden group shadow-sm"
                     onClick={() => logoInputRef.current?.click()}
+                    role="button"
+                    aria-label="Upload store logo"
                   >
-                    <Upload className="size-5 mb-1 text-zinc-400" />
+                    {logoPreview ? (
+                      <>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={logoPreview} alt="Logo" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-[2px]">
+                          <Edit2 className="size-5 text-white" />
+                        </div>
+                      </>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center">
+                         <Upload className="size-6 text-zinc-400 mb-1" />
+                      </div>
+                    )}
+                  </motion.div>
+                  <div className="flex-1">
+                    <p className="text-sm text-zinc-500">Upload your store's logo. This will be displayed on your store profile. Recommended size is 256x256px.</p>
                   </div>
-                )}
+                </div>
+                <input type="file" ref={logoInputRef} className="hidden" accept="image/*" onChange={handleLogoSelect} />
               </div>
-              <input type="file" ref={logoInputRef} className="hidden" accept="image/*" onChange={handleLogoSelect} />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-1 text-zinc-700">Store Name</label>
-              <input 
-                value={name} 
-                onChange={e => setName(e.target.value)}
-                className="w-full px-4 py-2 rounded-xl border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-red-600/20 focus:border-red-600"
-                placeholder="My Awesome Store"
-                disabled={loading}
-              />
-            </div>
+            {/* DETAILS SECTION */}
+            <div className="bg-white border border-zinc-950/10 rounded-2xl shadow-sm overflow-hidden p-5 sm:p-6 space-y-5">
+              <h3 className="text-sm font-bold text-zinc-950 pb-2 border-b border-zinc-100 uppercase tracking-wide text-[11px]">Store Details</h3>
 
-            <div>
-              <label className="block text-sm font-medium mb-1 text-zinc-700">Creator Name</label>
-              <input 
-                value={creator} 
-                onChange={e => setCreator(e.target.value)}
-                className="w-full px-4 py-2 rounded-xl border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-red-600/20 focus:border-red-600"
-                placeholder="John Doe"
-                disabled={loading}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1 text-zinc-700">Description</label>
-              <textarea 
-                value={description} 
-                onChange={e => setDescription(e.target.value)}
-                className="w-full px-4 py-2 rounded-xl border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-red-600/20 focus:border-red-600 resize-none h-24"
-                placeholder="Welcome to my store..."
-                disabled={loading}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2 text-zinc-700">Store Theme Color</label>
-              <div className="flex flex-wrap gap-3">
-                {["#dc2626", "#4f46e5", "#10b981", "#f59e0b", "#64748b", "#8b5cf6", "#ec4899", "#06b6d4"].map(color => (
-                  <button
-                    key={color}
-                    onClick={() => setThemeColor(color)}
-                    style={{ backgroundColor: color }}
-                    className={`size-8 rounded-full shadow-sm transition-all hover:scale-110 ${themeColor === color ? 'ring-2 ring-offset-2 ring-zinc-900 scale-110' : ''}`}
-                    aria-label={`Select theme color ${color}`}
-                    type="button"
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div className="space-y-1.5">
+                  <label htmlFor="store-name" className="block text-sm font-medium text-zinc-700">Store Name <span className="text-red-500">*</span></label>
+                  <input
+                    id="store-name"
+                    value={name}
+                    onChange={e => { setName(e.target.value); if (nameError) setNameError(undefined); }}
+                    onBlur={() => setNameError(!name.trim() ? "Your store needs a name." : undefined)}
+                    aria-invalid={!!nameError}
+                    aria-describedby={nameError ? "store-name-error" : undefined}
+                    className={`${inputBase} ${nameError ? inputErr : inputOk}`}
+                    placeholder="My Awesome Store"
+                    disabled={loading}
                   />
-                ))}
+                  <AnimatePresence>
+                    {nameError && (
+                      <motion.p
+                        id="store-name-error"
+                        role="alert"
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.18 }}
+                        className="text-xs text-red-600 font-medium"
+                      >
+                        {nameError}
+                      </motion.p>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label htmlFor="store-creator" className="block text-sm font-medium text-zinc-700">Creator Name</label>
+                  <input
+                    id="store-creator"
+                    value={creator}
+                    onChange={e => setCreator(e.target.value)}
+                    className={`${inputBase} ${inputOk}`}
+                    placeholder="John Doe"
+                    disabled={loading}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label htmlFor="store-description" className="block text-sm font-medium text-zinc-700">Description</label>
+                <textarea
+                  id="store-description"
+                  value={description}
+                  onChange={e => setDescription(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl border border-zinc-200 bg-white text-base sm:text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-950/10 focus:border-zinc-950 transition-all duration-200 resize-none h-28"
+                  placeholder="Welcome to my store..."
+                  disabled={loading}
+                />
+                <p className="text-[11px] text-zinc-400">Shown under your store name — a line or two about what you sell.</p>
+              </div>
+
+              <div className="space-y-3 pt-2">
+                <label className="block text-sm font-medium text-zinc-700">Theme Color</label>
+                <div className="flex flex-wrap gap-3">
+                  {["#09090b", "#dc2626", "#4f46e5", "#10b981", "#f59e0b", "#8b5cf6", "#ec4899", "#0ea5e9"].map(color => {
+                    const isSelected = themeColor === color;
+                    return (
+                      <motion.button
+                        key={color}
+                        onClick={() => setThemeColor(color)}
+                        whileHover={{ scale: 1.15 }}
+                        whileTap={{ scale: 0.9 }}
+                        animate={isSelected ? { scale: 1.12 } : { scale: 1 }}
+                        transition={{ type: "spring", stiffness: 420, damping: 20 }}
+                        style={{ backgroundColor: color }}
+                        className={`size-11 sm:size-10 rounded-full shadow-sm cursor-pointer flex items-center justify-center ${isSelected ? 'ring-2 ring-offset-2 ring-zinc-950' : 'ring-1 ring-black/10'}`}
+                        aria-label={`Select theme color ${color}`}
+                        aria-pressed={isSelected}
+                        type="button"
+                      >
+                        <AnimatePresence>
+                          {isSelected && (
+                            <motion.span
+                              initial={{ scale: 0, opacity: 0 }}
+                              animate={{ scale: 1, opacity: 1 }}
+                              exit={{ scale: 0, opacity: 0 }}
+                              transition={{ type: "spring", stiffness: 500, damping: 24 }}
+                            >
+                              <Check className="size-4 text-white drop-shadow" />
+                            </motion.span>
+                          )}
+                        </AnimatePresence>
+                      </motion.button>
+                    );
+                  })}
+                </div>
+                <p className="text-[11px] text-zinc-400">Used for buttons, category pills, and accents across your storefront.</p>
               </div>
             </div>
           </div>
 
-          <div className="p-5 sm:p-6 pt-4 flex-shrink-0 flex justify-end gap-3 border-t border-zinc-100">
-            <button onClick={onClose} disabled={loading} className="px-5 py-2.5 rounded-xl font-medium text-zinc-600 hover:bg-zinc-100 disabled:opacity-50">
+          {/* Footer Actions */}
+          <div className="px-6 py-4 flex-shrink-0 flex justify-end gap-3 border-t border-zinc-200 bg-white">
+            <button onClick={onClose} disabled={loading} className="px-5 h-11 sm:h-10 rounded-xl text-sm font-semibold text-zinc-700 bg-white border border-zinc-200 hover:border-zinc-950 disabled:opacity-50 transition-colors cursor-pointer active:scale-[0.98]">
               Cancel
             </button>
-            <button 
-              onClick={handleSave} 
-              disabled={loading || !name} 
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium bg-red-600 text-white hover:bg-red-700 shadow-sm disabled:opacity-50"
+            <button
+              onClick={handleSave}
+              disabled={loading || !name}
+              className="flex items-center justify-center gap-2 px-6 h-11 sm:h-10 min-w-[140px] rounded-xl text-sm font-semibold bg-zinc-950 text-white hover:bg-zinc-800 shadow-[0_4px_12px_-4px_rgb(0,0,0,0.4)] disabled:opacity-50 transition-all cursor-pointer active:scale-[0.98]"
             >
-              {loading && <Loader2 className="size-4 animate-spin" />}
-              Save Changes
+              {loading ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" />
+                  Saving…
+                </>
+              ) : (
+                "Save Changes"
+              )}
             </button>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {croppingImage && (

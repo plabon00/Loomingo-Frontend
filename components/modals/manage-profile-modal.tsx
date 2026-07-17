@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { X, Camera, Loader2, Info, Mail } from "lucide-react";
+import { X, Camera, Loader2, Info, Mail, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { auth } from "@/lib/firebase"; 
 
@@ -39,7 +39,6 @@ export function ManageProfileModal({ isOpen, onClose, onSuccess, onError }: Mana
         if (!user) return;
         const token = await user.getIdToken();
 
-        // 🚀 UPDATED: Fetching from the new Controller endpoint
         const res = await fetch(`/api/v1/me/profile`, {
           headers: { 
             Authorization: `Bearer ${token}`,
@@ -50,8 +49,8 @@ export function ManageProfileModal({ isOpen, onClose, onSuccess, onError }: Mana
         if (res.ok) {
           const data = await res.json();
           setName(data.name || "");
-          setEmail(data.email || user.email || ""); // Fallback to firebase email
-          setPhone(data.phone || ""); // handles null safely
+          setEmail(data.email || user.email || "");
+          setPhone(data.phone || ""); 
           setPhotoUrl(data.photoUrl || user.photoURL || "");
           setNotifyWhatsapp(data.notifyWhatsapp || false);
           setNotifyEmail(data.notifyEmail || false);
@@ -68,7 +67,6 @@ export function ManageProfileModal({ isOpen, onClose, onSuccess, onError }: Mana
     fetchUserData();
   }, [isOpen]);
 
-  // Handle ImgBB Upload
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -85,7 +83,6 @@ export function ManageProfileModal({ isOpen, onClose, onSuccess, onError }: Mana
 
       const result = await res.json();
       if (result.success) {
-        // Update the photoUrl state with the viewable URL from ImgBB
         setPhotoUrl(result.data.url); 
       } else {
         onError?.("Failed to upload image.");
@@ -98,7 +95,6 @@ export function ManageProfileModal({ isOpen, onClose, onSuccess, onError }: Mana
     }
   };
 
-  // Handle Save
   const handleSave = async () => {
     setIsLoading(true);
     try {
@@ -106,7 +102,6 @@ export function ManageProfileModal({ isOpen, onClose, onSuccess, onError }: Mana
       if (!user) return;
       const token = await user.getIdToken();
 
-      // 🚀 UPDATED: Match the ManageProfileDTO structure exactly
       const payload = {
         email, 
         name,
@@ -116,7 +111,6 @@ export function ManageProfileModal({ isOpen, onClose, onSuccess, onError }: Mana
         notifyEmail
       };
 
-      // 🚀 UPDATED: Hitting the new PUT endpoint
       const res = await fetch(`/api/v1/me/profile`, {
         method: "PUT",
         headers: {
@@ -143,31 +137,33 @@ export function ManageProfileModal({ isOpen, onClose, onSuccess, onError }: Mana
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm md:p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/40 sm:bg-black/20 sm:backdrop-blur-[2px] sm:p-4 transition-all duration-300" onClick={onClose}>
       <div 
-        className="bg-white text-zinc-900 md:border md:border-zinc-200 shadow-2xl relative w-full h-full md:h-auto md:max-h-[85vh] md:max-w-3xl flex flex-col animate-in zoom-in-95 fade-in duration-200 overflow-hidden md:rounded-3xl rounded-none"
+        className="bg-zinc-50 text-zinc-900 sm:border sm:border-zinc-200 shadow-2xl relative w-full h-[90vh] sm:h-auto sm:max-h-[85vh] sm:max-w-4xl flex flex-col animate-in slide-in-from-bottom-4 sm:zoom-in-95 fade-in duration-300 overflow-hidden rounded-t-[24px] sm:rounded-[20px]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 md:px-6 border-b">
-          <h2 className="text-xl font-bold">Manage Account</h2>
-          <button onClick={onClose} className="p-2 bg-zinc-100 rounded-full hover:bg-zinc-200 transition-colors">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-200 bg-white">
+          <h2 className="text-lg font-semibold tracking-tight">Account Settings</h2>
+          <button onClick={onClose} className="p-2 text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 rounded-full transition-colors active:scale-95">
             <X className="size-5" />
           </button>
         </div>
 
-        {/* Tabs & Content */}
-        <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
+        {/* Layout */}
+        <div className="flex flex-col sm:flex-row flex-1 overflow-hidden bg-zinc-50/50">
           
-          {/* Sidebar Tabs */}
-          <div className="w-full md:w-48 border-b md:border-b-0 md:border-r p-4 flex flex-row md:flex-col gap-2 overflow-x-auto bg-zinc-50 shrink-0">
+          {/* Sidebar */}
+          <div className="w-full sm:w-64 border-b sm:border-b-0 sm:border-r border-zinc-200 p-4 sm:p-6 flex flex-row sm:flex-col gap-1 overflow-x-auto shrink-0 bg-white sm:bg-transparent">
             {(["basic", "notifications", "billing"] as Tab[]).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 className={cn(
-                  "px-4 py-2.5 text-sm font-medium rounded-xl text-left capitalize whitespace-nowrap transition-colors",
-                  activeTab === tab ? "bg-primary/10 text-primary font-semibold" : "text-zinc-500 hover:bg-zinc-100"
+                  "px-4 py-2.5 text-sm font-medium rounded-lg text-left capitalize whitespace-nowrap transition-all active:scale-[0.98]",
+                  activeTab === tab 
+                    ? "bg-zinc-900 text-white shadow-sm" 
+                    : "text-zinc-600 hover:bg-zinc-200/50 hover:text-zinc-900"
                 )}
               >
                 {tab}
@@ -175,102 +171,119 @@ export function ManageProfileModal({ isOpen, onClose, onSuccess, onError }: Mana
             ))}
           </div>
 
-          {/* Tab Content */}
-          <div className="flex-1 p-4 md:p-8 overflow-y-auto relative">
+          {/* Content Area */}
+          <div className="flex-1 p-4 sm:p-8 overflow-y-auto relative custom-scrollbar">
             {isLoading && activeTab === "basic" ? (
               <div className="flex h-full items-center justify-center">
-                <Loader2 className="size-8 animate-spin text-primary" />
+                <Loader2 className="size-8 animate-spin text-zinc-400" />
               </div>
             ) : (
-              <>
+              <div className="max-w-2xl mx-auto w-full pb-20 sm:pb-0">
                 {/* BASIC INFO TAB */}
                 {activeTab === "basic" && (
-                  <div className="space-y-8 flex flex-col h-full">
-                    <div className="flex-1 space-y-8">
-                      {/* Profile Picture */}
-                      <div className="flex flex-col items-center gap-3">
-                        <div className="relative group">
-                          <img 
-                            src={photoUrl || "https://i.ibb.co/w04Prt6/c1f64245afb2.gif"} // Fallback placeholder
-                            alt="Profile" 
-                            className="size-24 rounded-full object-cover border-4 border-zinc-100 shadow-sm"
-                          />
-                          <button 
-                            onClick={() => fileInputRef.current?.click()}
-                            className="absolute bottom-0 right-0 bg-primary text-white p-2 rounded-full shadow-md hover:bg-primary/90 transition transform hover:scale-105 active:scale-95"
-                            disabled={isUploading}
-                          >
-                            {isUploading ? <Loader2 className="size-4 animate-spin" /> : <Camera className="size-4" />}
-                          </button>
-                          <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageUpload} />
-                        </div>
-                        <span className="text-xs text-zinc-500 font-medium">Upload new picture</span>
+                  <div className="space-y-6">
+                    
+                    {/* Shadcn-style Card */}
+                    <div className="bg-white border border-zinc-200 rounded-xl shadow-sm overflow-hidden">
+                      <div className="px-6 py-5 border-b border-zinc-200">
+                        <h3 className="text-base font-semibold text-zinc-900">Personal Information</h3>
+                        <p className="text-sm text-zinc-500 mt-1">Update your photo and personal details.</p>
                       </div>
+                      
+                      <div className="p-6 space-y-6">
+                        {/* Profile Picture */}
+                        <div className="flex items-center gap-5">
+                          <div className="relative group">
+                            <img 
+                              src={photoUrl || "https://i.ibb.co/w04Prt6/c1f64245afb2.gif"} 
+                              alt="Profile" 
+                              className="size-20 sm:size-24 rounded-full object-cover border-2 border-zinc-100 shadow-sm transition-transform duration-300 group-hover:scale-[1.02]"
+                            />
+                            <button 
+                              onClick={() => fileInputRef.current?.click()}
+                              className="absolute -bottom-2 -right-2 bg-white text-zinc-700 p-2 rounded-full border border-zinc-200 shadow-sm hover:shadow-md hover:text-zinc-900 transition-all active:scale-95"
+                              disabled={isUploading}
+                            >
+                              {isUploading ? <Loader2 className="size-4 animate-spin" /> : <Camera className="size-4" />}
+                            </button>
+                            <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageUpload} />
+                          </div>
+                          <div>
+                            <h4 className="text-sm font-medium text-zinc-900">Profile Photo</h4>
+                            <p className="text-xs text-zinc-500 mt-1">Recommended 256x256px.<br/> JPG, GIF or PNG.</p>
+                          </div>
+                        </div>
 
-                      {/* Inputs */}
-                      <div className="space-y-5 max-w-md mx-auto w-full">
-                        {/* Email (Read Only) */}
-                        <div className="space-y-1.5">
-                          <label className="text-sm font-medium text-zinc-500">Email Address</label>
-                          <div className="relative">
-                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-500" />
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                          {/* Name */}
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium text-zinc-700">Full Name</label>
                             <input 
-                              type="email" 
-                              value={email} 
-                              disabled
-                              className="w-full pl-10 p-3 rounded-xl border bg-zinc-100 text-zinc-500 text-sm outline-none cursor-not-allowed"
+                              type="text" 
+                              value={name} 
+                              onChange={(e) => setName(e.target.value)}
+                              className="w-full h-11 px-4 rounded-lg border border-zinc-200 bg-white text-base sm:text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent transition-all shadow-sm"
+                              placeholder="Jane Doe"
+                            />
+                          </div>
+
+                          {/* Phone */}
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium text-zinc-700">Phone Number</label>
+                            <input 
+                              type="tel" 
+                              value={phone} 
+                              onChange={(e) => setPhone(e.target.value)}
+                              className="w-full h-11 px-4 rounded-lg border border-zinc-200 bg-white text-base sm:text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent transition-all shadow-sm"
+                              placeholder="+1 234 567 890"
                             />
                           </div>
                         </div>
 
-                        {/* Name (Editable) */}
-                        <div className="space-y-1.5">
-                          <label className="text-sm font-medium">Full Name</label>
-                          <input 
-                            type="text" 
-                            value={name} 
-                            onChange={(e) => setName(e.target.value)}
-                            className="w-full p-3 rounded-xl border bg-white text-sm focus:ring-2 focus:ring-primary outline-none transition-shadow"
-                            placeholder="John Doe"
-                          />
-                        </div>
-
-                        {/* Phone (Editable) */}
-                        <div className="space-y-1.5">
-                          <label className="text-sm font-medium">Phone Number</label>
-                          <input 
-                            type="tel" 
-                            value={phone} 
-                            onChange={(e) => setPhone(e.target.value)}
-                            className="w-full p-3 rounded-xl border bg-white text-sm focus:ring-2 focus:ring-primary outline-none transition-shadow"
-                            placeholder="+1 234 567 890"
-                          />
+                        {/* Email (Read Only) */}
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium text-zinc-700">Email Address</label>
+                          <div className="relative">
+                            <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-zinc-400" />
+                            <input 
+                              type="email" 
+                              value={email} 
+                              disabled
+                              className="w-full h-11 pl-10 pr-4 rounded-lg border border-zinc-200 bg-zinc-50 text-base sm:text-sm text-zinc-500 outline-none cursor-not-allowed shadow-sm"
+                            />
+                          </div>
+                          <p className="text-xs text-zinc-500">Contact support to change your email address.</p>
                         </div>
                       </div>
-                    </div>
-
-                    {/* Developer Note */}
-                    <div className="mt-8 pt-6 border-t">
-                      <p className="text-[11px] md:text-xs text-zinc-500 text-center leading-relaxed max-w-sm mx-auto">
-                        <span className="text-primary font-bold mr-1">*</span> 
-                        We are currently in active development mode. Many more features will be rolled out soon! You will be notified when the final product launches, but until then, enjoy early access for free.
-                      </p>
                     </div>
                   </div>
                 )}
 
                 {/* NOTIFICATIONS TAB */}
                 {activeTab === "notifications" && (
-                  <div className="space-y-6 max-w-md mx-auto">
-                    <h3 className="font-semibold text-lg border-b pb-2">Communication Preferences</h3>
-                    <div className="space-y-3">
-                      <label className="flex items-center gap-4 p-4 border rounded-2xl cursor-pointer hover:bg-zinc-100 transition shadow-sm">
-                        <input type="checkbox" checked={notifyWhatsapp} onChange={(e) => setNotifyWhatsapp(e.target.checked)} className="size-5 accent-primary" />
-                        <span className="text-sm font-medium">Receive updates via WhatsApp</span>
+                  <div className="bg-white border border-zinc-200 rounded-xl shadow-sm overflow-hidden">
+                    <div className="px-6 py-5 border-b border-zinc-200">
+                      <h3 className="text-base font-semibold text-zinc-900">Communication Preferences</h3>
+                      <p className="text-sm text-zinc-500 mt-1">Manage how you receive updates and alerts.</p>
+                    </div>
+                    <div className="p-6 space-y-4">
+                      <label className="flex items-start gap-4 p-4 border border-zinc-200 rounded-xl cursor-pointer hover:bg-zinc-50 transition-all active:scale-[0.99]">
+                        <div className="mt-0.5">
+                           <input type="checkbox" checked={notifyWhatsapp} onChange={(e) => setNotifyWhatsapp(e.target.checked)} className="size-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900" />
+                        </div>
+                        <div>
+                          <span className="text-sm font-medium text-zinc-900 block">WhatsApp Updates</span>
+                          <span className="text-sm text-zinc-500">Receive order notifications and alerts via WhatsApp.</span>
+                        </div>
                       </label>
-                      <label className="flex items-center gap-4 p-4 border rounded-2xl cursor-pointer hover:bg-zinc-100 transition shadow-sm">
-                        <input type="checkbox" checked={notifyEmail} onChange={(e) => setNotifyEmail(e.target.checked)} className="size-5 accent-primary" />
-                        <span className="text-sm font-medium">Receive updates via Email</span>
+                      <label className="flex items-start gap-4 p-4 border border-zinc-200 rounded-xl cursor-pointer hover:bg-zinc-50 transition-all active:scale-[0.99]">
+                        <div className="mt-0.5">
+                           <input type="checkbox" checked={notifyEmail} onChange={(e) => setNotifyEmail(e.target.checked)} className="size-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900" />
+                        </div>
+                        <div>
+                          <span className="text-sm font-medium text-zinc-900 block">Email Newsletters</span>
+                          <span className="text-sm text-zinc-500">Receive feature updates, tips, and offers via Email.</span>
+                        </div>
                       </label>
                     </div>
                   </div>
@@ -278,31 +291,37 @@ export function ManageProfileModal({ isOpen, onClose, onSuccess, onError }: Mana
 
                 {/* BILLING TAB */}
                 {activeTab === "billing" && (
-                  <div className="flex flex-col items-center justify-center text-center space-y-4 h-full pt-8">
-                    <div className="size-16 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-2">
-                      <Info className="size-8" />
+                  <div className="bg-white border border-zinc-200 rounded-xl shadow-sm overflow-hidden">
+                    <div className="px-6 py-5 border-b border-zinc-200">
+                      <h3 className="text-base font-semibold text-zinc-900">Plan & Billing</h3>
+                      <p className="text-sm text-zinc-500 mt-1">Manage your subscription and payment methods.</p>
                     </div>
-                    <h3 className="text-xl font-bold">Beta Mode Active</h3>
-                    <div className="max-w-xs space-y-2 text-sm text-zinc-500">
-                      <p>We are currently in beta mode. The subscription model will be introduced soon.</p>
-                      <p>You are helping us improve! Feel free to suggest a feature you need via the Suggestion tab.</p>
+                    <div className="p-10 flex flex-col items-center justify-center text-center space-y-4">
+                      <div className="size-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 mb-2 ring-8 ring-blue-50/50">
+                        <Info className="size-6" />
+                      </div>
+                      <h3 className="text-lg font-semibold text-zinc-900">Beta Mode Active</h3>
+                      <div className="max-w-sm space-y-2 text-sm text-zinc-500">
+                        <p>We are currently in beta mode. The subscription model will be introduced soon.</p>
+                        <p>You are helping us improve! Enjoy all premium features for free during this period.</p>
+                      </div>
                     </div>
                   </div>
                 )}
-              </>
+              </div>
             )}
           </div>
         </div>
 
         {/* Footer Actions */}
-        <div className="p-4 md:px-6 border-t bg-zinc-50 flex justify-end gap-3 shrink-0">
-          <button onClick={onClose} className="px-5 py-2.5 rounded-xl border bg-white text-sm font-semibold hover:bg-zinc-100 transition">
+        <div className="px-6 py-4 border-t border-zinc-200 bg-white flex justify-end gap-3 shrink-0">
+          <button onClick={onClose} className="px-5 h-10 rounded-lg border border-zinc-200 bg-white text-sm font-medium text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900 transition-all active:scale-[0.98]">
             Cancel
           </button>
           <button 
             onClick={handleSave} 
             disabled={isLoading || activeTab === "billing"} 
-            className="px-6 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition flex items-center gap-2 disabled:opacity-50 shadow-sm"
+            className="px-6 h-10 rounded-lg bg-zinc-900 text-white text-sm font-medium hover:bg-zinc-800 transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50 shadow-sm min-w-[120px]"
           >
             {isLoading && <Loader2 className="size-4 animate-spin" />}
             Save Changes

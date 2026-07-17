@@ -39,6 +39,11 @@ export default function DashboardContent() {
   const [topAlert, setTopAlert] = useState("");
   const [authMessage, setAuthMessage] = useState(""); 
   const [showForm, setShowForm] = useState(true);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // 1. Persistent Client Cache (LocalStorage) for instant load
   const cachedMe = useMemo(() => {
@@ -126,6 +131,8 @@ export default function DashboardContent() {
       }
     }, 1000);
   };
+
+  if (!mounted) return null;
 
   return (
     <>

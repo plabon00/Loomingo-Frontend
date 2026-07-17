@@ -2,6 +2,7 @@
 
 import React, { useRef, useState } from 'react';
 import { motion, useScroll, useMotionValueEvent } from 'motion/react';
+import { Zap, Lock, Target, Bot } from 'lucide-react';
 
 const avatars: string[] = [
   'https://randomuser.me/api/portraits/men/32.jpg',
@@ -14,22 +15,22 @@ const avatars: string[] = [
 
 const features = [
   {
-    icon: "⚡️", 
+    icon: Zap,
     title: "Instant Comment Replies",
     text: "Turn every comment into a conversation. Trigger automated DMs the moment someone engages with your posts or reels to boost the algorithm."
   },
   {
-    icon: "🔒",
+    icon: Lock,
     title: "Smart 'Follow Gate' Links",
     text: "Grow your audience effortlessly. Automatically require users to follow your page before they receive your exclusive links, templates, or offers."
   },
   {
-    icon: "🎯",
+    icon: Target,
     title: "Seamless Lead Capture",
     text: "Collect emails, phone numbers, and customer feedback directly inside DMs. Skip the clunky external landing pages and convert faster."
   },
   {
-    icon: "🤖",
+    icon: Bot,
     title: "24/7 AI Sales Assistant",
     text: "Let smart AI handle FAQs, qualify leads, and close sales around the clock. Ensure no customer is ever left waiting for a reply."
   }
@@ -57,7 +58,7 @@ export default function PotentialSection() {
 
   return (
     // Slightly shorter scroll duration on mobile (250vh) so it doesn't feel tedious, 300vh on desktop
-    <section ref={containerRef} className="relative w-full h-[250vh] md:h-[300vh] bg-white">
+    <section ref={containerRef} className="relative w-full h-[250vh] md:h-[300vh] bg-transparent">
       
       {/* STICKY CONTAINER: Uses 100dvh for better mobile browser support */}
       <div className="sticky top-0 h-[100dvh] w-full flex items-center justify-center overflow-hidden py-8 md:py-0">
@@ -74,17 +75,20 @@ export default function PotentialSection() {
           <div className="w-full md:w-1/2 flex flex-col w-full max-w-md md:max-w-none mx-auto md:pt-8">
             {features.map((feature, i) => {
               const isActive = i === activeIndex;
-              
+              const Icon = feature.icon;
+
               return (
-                <div 
-                  key={i} 
+                <div
+                  key={i}
                   className={`flex flex-col py-3 md:py-6 transition-all duration-500 ease-in-out ${
-                    i !== features.length - 1 ? 'border-b border-zinc-100' : ''
+                    i !== features.length - 1 ? 'border-b border-red-950/10' : ''
                   }`}
                 >
                   <div className="flex items-center gap-3 md:gap-4">
-                    <div className="text-xl md:text-2xl opacity-80 shrink-0">
-                      {feature.icon}
+                    <div className={`size-9 md:size-10 rounded-xl flex items-center justify-center shrink-0 transition-colors duration-300 ${
+                      isActive ? 'bg-red-600 text-white shadow-md shadow-red-600/25' : 'bg-red-950/5 text-red-950/40'
+                    }`}>
+                      <Icon className="size-4 md:size-5" />
                     </div>
                     <h3 className={`text-lg sm:text-xl md:text-2xl font-medium transition-colors duration-300 ${
                       isActive ? 'text-red-950' : 'text-red-950/40'
@@ -102,7 +106,7 @@ export default function PotentialSection() {
                       marginBottom: isActive ? 8 : 0
                     }}
                     transition={{ duration: 0.4, ease: "easeInOut" }}
-                    className="overflow-hidden pl-9 md:pl-12" 
+                    className="overflow-hidden pl-12 md:pl-14"
                   >
                     <p className="text-zinc-500 text-sm md:text-base leading-relaxed pr-2 md:pr-8">
                       {feature.text}
@@ -120,7 +124,7 @@ export default function PotentialSection() {
             </div>
             <h2 className="text-3xl sm:text-4xl md:text-6xl font-medium text-red-950 leading-[1.1] mb-3 md:mb-6 tracking-tight">
               Automate your <br className="hidden sm:block" />
-              <span className="text-red-600 italic font-serif">growth</span>
+              <span className="font-editorial text-red-600">growth</span>
             </h2>
             <p className="text-sm md:text-base text-red-950/70 max-w-sm mb-6 md:mb-8 px-4 md:px-0">
               Everything you need to turn casual scrollers into loyal customers on autopilot.

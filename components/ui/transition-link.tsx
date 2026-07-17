@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useTransitionState } from "@/components/providers/transition-provider";
 
 interface TransitionLinkProps extends React.ComponentProps<typeof Link> {
@@ -11,9 +11,17 @@ interface TransitionLinkProps extends React.ComponentProps<typeof Link> {
 
 export function TransitionLink({ children, href, onClick, ...props }: TransitionLinkProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const { startTransition } = useTransitionState();
 
   const handleTransition = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+    // If the user is already on this page, just fire the onClick (e.g. to close a menu) and prevent the reload/animation
+    if (pathname === href.toString() || pathname.startsWith(href.toString()) && href.toString() !== "/") {
+      if (onClick) onClick(e);
+      e.preventDefault();
+      return;
+    }
+
     if (onClick) onClick(e);
 
     // Allow native behavior for new tabs or external logic

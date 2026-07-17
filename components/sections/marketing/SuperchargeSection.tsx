@@ -115,7 +115,7 @@ const SuperchargeSection: React.FC = () => {
 
   // 2. FIX: Removed the invalid JSX comment from the return statement
   return (
-    <section ref={containerRef} className="relative w-full bg-white h-[200vh]">
+    <section ref={containerRef} className="relative w-full bg-transparent h-[200vh]">
       
       <div className="sticky top-0 h-[100dvh] w-full flex flex-col items-center justify-center overflow-hidden">
 
@@ -134,7 +134,7 @@ const SuperchargeSection: React.FC = () => {
             <h2 className="text-4xl sm:text-5xl md:text-6xl font-medium text-red-950 leading-[1.1] mb-4 md:mb-6 tracking-tight">
               Skyrocket Your <br className="hidden sm:block" />
               Social Reach <br className="hidden sm:block" />
-              <span className="text-red-600 italic font-serif tracking-tight drop-shadow-sm">
+              <span className="font-editorial text-red-600 tracking-tight drop-shadow-sm">
                 by 10X
               </span>
             </h2>

@@ -3,8 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader2, ArrowRight, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "@/lib/firebase";
@@ -50,40 +49,63 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
   return (
     <div 
       className={cn(
-        "flex flex-col gap-6 w-full max-w-sm mx-auto bg-white border border-zinc-100 rounded-[2rem] shadow-xl shadow-zinc-500/5", 
+        "relative w-full max-w-[400px] mx-auto overflow-hidden bg-white/70 backdrop-blur-3xl rounded-[32px] border border-white/40 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] p-8 sm:p-10", 
         className
       )} 
       {...props}
     >
-      {/* Container for content with internal padding */}
-      <div className="flex flex-col items-center gap-6 px-8 pt-8 pb-6">
-        <div className="flex size-16 items-center justify-center overflow-hidden rounded-2xl">
-          <img src="/icon.png" alt="Loomingo Logo" className="size-full object-contain" />
-        </div>
-        <div className="text-center">
-          <h1 className="text-2xl font-semibold text-zinc-900 tracking-tight">Welcome to Loomingo</h1>
-          <p className="text-sm text-zinc-500 mt-1">Sign in to manage your automations</p>
+      {/* Decorative gradient blur in background */}
+      <div className="absolute -top-24 -right-24 w-48 h-48 bg-red-400/20 rounded-full blur-[40px] pointer-events-none" />
+      <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-orange-400/20 rounded-full blur-[40px] pointer-events-none" />
+
+      <div className="relative z-10 flex flex-col items-center">
+        
+        {/* Logo with slight animation */}
+        <div className="relative mb-6 group cursor-default">
+          <div className="absolute inset-0 bg-red-500/20 rounded-3xl blur-xl group-hover:bg-red-500/30 transition-all duration-500" />
+          <div className="relative flex size-20 items-center justify-center bg-white rounded-3xl shadow-sm border border-zinc-100 group-hover:-translate-y-1 group-hover:scale-105 transition-all duration-500">
+            <img src="/icon.png" alt="Loomingo Logo" className="size-12 object-contain" />
+          </div>
         </div>
 
-        <Button 
-          variant="default" 
+        {/* Text */}
+        <div className="text-center mb-8">
+          <h1 className="text-[28px] font-bold text-zinc-900 tracking-tight leading-tight flex items-center justify-center gap-2">
+            Welcome back <Sparkles className="size-5 text-red-500 animate-pulse" />
+          </h1>
+          <p className="text-sm font-medium text-zinc-500 mt-2">Log in or sign up in seconds.</p>
+        </div>
+
+        {/* Fancy Google Button */}
+        <button 
           onClick={handleGoogleSignUp}
           disabled={isLoading}
-          className="w-full h-12 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-medium transition-all"
+          className="group relative w-full h-14 bg-zinc-900 hover:bg-zinc-800 text-white rounded-2xl font-semibold transition-all duration-300 active:scale-[0.98] overflow-hidden flex items-center justify-center shadow-lg hover:shadow-xl disabled:opacity-80 disabled:pointer-events-none"
         >
-          {isLoading ? <Loader2 className="mr-2 size-4 animate-spin" /> : (
-            <svg className="mr-2 size-4" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z" />
-            </svg>
+          {/* Button inner shine effect */}
+          <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent group-hover:animate-[shimmer_1.5s_infinite]" />
+          
+          {isLoading ? (
+            <Loader2 className="size-5 animate-spin" />
+          ) : (
+            <div className="flex items-center gap-3">
+              <div className="bg-white p-1 rounded-full">
+                <svg className="size-4" viewBox="0 0 24 24" fill="#000">
+                  <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z" />
+                </svg>
+              </div>
+              <span className="tracking-wide">Continue with Google</span>
+              <ArrowRight className="size-4 ml-1 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
+            </div>
           )}
-          {isLoading ? "Authenticating..." : "Continue with Google"}
-        </Button>
-      </div>
+        </button>
 
-      {/* Footer area sits flush with the bottom */}
-      <p className="px-8 pb-8 text-[11px] text-zinc-400 text-center leading-relaxed">
-        By continuing, you agree to our <a href="#" className="underline hover:text-zinc-600">Terms</a> and <a href="#" className="underline hover:text-zinc-600">Privacy Policy</a>.
-      </p>
+        {/* Footer */}
+        <p className="mt-8 text-xs font-medium text-zinc-400 text-center leading-relaxed">
+          By continuing, you agree to Loomingo's <br/>
+          <a href="/terms" className="text-zinc-600 hover:text-zinc-900 underline underline-offset-2 transition-colors">Terms of Service</a> and <a href="/privacy-policy" className="text-zinc-600 hover:text-zinc-900 underline underline-offset-2 transition-colors">Privacy Policy</a>.
+        </p>
+      </div>
     </div>
   );
 }

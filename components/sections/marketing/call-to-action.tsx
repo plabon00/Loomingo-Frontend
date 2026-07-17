@@ -52,7 +52,7 @@ export default function CallToAction() {
         {/* Button */}
         <div className="flex flex-wrap justify-center gap-4">
           <AnimatedButton onClick={handleGetStarted}>
-            Get Started for Free
+            {user ? "Visit Dashboard" : "Get Started for Free"}
           </AnimatedButton>
         </div>
 
@@ -62,8 +62,9 @@ export default function CallToAction() {
       <DialogPrimitive.Root open={isSignInOpen} onOpenChange={setIsSignInOpen}>
         <DialogPrimitive.Portal>
           
+          <DialogPrimitive.Overlay className="fixed inset-0 z-[100] bg-zinc-900/40 backdrop-blur-md animate-in fade-in duration-700" />
           <DialogPrimitive.Content 
-            className="fixed left-[50%] top-[50%] z-50 translate-x-[-50%] translate-y-[-50%] p-0 border-none rounded-[2rem] shadow-2xl bg-white outline-none w-full max-w-sm"
+            className="fixed left-[50%] top-[50%] z-[100] translate-x-[-50%] translate-y-[-50%] p-0 border-none rounded-[32px] outline-none w-full max-w-sm animate-in fade-in slide-in-from-bottom-24 zoom-in-[0.95] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
           >
             <DialogPrimitive.Title className="sr-only">Sign In to Loomingo</DialogPrimitive.Title>
             <DialogPrimitive.Description className="sr-only">
