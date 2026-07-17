@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import { useTransitionState } from "@/components/providers/transition-provider";
 
-export default function SplashTransition() {
+function SplashContent() {
   const { isTransitioning, endTransition, origin } = useTransitionState();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -33,11 +33,10 @@ export default function SplashTransition() {
         <motion.div
           initial={{ clipPath: `circle(0px at ${cx}px ${cy}px)`, opacity: 1 }}
           animate={{ clipPath: `circle(150% at ${cx}px ${cy}px)`, opacity: 1 }}
-          exit={{ opacity: 0 }}
+          exit={{ opacity: 0, transition: { duration: 0.4, ease: "easeOut" } }}
           transition={{ 
             duration: 0.8, 
-            ease: [0.22, 1, 0.36, 1],
-            exit: { duration: 0.4, ease: "easeOut" } 
+            ease: [0.22, 1, 0.36, 1]
           }}
           className="fixed inset-0 z-[9999] bg-white flex items-center justify-center pointer-events-auto"
         >
@@ -57,5 +56,13 @@ export default function SplashTransition() {
         </motion.div>
       )}
     </AnimatePresence>
+  );
+}
+
+export default function SplashTransition() {
+  return (
+    <Suspense fallback={null}>
+      <SplashContent />
+    </Suspense>
   );
 }
