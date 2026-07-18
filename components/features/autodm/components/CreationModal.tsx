@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 import {
   X,
   ChevronLeft,
@@ -13,17 +15,28 @@ import {
   CopyPlus,
   Upload,
   Eye,
-  Loader2
+  Loader2,
+  Globe
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { FormData } from "../types";
 
+// ————— Theme tokens —————
+const INK = "#152436";
+const PRIMARY = "#5742f5";
+const PAPER = "#f6f4ef";
+
 const uniformButtonInputClass =
-  "w-full h-11 px-4 text-sm bg-zinc-100/80 border border-zinc-200 rounded-[20px] font-semibold !text-black transition-all focus-visible:ring-1 focus-visible:ring-zinc-300 shadow-sm !placeholder-zinc-500 placeholder:font-normal text-center hover:bg-zinc-200/50 cursor-pointer focus:bg-white";
+  "w-full h-11 px-4 text-sm bg-white border border-[#e6e1d6] rounded-[20px] font-semibold !text-[#152436] transition-all focus-visible:ring-1 focus-visible:ring-[#152436]/20 shadow-sm !placeholder-zinc-400 placeholder:font-normal text-center hover:border-[#152436]/30 cursor-pointer focus:bg-white";
 
 const uniformTextAreaClass =
-  "w-full text-sm border border-zinc-200 rounded-2xl p-4 bg-white focus:ring-1 focus:ring-zinc-300 outline-none min-h-[90px] !text-black !placeholder-zinc-500 shadow-sm transition-all";
+  "w-full text-sm border border-[#e6e1d6] rounded-2xl p-4 bg-white focus:ring-1 focus:ring-[#152436]/20 outline-none min-h-[90px] !text-[#152436] !placeholder-zinc-400 shadow-sm transition-all";
 
 interface CreationModalProps {
   isOpen: boolean;
@@ -59,6 +72,18 @@ export function CreationModal({
   handleSubmit
 }: CreationModalProps) {
   
+  const repliesContainerRef = useRef<HTMLDivElement>(null);
+
+  useGSAP(() => {
+    if (formData.replyPublicly && repliesContainerRef.current) {
+      gsap.fromTo(
+        ".gsap-reply-item",
+        { opacity: 0, y: 15 },
+        { opacity: 1, y: 0, duration: 0.4, stagger: 0.1, ease: "power2.out" }
+      );
+    }
+  }, [formData.replyPublicly, formData.commentReplies.length]);
+
   if (!isOpen) return null;
 
   const handleAddKeyword = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -136,11 +161,16 @@ export function CreationModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/40 backdrop-blur-sm p-4">
-          <div className="bg-zinc-50 border border-zinc-200 shadow-2xl rounded-[2rem] overflow-hidden relative flex flex-col w-full max-w-[420px] aspect-[9/16] max-h-[90vh]">
-            
-            {/* Modal Header */}
-            <div className="flex items-center justify-between p-5 border-b border-zinc-200 shrink-0 bg-white">
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent 
+        aria-describedby={undefined}
+        className="w-[95%] max-w-[420px] p-0 border-[#e6e1d6] bg-white rounded-[2rem] overflow-hidden flex flex-col h-[90dvh] md:aspect-[9/16] md:h-auto md:max-h-[90vh] sm:rounded-[2rem] shadow-2xl [&>button:last-child]:hidden outline-none gap-0"
+        style={{ backgroundColor: PAPER }}
+      >
+        <DialogTitle className="sr-only">Automation Setup</DialogTitle>
+        
+        {/* Modal Header */}
+            <div className="flex items-center justify-between p-5 border-b border-[#e6e1d6] shrink-0 bg-white">
               {modalStep > 0 && !isEditing ? (
                 <button
                   onClick={() => setModalStep((s) => s - 1)}
@@ -154,7 +184,7 @@ export function CreationModal({
               )}
 
               <div className="text-center">
-                <h3 className="font-semibold text-lg text-zinc-900">
+                <h3 className="font-semibold text-lg" style={{ color: INK }}>
                   {modalStep === 0
                     ? "Select Post"
                     : isEditing
@@ -191,6 +221,18 @@ export function CreationModal({
                     </div>
                   ) : (
                     <div className="grid grid-cols-3 gap-3">
+                      {/* Universal / Any Post Card */}
+                      <div
+                        onClick={() => handleSelectMedia("GLOBAL")}
+                        className={`relative aspect-square rounded-xl overflow-hidden border-2 transition-all bg-gradient-to-br from-zinc-50 to-zinc-100 shadow-sm cursor-pointer flex flex-col items-center justify-center p-2 text-center group ${formData.mediaId === "GLOBAL" ? "border-zinc-900 shadow-md scale-[1.02]" : "border-zinc-200 hover:border-zinc-300 hover:opacity-90"}`}
+                      >
+                        <div className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                          <Globe className="size-5 text-zinc-800" />
+                        </div>
+                        <span className="text-[11px] font-bold text-zinc-900 leading-tight">Universal<br/>Rule</span>
+                        <p className="text-[8px] text-zinc-500 mt-1 leading-tight px-1">Applies to all posts</p>
+                      </div>
+
                       {availableMedia.map((media) => (
                         <div
                           key={media.id}
@@ -284,7 +326,7 @@ export function CreationModal({
                         Trigger Keywords
                       </label>
                       <p className="text-xs text-zinc-500 mb-4">
-                        Type a word and press Enter.
+                        Pro Tip: Emojis work perfectly! Users don't need to type the exact word—if they include your emoji anywhere in their comment, we'll catch it.
                       </p>
                       <div className="flex flex-wrap gap-2 mb-3">
                         {formData.triggerKeywords.map((kw) => (
@@ -309,7 +351,7 @@ export function CreationModal({
                           })
                         }
                         onKeyDown={handleAddKeyword}
-                        placeholder="e.g. GROW, GUIDE, LINK..."
+                        placeholder="Type a keyword or emoji (e.g. 'Link', 🎁, 🙌) and press Enter"
                         /* FIXED VISIBILITY: Added !text-zinc-900 and placeholder:text-zinc-500 */
                         className="!text-zinc-900 placeholder:text-zinc-500 bg-zinc-50 border-zinc-200 focus-visible:ring-zinc-300 rounded-xl"
                       />
@@ -342,19 +384,62 @@ export function CreationModal({
 
                     {formData.replyPublicly && (
                       <div className="animate-in fade-in slide-in-from-top-2 pt-3 border-t border-zinc-100">
-                        <label className="text-sm font-semibold text-zinc-900 block mb-3">
-                          What to reply
-                        </label>
-                        <textarea
-                          className={uniformTextAreaClass}
-                          value={formData.commentText}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              commentText: e.target.value,
-                            })
-                          }
-                        />
+                        <div className="flex items-center justify-between mb-2">
+                          <label className="text-sm font-semibold text-zinc-900 block">
+                            What to reply
+                          </label>
+                          <span className="text-[10px] font-bold text-zinc-500 bg-zinc-100 px-2 py-0.5 rounded-full">
+                            {formData.commentReplies.length}/5
+                          </span>
+                        </div>
+                        <p className="text-xs text-zinc-500 mb-4">
+                          Add multiple replies! We'll cycle through them randomly so Instagram doesn't flag you for spam.
+                        </p>
+                        
+                        <div className="space-y-3" ref={repliesContainerRef}>
+                          {formData.commentReplies.map((reply, idx) => (
+                            <div key={idx} className="gsap-reply-item relative group">
+                              <textarea
+                                className={uniformTextAreaClass}
+                                value={reply}
+                                onChange={(e) => {
+                                  const newReplies = [...formData.commentReplies];
+                                  newReplies[idx] = e.target.value;
+                                  setFormData({ ...formData, commentReplies: newReplies });
+                                }}
+                                placeholder="Type your reply here..."
+                              />
+                              {formData.commentReplies.length > 1 && (
+                                <button
+                                  onClick={() => {
+                                    setFormData({
+                                      ...formData,
+                                      commentReplies: formData.commentReplies.filter((_, i) => i !== idx)
+                                    });
+                                  }}
+                                  className="absolute top-2 right-2 p-1.5 bg-white border border-zinc-200 rounded-md text-zinc-400 hover:text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all shadow-sm"
+                                >
+                                  <Trash2 className="size-3.5" />
+                                </button>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                        
+                        {formData.commentReplies.length < 5 && (
+                          <Button
+                            variant="outline"
+                            className="w-full border-dashed border-2 border-zinc-200 text-zinc-700 font-medium mt-3 h-11 text-sm rounded-xl hover:bg-zinc-50 hover:border-zinc-300 transition-all"
+                            onClick={() => {
+                              setFormData({
+                                ...formData,
+                                commentReplies: [...formData.commentReplies, ""]
+                              });
+                            }}
+                          >
+                            <Plus className="mr-2 size-4" /> Add Another Variation
+                          </Button>
+                        )}
                       </div>
                     )}
                   </div>
@@ -835,12 +920,12 @@ export function CreationModal({
 
             {/* Explicit Back & Next Footer Navigation */}
             {modalStep > 0 && (
-              <div className="p-4 border-t border-zinc-200 bg-white shrink-0 flex gap-2 rounded-b-[2rem]">
+              <div className="p-4 border-t border-[#e6e1d6] bg-white shrink-0 flex gap-2 rounded-b-[2rem]">
                 {(!isEditing || modalStep > 1) && (
                   <Button
                     variant="outline"
                     onClick={() => setModalStep((s) => s - 1)}
-                    className="w-1/4 h-11 rounded-xl text-sm font-semibold border-zinc-200 text-zinc-700 hover:bg-zinc-50 px-0"
+                    className="w-1/4 h-11 rounded-xl text-sm font-semibold border-[#e6e1d6] text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 px-0 transition-colors"
                     disabled={isSubmitting}
                   >
                     Back
@@ -852,7 +937,7 @@ export function CreationModal({
                   <Button
                     variant="secondary"
                     onClick={() => setIsPreviewOpen(true)}
-                    className="w-1/3 h-11 rounded-xl text-sm font-semibold bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors px-0"
+                    className="w-1/3 h-11 rounded-xl text-sm font-semibold transition-colors px-0 bg-[#eef7f3] text-[#0b7a55] hover:bg-[#d8f0e4]"
                     disabled={isSubmitting}
                   >
                     <Eye className="mr-1.5 size-4" /> Preview
@@ -865,7 +950,8 @@ export function CreationModal({
                       ? handleSubmit()
                       : setModalStep((s) => s + 1)
                   }
-                  className="flex-1 h-11 rounded-xl text-sm font-semibold flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 text-white transition-colors"
+                  className="flex-1 h-11 rounded-xl text-sm font-semibold flex items-center justify-center text-white transition-colors hover:opacity-90"
+                  style={{ backgroundColor: PRIMARY }}
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (
@@ -880,7 +966,7 @@ export function CreationModal({
                 </Button>
               </div>
             )}
-          </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

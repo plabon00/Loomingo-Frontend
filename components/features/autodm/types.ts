@@ -1,7 +1,7 @@
 export type AutomationStatsDTO = {
   totalDmsSent: number;
   totalFollowersGained: number;
-  activeAutomationsCount: number;
+  totalCommentsTriggered: number;
 };
 
 export type AutomationCardDTO = {
@@ -31,7 +31,7 @@ export const defaultFormData = {
   keywordInput: "",
   
   replyPublicly: true,
-  commentText: "Thanks for commenting! Check your DMs 🚀",
+  commentReplies: ["Thanks for commenting! Check your DMs 🚀"] as string[],
   
   templateType: "TEXT_BUTTON" as "TEXT_BUTTON" | "BANNER_BUTTON",
   

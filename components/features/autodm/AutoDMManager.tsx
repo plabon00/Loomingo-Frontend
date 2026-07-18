@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Plus,
   Play,
@@ -42,11 +42,16 @@ import { defaultFormData, AutomationStatsDTO, AutomationCardDTO, CarouselElement
 import type { FormData } from "./types";
 
 
+// ————— Theme tokens —————
+const INK = "#152436";
+const PRIMARY = "#5742f5";
+const PAPER = "#f6f4ef";
+
 export default function AutoDMManager() {
-  const [stats, setStats] = useState({
+  const [stats, setStats] = useState<AutomationStatsDTO>({
     totalDmsSent: 0,
     totalFollowersGained: 0,
-    activeAutomationsCount: 0,
+    totalCommentsTriggered: 0,
   });
 
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
@@ -94,7 +99,7 @@ export default function AutoDMManager() {
         setStats({
           totalDmsSent: data.stats?.totalDmsSent || 0,
           totalFollowersGained: data.stats?.totalFollowersGained || 0,
-          activeAutomationsCount: activeCount,
+          totalCommentsTriggered: data.stats?.totalCommentsTriggered || 0,
         });
       }
     } catch (error) {
@@ -352,8 +357,8 @@ export default function AutoDMManager() {
           triggerKeywords: ruleData.triggerKeywords || [],
           keywordInput: "",
           
-          replyPublicly: ruleData.commentText ? true : false,
-          commentText: ruleData.commentText || "Thanks for commenting! Check your DMs 🚀",
+          replyPublicly: ruleData.commentReplies?.length > 0 ? true : (ruleData.commentText ? true : false),
+          commentReplies: ruleData.commentReplies?.length > 0 ? ruleData.commentReplies : (ruleData.commentText ? [ruleData.commentText] : ["Thanks for commenting! Check your DMs 🚀"]),
           
           requireFollow: ruleData.requireFollow || false,
           
@@ -560,6 +565,7 @@ export default function AutoDMManager() {
           };
 
       const payload = {
+        targetMediaId: formData.mediaId === "GLOBAL" ? null : safeMediaId,
         media: {
           mediaId: safeMediaId,
           isActive: true,
@@ -568,7 +574,7 @@ export default function AutoDMManager() {
           businessIgUserId: activeInstagramId,
         },
         triggerKeywords: formData.triggerKeywords,
-        commentText: formData.replyPublicly ? (formData.commentText || "") : "",
+        commentReplies: formData.replyPublicly ? formData.commentReplies : [],
         requireFollow: Boolean(formData.requireFollow),
 
         openingMessage: openingMessagePayload,
@@ -623,19 +629,19 @@ export default function AutoDMManager() {
 
   
   return (
-    <div className="min-h-screen bg-transparent relative pb-20 md:pb-0 z-10 flex flex-col">
+    <div className="min-h-screen relative pb-20 md:pb-0 z-10 flex flex-col font-sans text-zinc-900" style={{ backgroundColor: PAPER }}>
       
       {/* LOCKED STATE OVERLAY */}
       {!isConnected && (
-        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/40 backdrop-blur-md rounded-tl-3xl p-6">
-          <div className="w-24 h-24 bg-white rounded-3xl flex items-center justify-center mb-8 shadow-xl shadow-zinc-200/50 border border-zinc-100 relative">
+        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center backdrop-blur-md rounded-tl-3xl p-6" style={{ backgroundColor: `${PAPER}cc` }}>
+          <div className="w-24 h-24 bg-white rounded-3xl flex items-center justify-center mb-8 shadow-xl border border-[#e6e1d6] relative">
             <InstagramIcon className="size-12 text-black relative z-10" />
-            <div className="absolute -top-2 -right-2 bg-zinc-900 rounded-full p-2 border-[3px] border-white shadow-sm">
+            <div className="absolute -top-2 -right-2 rounded-full p-2 border-[3px] border-white shadow-sm" style={{ backgroundColor: INK }}>
               <Lock className="size-4 text-white" />
             </div>
           </div>
           
-          <h3 className="text-2xl md:text-3xl font-semibold text-zinc-900 mb-4 tracking-tight text-center">Oops, it looks like you didn't Connect your Instagram account</h3>
+          <h3 className="text-2xl md:text-3xl font-semibold mb-4 tracking-tight text-center" style={{ color: INK }}>Oops, it looks like you didn&apos;t Connect your Instagram account</h3>
           
           <p className="text-sm md:text-base text-zinc-500 mb-10 font-medium text-center max-w-lg">
             You need to link your Instagram account with Loomingo to start setting up Auto DMs and growth automations.
@@ -644,7 +650,8 @@ export default function AutoDMManager() {
           <Button
             onClick={handleConnect}
             disabled={isConnecting}
-            className="w-full max-w-sm relative z-10 bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] hover:opacity-90 text-white border-0 rounded-2xl h-14 text-base font-semibold transition-all shadow-lg hover:shadow-xl hover:scale-[1.02]"
+            className="w-full max-w-sm relative z-10 text-white border-0 rounded-2xl h-14 text-base font-semibold transition-all shadow-lg hover:shadow-xl hover:scale-[1.02] hover:opacity-90"
+            style={{ backgroundColor: PRIMARY }}
           >
             <InstagramIcon className="size-5 mr-3" />
             {isConnecting ? "Connecting..." : "Connect Instagram"}
