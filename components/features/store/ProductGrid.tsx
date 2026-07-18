@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Edit2, Trash2, ArrowUpRight, Share2, Check, Plus, PackageOpen } from "lucide-react";
+import { Edit2, Trash2, ArrowUpRight, Share2, Check, Plus, PackageOpen, CheckCircle2 } from "lucide-react";
 import type { Product } from "@/lib/store";
 import { ProductPreviewModal } from "@/components/modals/product-preview-modal";
 import { motion, AnimatePresence } from "motion/react";
@@ -15,6 +15,9 @@ export default function ProductGrid({
   onAddProduct,
   initialPreviewProduct,
   themeColor,
+  selectionMode = false,
+  selectedIds = [],
+  onToggleSelect,
 }: {
   products: Product[];
   onEdit?: (p: Product) => void;
@@ -22,6 +25,9 @@ export default function ProductGrid({
   onAddProduct?: () => void;
   initialPreviewProduct?: Product | null;
   themeColor?: string;
+  selectionMode?: boolean;
+  selectedIds?: string[];
+  onToggleSelect?: (id: string) => void;
 }) {
   const [previewProduct, setPreviewProduct] = useState<Product | null>(initialPreviewProduct || null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -89,11 +95,33 @@ export default function ProductGrid({
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, scale: 0.92, transition: { duration: 0.2 } }}
               transition={{ ...cardTransition, delay: Math.min(index * 0.05, 0.4) }}
-              onClick={() => setPreviewProduct(p)}
-              className="group relative flex flex-col overflow-hidden rounded-2xl border border-zinc-950/10 bg-white hover:border-zinc-950/25 shadow-[0_1px_2px_rgb(0,0,0,0.04)] hover:shadow-[0_16px_32px_-16px_rgb(0,0,0,0.18)] transition-[border-color,box-shadow] duration-300 h-full cursor-pointer"
+              onClick={() => {
+                if (selectionMode && onToggleSelect) {
+                  onToggleSelect(p.id);
+                } else {
+                  setPreviewProduct(p);
+                }
+              }}
+              className={`group relative flex flex-col overflow-hidden bg-white transition-all duration-300 h-full cursor-pointer ${
+                selectionMode && selectedIds.includes(p.id)
+                  ? "border-violet-600 border-2 rounded-lg"
+                  : "border border-zinc-200 rounded-lg hover:shadow-md"
+              }`}
             >
               {/* Image Section */}
-              <div className="aspect-[4/5] bg-zinc-100 relative overflow-hidden">
+              <div className="aspect-[4/5] bg-zinc-50 relative overflow-hidden">
+                {/* Selection checkbox overlay */}
+                {selectionMode && (
+                  <div className={`absolute top-2.5 left-2.5 z-20 size-7 flex items-center justify-center transition-all duration-200 border-2 ${
+                    selectedIds.includes(p.id)
+                      ? "bg-violet-600 border-violet-600 text-white"
+                      : "bg-white border-zinc-900 text-zinc-400"
+                  }`}>
+                    {selectedIds.includes(p.id) && (
+                      <CheckCircle2 className="size-5" />
+                    )}
+                  </div>
+                )}
                 {p.images[0] ? (
                   /* eslint-disable-next-line @next/next/no-img-element */
                   <img src={p.images[0]} alt={p.name} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]" />
@@ -102,13 +130,7 @@ export default function ProductGrid({
                     <PackageOpen className="size-8" />
                   </div>
                 )}
-
-                {/* Price tag — always visible, stamped on the image like a shop label */}
-                {p.price != null && (
-                  <span className="absolute bottom-2.5 left-2.5 text-[11px] sm:text-xs font-bold px-2 py-1 rounded-lg bg-white/95 backdrop-blur text-zinc-950 shadow-sm border border-zinc-950/10">
-                    ₹{Number(p.price).toFixed(2)}
-                  </span>
-                )}
+                {/* Price tag in image - removing, we will put it below like the sample */}
 
                 {/* Action Overlay */}
                 <div className="absolute top-2.5 right-2.5 flex flex-col gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:translate-x-1 sm:group-hover:translate-x-0 transition-all duration-200">
@@ -142,28 +164,40 @@ export default function ProductGrid({
               </div>
 
               {/* Details Section */}
-              <div className="p-3 sm:p-4 flex flex-col flex-1 border-t border-zinc-950/5">
-                <h3 className="text-sm font-semibold text-zinc-950 line-clamp-2 leading-snug mb-1">{p.name}</h3>
-                <p className="text-[11px] sm:text-xs text-zinc-500 line-clamp-2 flex-1 mb-3 leading-relaxed">{p.description}</p>
-
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (p.isWhatsapp && p.whatsappNumber) {
-                      const productLink = `${window.location.origin}/shop/${p.storeId}/${p.code || p.id}`;
-                      const msg = encodeURIComponent(`Hi, I would like to purchase ${p.name} for ₹${Number(p.price).toFixed(2)}.\n\nProduct Link: ${productLink}`);
-                      window.open(`https://wa.me/${p.whatsappNumber}?text=${msg}`, "_blank");
-                    } else {
-                      window.open(p.link || "#", "_blank");
-                    }
-                  }}
-                  style={{ backgroundColor: accent }}
-                  className="group/btn w-full h-9 sm:h-10 flex items-center justify-center gap-1.5 text-white text-xs sm:text-sm font-semibold rounded-xl hover:brightness-110 transition-all duration-200 active:scale-[0.97] cursor-pointer"
-                >
-                  Get it now
-                  <ArrowUpRight className="size-3.5 transition-transform duration-200 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
-                </button>
+              <div className="p-3 flex flex-col flex-grow">
+                <h3 className="text-[15px] font-bold text-zinc-900 truncate tracking-tight">{p.name}</h3>
+                {p.description && (
+                  <p className="text-[13px] text-zinc-500 truncate mt-0.5">{p.description}</p>
+                )}
+                <div className="mt-1.5 flex items-center gap-1.5">
+                  <span className="text-[16px] font-bold text-zinc-900">
+                    {p.price != null ? `₹${Number(p.price).toFixed(0)}` : 'Price on request'}
+                  </span>
+                </div>
               </div>
+
+              {/* Action buttons (only in non-selection mode) */}
+              {!selectionMode && (
+                <div className="px-3 pb-3">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (p.isWhatsapp && p.whatsappNumber) {
+                        const productLink = `${window.location.origin}/shop/${p.storeId}/${p.code || p.id}`;
+                        const msg = encodeURIComponent(`Hi, I would like to purchase ${p.name} for ₹${Number(p.price).toFixed(2)}.\n\nProduct Link: ${productLink}`);
+                        window.open(`https://wa.me/${p.whatsappNumber}?text=${msg}`, "_blank");
+                      } else {
+                        window.open(p.link || "#", "_blank");
+                      }
+                    }}
+                    style={{ backgroundColor: accent }}
+                    className="group/btn w-full h-9 sm:h-10 flex items-center justify-center gap-1.5 text-white text-[13px] font-bold rounded-md hover:brightness-105 transition-all cursor-pointer"
+                  >
+                    Get it now
+                    <ArrowUpRight className="size-3.5 transition-transform duration-200 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
+                  </button>
+                </div>
+              )}
             </motion.div>
           ))}
         </AnimatePresence>

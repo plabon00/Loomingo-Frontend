@@ -88,3 +88,94 @@ export async function saveStoreAction(uid: string, store: Store) {
     return { success: false, error: "Failed to save store" };
   }
 }
+
+// ─── Collection Actions ────────────────────────────────────────────────
+
+export async function createCollectionAction(
+  storeId: string,
+  name: string,
+  description: string,
+  thumbnailUrl: string,
+  productIds: string[]
+) {
+  try {
+    const res = await fetch(`${API_URL}/api/collections`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ storeId, name, description, thumbnailUrl, productIds }),
+    });
+
+    if (!res.ok) throw new Error("Failed to create collection");
+    const data = await res.json();
+
+    return { success: true, collection: data.collection };
+  } catch (error) {
+    console.error("Failed to create collection:", error);
+    return { success: false, error: "Failed to create collection" };
+  }
+}
+
+export async function getCollectionsAction(storeId: string) {
+  try {
+    const res = await fetch(`${API_URL}/api/collections?storeId=${storeId}`, {
+      cache: "no-store",
+    });
+
+    if (!res.ok) throw new Error("Failed to fetch collections");
+    const data = await res.json();
+
+    return { success: true, collections: data.collections || [] };
+  } catch (error) {
+    console.error("Failed to fetch collections:", error);
+    return { success: false, collections: [] };
+  }
+}
+
+export async function deleteCollectionAction(collectionId: string) {
+  try {
+    const res = await fetch(`${API_URL}/api/collections?id=${collectionId}`, {
+      method: "DELETE",
+    });
+
+    if (!res.ok) throw new Error("Failed to delete collection");
+
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to delete collection:", error);
+    return { success: false, error: "Failed to delete collection" };
+  }
+}
+
+export async function getCollectionByTokenAction(shareToken: string) {
+  try {
+    const res = await fetch(`${API_URL}/api/collections/${shareToken}`, {
+      next: { tags: [`collection-${shareToken}`] },
+    });
+
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (!data.collection) return null;
+
+    const collection = data.collection;
+    // Map products imageUrls → images
+    if (collection.products) {
+      collection.products = collection.products.map((p: any) => ({
+        ...p,
+        images: p.imageUrls || [],
+      }));
+    }
+    if (collection.store) {
+      collection.store = {
+        ...collection.store,
+        banner: collection.store.bannerUrl,
+        products: [],
+      };
+    }
+
+    return collection;
+  } catch (error) {
+    console.error("Failed to fetch collection:", error);
+    return null;
+  }
+}
+

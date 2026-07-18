@@ -1,16 +1,18 @@
 "use client";
 
-import { useEffect, useState, useOptimistic, startTransition, useRef } from "react";
+import { useEffect, useState, useOptimistic, startTransition, useRef, useCallback } from "react";
 import { useAuthUser } from "@/hooks/use-auth-user";
 import { MobileNavbar, BottomDock, DesktopSidebar } from "@/components/layout/AppNavigation";
 import { StoreHeader } from "@/components/features/store/StoreHeader";
 import ProductGrid from "@/components/features/store/ProductGrid";
+import { CollectionList } from "@/components/features/store/CollectionList";
 import { GridBackground } from "@/components/ui/grid-background";
 import { StoreDetailsModal } from "@/components/modals/store-details-modal";
 import { ProductModal } from "@/components/modals/product-modal";
-import { Store, Product, API_URL, storeFetcher, mapStoreFromDB, emptyStore } from "@/lib/store";
-import { addProductAction, deleteProductAction, saveStoreAction } from "@/app/actions/store";
-import { Loader2, ChevronDown, Trash2, PencilLine } from "lucide-react";
+import { CreateCollectionModal } from "@/components/modals/create-collection-modal";
+import { Store, Product, ProductCollection, API_URL, storeFetcher, mapStoreFromDB, emptyStore } from "@/lib/store";
+import { addProductAction, deleteProductAction, saveStoreAction, createCollectionAction, getCollectionsAction, deleteCollectionAction } from "@/app/actions/store";
+import { Loader2, ChevronDown, Trash2, PencilLine, CheckSquare, X, FolderOpen, PackagePlus } from "lucide-react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import useSWR from "swr";
 import { Footer } from "@/components/layout/Footer";
@@ -18,6 +20,9 @@ import { Toaster, toast } from "sonner";
 import { motion, AnimatePresence } from "motion/react";
 
 type OptimisticAction = { action: 'add' | 'edit' | 'delete', product: Product };
+
+// Tab type for switching between products and collections
+type StoreTab = "products" | "collections";
 
 
 
@@ -162,11 +167,31 @@ export default function StoreManagerPage() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [confirmAction, setConfirmAction] = useState<{ type: 'edit' | 'delete', product: Product } | null>(null);
 
+  // ─── Collections state ─────────────────────────────────────────────
+  const [activeTab, setActiveTab] = useState<StoreTab>("products");
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [showCreateCollection, setShowCreateCollection] = useState(false);
+  const [collections, setCollections] = useState<ProductCollection[]>([]);
+  const [collectionsLoaded, setCollectionsLoaded] = useState(false);
+
   const store = rawData?.store
     ? mapStoreFromDB(rawData.store)
     : user
       ? emptyStore(user.uid)
       : null;
+
+  // Load collections when store is available
+  useEffect(() => {
+    if (store?.id && !collectionsLoaded) {
+      getCollectionsAction(store.id).then((result) => {
+        if (result.success) {
+          setCollections(result.collections);
+        }
+        setCollectionsLoaded(true);
+      });
+    }
+  }, [store?.id, collectionsLoaded]);
 
   // 2. React useOptimistic for instant, 0-latency UI updates
   const [optimisticProducts, setOptimisticProducts] = useOptimistic(
@@ -178,6 +203,42 @@ export default function StoreManagerPage() {
       return [...state, product];
     }
   );
+
+  // ─── Selection helpers ─────────────────────────────────────────────
+  const handleToggleSelect = useCallback((id: string) => {
+    setSelectedIds(prev =>
+      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+    );
+  }, []);
+
+  const handleExitSelectionMode = useCallback(() => {
+    setSelectionMode(false);
+    setSelectedIds([]);
+  }, []);
+
+  const handleCreateCollection = useCallback(async (name: string, description: string, thumbnailUrl: string): Promise<string | null> => {
+    if (!store) return null;
+    const result = await createCollectionAction(store.id, name, description, thumbnailUrl, selectedIds);
+    if (result.success && result.collection) {
+      toast.success("Collection created!");
+      setCollections(prev => [result.collection, ...prev]);
+      handleExitSelectionMode();
+      return result.collection.shareToken;
+    } else {
+      toast.error("Failed to create collection");
+      return null;
+    }
+  }, [store, selectedIds, handleExitSelectionMode]);
+
+  const handleDeleteCollection = useCallback(async (id: string) => {
+    const result = await deleteCollectionAction(id);
+    if (result.success) {
+      setCollections(prev => prev.filter(c => c.id !== id));
+      toast.success("Collection deleted");
+    } else {
+      toast.error("Failed to delete collection");
+    }
+  }, []);
 
   if (isLoading || !store || !user) {
     return (
@@ -211,7 +272,7 @@ export default function StoreManagerPage() {
     });
 
     // 4. Background Server Action
-    const result = await addProductAction(store.id, store.handle, product);
+    const result = await addProductAction(store.id, store.handle || store.id, product);
 
     if (result.success) {
       toast.success(isEdit ? "Product updated" : "Product added");
@@ -228,7 +289,7 @@ export default function StoreManagerPage() {
       setOptimisticProducts({ action: 'delete', product });
     });
 
-    const result = await deleteProductAction(store.handle, product.id);
+    const result = await deleteProductAction(store.handle || store.id, product.id);
 
     if (result.success) {
       toast.success("Product deleted");
@@ -261,36 +322,167 @@ export default function StoreManagerPage() {
       <StoreHeader store={store} onEdit={() => setIsEditingStore(true)} />
 
       <main className="max-w-6xl mx-auto px-4 py-6">
-        {/* Section header */}
-        <div className="flex items-baseline justify-between mb-4">
-          <h2 className="text-lg sm:text-xl font-bold tracking-tight text-zinc-950">
-            The Shelf
-            <span className="font-editorial font-normal text-zinc-400 text-base sm:text-lg ml-2">
-              {optimisticProducts.length === 0
-                ? "— waiting for its first product"
-                : `— ${optimisticProducts.length} ${optimisticProducts.length === 1 ? "item" : "items"} on display`}
-            </span>
-          </h2>
+        {/* ─── Tab Bar + Selection Controls ────────────────────────── */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+          <div className="flex items-center gap-2">
+            {/* Products / Collections tabs */}
+            <div className="flex bg-white rounded-xl border border-zinc-950/10 p-1 shadow-sm">
+              <button
+                onClick={() => { setActiveTab("products"); handleExitSelectionMode(); }}
+                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ${
+                  activeTab === "products"
+                    ? "bg-zinc-950 text-white shadow-sm"
+                    : "text-zinc-500 hover:text-zinc-800"
+                }`}
+              >
+                All Products
+              </button>
+              <button
+                onClick={() => { setActiveTab("collections"); handleExitSelectionMode(); }}
+                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
+                  activeTab === "collections"
+                    ? "bg-zinc-950 text-white shadow-sm"
+                    : "text-zinc-500 hover:text-zinc-800"
+                }`}
+              >
+                <FolderOpen className="size-3.5" />
+                Collections
+                {collections.length > 0 && (
+                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                    activeTab === "collections"
+                      ? "bg-white/20 text-white"
+                      : "bg-zinc-200 text-zinc-600"
+                  }`}>
+                    {collections.length}
+                  </span>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Selection mode toggle — only visible on products tab */}
+          {activeTab === "products" && (
+            <div className="flex items-center gap-2">
+              {selectionMode ? (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="flex items-center gap-2"
+                >
+                  <span className="text-sm font-semibold text-violet-700 bg-violet-50 px-3 py-1.5 rounded-lg border border-violet-200">
+                    {selectedIds.length} selected
+                  </span>
+                  <button
+                    onClick={handleExitSelectionMode}
+                    className="h-9 px-3 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-600 text-sm font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    <X className="size-3.5" />
+                    Cancel
+                  </button>
+                </motion.div>
+              ) : (
+                <button
+                  onClick={() => setSelectionMode(true)}
+                  className="h-9 px-4 rounded-lg bg-white border border-zinc-200 text-zinc-700 text-sm font-semibold flex items-center gap-2 hover:border-zinc-400 transition-colors cursor-pointer shadow-sm"
+                >
+                  <CheckSquare className="size-4" />
+                  <span className="hidden sm:inline">Select Products</span>
+                  <span className="sm:hidden">Select</span>
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
-        <ResponsiveCategories
-          categories={categories as string[]}
-          activeCategory={activeCategory}
-          setActiveCategory={setActiveCategory}
-          themeColor={store.themeColor || '#dc2626'}
-        />
+        {/* ─── Products Tab ───────────────────────────────────────── */}
+        {activeTab === "products" && (
+          <>
+            {/* Section header */}
+            <div className="flex items-baseline justify-between mb-4">
+              <h2 className="text-lg sm:text-xl font-bold tracking-tight text-zinc-950">
+                The Shelf
+                <span className="font-editorial font-normal text-zinc-400 text-base sm:text-lg ml-2">
+                  {optimisticProducts.length === 0
+                    ? "— waiting for its first product"
+                    : `— ${optimisticProducts.length} ${optimisticProducts.length === 1 ? "item" : "items"} on display`}
+                </span>
+              </h2>
+            </div>
 
-        <ProductGrid
-          products={filteredProducts}
-          onEdit={(p) => setConfirmAction({ type: 'edit', product: p })}
-          onDelete={(id) => {
-            const p = store.products.find(x => x.id === id);
-            if (p) setConfirmAction({ type: 'delete', product: p });
-          }}
-          onAddProduct={() => setIsAddingProduct(true)}
-          themeColor={store.themeColor}
-        />
+            <ResponsiveCategories
+              categories={categories as string[]}
+              activeCategory={activeCategory}
+              setActiveCategory={setActiveCategory}
+              themeColor={store.themeColor || '#dc2626'}
+            />
+
+            <ProductGrid
+              products={filteredProducts}
+              onEdit={selectionMode ? undefined : (p) => setConfirmAction({ type: 'edit', product: p })}
+              onDelete={selectionMode ? undefined : (id) => {
+                const p = store.products.find(x => x.id === id);
+                if (p) setConfirmAction({ type: 'delete', product: p });
+              }}
+              onAddProduct={selectionMode ? undefined : () => setIsAddingProduct(true)}
+              themeColor={store.themeColor}
+              selectionMode={selectionMode}
+              selectedIds={selectedIds}
+              onToggleSelect={handleToggleSelect}
+            />
+          </>
+        )}
+
+        {/* ─── Collections Tab ────────────────────────────────────── */}
+        {activeTab === "collections" && (
+          <>
+            <div className="flex items-baseline justify-between mb-6">
+              <h2 className="text-lg sm:text-xl font-bold tracking-tight text-zinc-950">
+                Your Collections
+                <span className="font-editorial font-normal text-zinc-400 text-base sm:text-lg ml-2">
+                  — {collections.length} {collections.length === 1 ? "collection" : "collections"}
+                </span>
+              </h2>
+            </div>
+
+            <CollectionList
+              collections={collections}
+              onDelete={handleDeleteCollection}
+              themeColor={store.themeColor}
+            />
+          </>
+        )}
       </main>
+
+      {/* ─── Floating Action Bar (selection mode) ─────────────────── */}
+      <AnimatePresence>
+        {selectionMode && selectedIds.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 40 }}
+            transition={{ type: "spring", stiffness: 360, damping: 28 }}
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[150] md:left-[calc(50%+8rem)] w-[calc(100%-2rem)] max-w-md"
+          >
+            <div className="bg-zinc-950 rounded-2xl shadow-xl border border-white/10 px-5 py-4 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="size-10 shrink-0 rounded-xl bg-violet-600 flex items-center justify-center">
+                  <PackagePlus className="size-5 text-white" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-white text-sm font-semibold truncate">{selectedIds.length} product{selectedIds.length !== 1 ? "s" : ""} selected</p>
+                  <p className="text-zinc-400 text-xs">Ready to bundle</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowCreateCollection(true)}
+                className="shrink-0 h-10 px-5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-sm font-semibold shadow-lg hover:shadow-xl transition-all cursor-pointer"
+              >
+                Create
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <Footer />
       <Toaster position="bottom-center" />
@@ -311,6 +503,14 @@ export default function StoreManagerPage() {
             setEditingProduct(undefined);
           }}
           onSave={handleSaveProduct}
+        />
+      )}
+
+      {showCreateCollection && (
+        <CreateCollectionModal
+          selectedCount={selectedIds.length}
+          onClose={() => setShowCreateCollection(false)}
+          onSubmit={handleCreateCollection}
         />
       )}
 

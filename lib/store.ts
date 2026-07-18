@@ -28,6 +28,7 @@ export type Store = {
   banner?: string; // fallback for old UI fields
   logoUrl?: string;
   themeColor?: string;
+  handle?: string; // store handle (= id), set by mapStoreFromDB
   products: Product[];
 };
 
@@ -155,3 +156,75 @@ export const storeFetcher = async (url: string) => {
   if (!res.ok) throw new Error("Failed to fetch");
   return res.json();
 };
+
+// ─── Product Collections ───────────────────────────────────────────────
+
+export type ProductCollection = {
+  id: string;
+  storeId: string;
+  name: string;
+  description: string;
+  productIds: string[];
+  shareToken: string;
+  thumbnailUrl?: string;
+  createdAt: string;
+  updatedAt: string;
+  products?: Product[];   // populated when fetching by shareToken
+  store?: Store;          // populated when fetching by shareToken
+};
+
+export async function createCollection(
+  storeId: string,
+  name: string,
+  description: string,
+  thumbnailUrl: string,
+  productIds: string[]
+): Promise<ProductCollection> {
+  const res = await fetch(`${API_URL}/api/collections`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ storeId, name, description, thumbnailUrl, productIds }),
+  });
+  if (!res.ok) throw new Error("Failed to create collection");
+  const data = await res.json();
+  return data.collection;
+}
+
+export async function getCollections(storeId: string): Promise<ProductCollection[]> {
+  const res = await fetch(`${API_URL}/api/collections?storeId=${storeId}`);
+  if (!res.ok) throw new Error("Failed to fetch collections");
+  const data = await res.json();
+  return data.collections || [];
+}
+
+export async function deleteCollection(id: string): Promise<void> {
+  await fetch(`${API_URL}/api/collections?id=${id}`, { method: 'DELETE' });
+}
+
+export async function getCollectionByToken(shareToken: string): Promise<ProductCollection | null> {
+  try {
+    const res = await fetch(`${API_URL}/api/collections/${shareToken}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (!data.collection) return null;
+    // Map products imageUrls → images
+    const collection = data.collection;
+    if (collection.products) {
+      collection.products = collection.products.map((p: any) => ({
+        ...p,
+        images: p.imageUrls || [],
+      }));
+    }
+    if (collection.store) {
+      collection.store = {
+        ...collection.store,
+        banner: collection.store.bannerUrl,
+        products: [],
+      };
+    }
+    return collection;
+  } catch {
+    return null;
+  }
+}
+
