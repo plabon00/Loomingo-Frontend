@@ -116,7 +116,7 @@ export default function DashboardContent() {
     const left = window.screen.width / 2 - width / 2;
     const top = window.screen.height / 2 - height / 2;
     
-    const backendUrl = "https://jesica-noncommendatory-marjory.ngrok-free.dev";
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || "https://loomingo-backend-1.onrender.com";
     const authUrl = `${backendUrl}/api/instagram/connect_account?uid=${firebaseUid}`;
     
     const popup = window.open(authUrl, "Instagram Auth", `width=${width},height=${height},top=${top},left=${left}`);

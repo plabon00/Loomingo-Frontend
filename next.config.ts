@@ -19,9 +19,9 @@ const nextConfig: NextConfig = {
   },
 
   async rewrites() {
-    // BACKEND_URL is a server-side variable read at runtime by Vercel (not baked at build time).
+    // NEXT_PUBLIC_API_URL is a server-side variable read at runtime by Vercel (not baked at build time).
     // For local dev, it defaults to localhost:8080.
-    // On Vercel, set BACKEND_URL=https://jesica-noncommendatory-marjory.ngrok-free.dev in the dashboard.
+    // On Vercel, set NEXT_PUBLIC_API_URL=https://loomingo-backend-1.onrender.com in the dashboard.
     const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
     return [
       {
