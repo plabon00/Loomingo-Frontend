@@ -104,39 +104,48 @@ export default function ProductGrid({
               }}
               className={`group relative flex flex-col overflow-hidden bg-white transition-all duration-300 h-full cursor-pointer ${
                 selectionMode && selectedIds.includes(p.id)
-                  ? "border-violet-600 border-2 rounded-lg"
-                  : "border border-zinc-200 rounded-lg hover:shadow-md"
+                  ? "border-2 rounded-xl shadow-md"
+                  : "border border-zinc-200 rounded-xl hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:-translate-y-1"
               }`}
+              style={selectionMode && selectedIds.includes(p.id) ? { borderColor: accent } : {}}
             >
               {/* Image Section */}
               <div className="aspect-[4/5] bg-zinc-50 relative overflow-hidden">
                 {/* Selection checkbox overlay */}
                 {selectionMode && (
-                  <div className={`absolute top-2.5 left-2.5 z-20 size-7 flex items-center justify-center transition-all duration-200 border-2 ${
-                    selectedIds.includes(p.id)
-                      ? "bg-violet-600 border-violet-600 text-white"
-                      : "bg-white border-zinc-900 text-zinc-400"
-                  }`}>
-                    {selectedIds.includes(p.id) && (
-                      <CheckCircle2 className="size-5" />
-                    )}
+                  <div 
+                    className={`absolute top-3 left-3 z-20 size-6 rounded-md flex items-center justify-center transition-all duration-200 shadow-sm ${
+                      selectedIds.includes(p.id)
+                        ? "text-white scale-110"
+                        : "bg-white/90 backdrop-blur-sm border-2 border-zinc-300 text-transparent"
+                    }`}
+                    style={selectedIds.includes(p.id) ? { backgroundColor: accent, border: `2px solid ${accent}` } : {}}
+                  >
+                    <Check className="size-4 stroke-[3]" />
                   </div>
                 )}
+                
+                {/* Selection Overlay Dimmer */}
+                {selectionMode && (
+                  <div className={`absolute inset-0 z-10 transition-colors duration-300 pointer-events-none ${
+                    selectedIds.includes(p.id) ? "bg-black/10" : "bg-transparent group-hover:bg-black/5"
+                  }`} />
+                )}
+
                 {p.images[0] ? (
                   /* eslint-disable-next-line @next/next/no-img-element */
-                  <img src={p.images[0]} alt={p.name} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]" />
+                  <img src={p.images[0]} alt={p.name} loading="lazy" className={`w-full h-full object-cover transition-transform duration-700 ease-[0.22,1,0.36,1] ${selectionMode && selectedIds.includes(p.id) ? "scale-[1.02]" : "group-hover:scale-[1.08]"}`} />
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center text-zinc-300">
                     <PackageOpen className="size-8" />
                   </div>
                 )}
-                {/* Price tag in image - removing, we will put it below like the sample */}
 
                 {/* Action Overlay */}
-                <div className="absolute top-2.5 right-2.5 flex flex-col gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:translate-x-1 sm:group-hover:translate-x-0 transition-all duration-200">
+                <div className="absolute top-3 right-3 z-30 flex flex-col gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:translate-x-1 sm:group-hover:translate-x-0 transition-all duration-300 ease-[0.22,1,0.36,1]">
                   <button
                     onClick={(e) => handleShare(e, p)}
-                    className="size-9 rounded-full bg-white/95 backdrop-blur flex items-center justify-center text-zinc-600 hover:text-zinc-950 shadow-sm border border-zinc-950/10 transition-all duration-150 active:scale-90 cursor-pointer"
+                    className="size-9 rounded-full bg-white/95 backdrop-blur-sm flex items-center justify-center text-zinc-600 hover:text-zinc-950 shadow-md border border-zinc-950/5 transition-all duration-200 active:scale-95 cursor-pointer"
                     aria-label="Share product"
                   >
                     {copiedId === p.id ? <Check className="size-4 text-green-600" /> : <Share2 className="size-4" />}
@@ -145,7 +154,7 @@ export default function ProductGrid({
                   {onEdit && (
                     <button
                       onClick={(e) => handleEdit(e, p)}
-                      className="size-9 rounded-full bg-white/95 backdrop-blur flex items-center justify-center text-zinc-600 hover:text-zinc-950 shadow-sm border border-zinc-950/10 transition-all duration-150 active:scale-90 cursor-pointer"
+                      className="size-9 rounded-full bg-white/95 backdrop-blur-sm flex items-center justify-center text-zinc-600 hover:text-zinc-950 shadow-md border border-zinc-950/5 transition-all duration-200 active:scale-95 cursor-pointer"
                       aria-label="Edit product"
                     >
                       <Edit2 className="size-4" />
@@ -154,7 +163,7 @@ export default function ProductGrid({
                   {onDelete && (
                     <button
                       onClick={(e) => handleDelete(e, p)}
-                      className="size-9 rounded-full bg-white/95 backdrop-blur flex items-center justify-center text-zinc-600 hover:text-red-600 shadow-sm border border-zinc-950/10 transition-all duration-150 active:scale-90 cursor-pointer"
+                      className="size-9 rounded-full bg-white/95 backdrop-blur-sm flex items-center justify-center text-zinc-600 hover:text-red-600 shadow-md border border-zinc-950/5 transition-all duration-200 active:scale-95 cursor-pointer"
                       aria-label="Delete product"
                     >
                       <Trash2 className="size-4" />
@@ -164,13 +173,13 @@ export default function ProductGrid({
               </div>
 
               {/* Details Section */}
-              <div className="p-3 flex flex-col flex-grow">
-                <h3 className="text-[15px] font-bold text-zinc-900 truncate tracking-tight">{p.name}</h3>
+              <div className="p-4 flex flex-col flex-grow bg-white">
+                <h3 className="text-[15px] font-extrabold text-zinc-900 truncate tracking-tight">{p.name}</h3>
                 {p.description && (
-                  <p className="text-[13px] text-zinc-500 truncate mt-0.5">{p.description}</p>
+                  <p className="text-[13px] text-zinc-500 truncate mt-1">{p.description}</p>
                 )}
-                <div className="mt-1.5 flex items-center gap-1.5">
-                  <span className="text-[16px] font-bold text-zinc-900">
+                <div className="mt-2.5 flex items-center gap-1.5">
+                  <span className="text-[16px] font-extrabold text-zinc-900" style={{ color: selectionMode && selectedIds.includes(p.id) ? accent : undefined }}>
                     {p.price != null ? `₹${Number(p.price).toFixed(0)}` : 'Price on request'}
                   </span>
                 </div>

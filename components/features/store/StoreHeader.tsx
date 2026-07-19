@@ -48,10 +48,12 @@ export function StoreHeader({ store, onEdit }: { store: Store, onEdit?: () => vo
     }
   };
 
+  const isOwner = !!onEdit;
+
   return (
     <div className="relative w-full flex flex-col items-center" ref={containerRef}>
       {/* Premium Hero Banner */}
-      <div className="w-full h-56 sm:h-72 lg:h-[22rem] bg-zinc-100 overflow-hidden relative">
+      <div className="w-full h-48 sm:h-56 lg:h-[18rem] bg-zinc-100 overflow-hidden relative">
         {store.banner ? (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img src={store.banner} alt="Store Banner" className="w-full h-full object-cover" />
@@ -69,34 +71,42 @@ export function StoreHeader({ store, onEdit }: { store: Store, onEdit?: () => vo
       </div>
 
       {/* Store Info Container */}
-      <div className="w-full max-w-6xl px-4 sm:px-6 lg:px-8 relative -mt-16 sm:-mt-20 z-10 pb-8">
-        <div className="gsap-store-card bg-white/80 backdrop-blur-xl rounded-3xl border border-white p-6 sm:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.06)] flex flex-col sm:flex-row gap-6 sm:gap-10 items-start sm:items-center">
-          
-          {/* Accent ink edge */}
-          <div className="absolute left-0 top-0 bottom-0 w-1.5 rounded-l-3xl" style={{ backgroundColor: accent }} aria-hidden="true" />
+      <div className="w-full max-w-5xl px-4 sm:px-6 relative -mt-12 sm:-mt-16 z-10 pb-6">
+        <div 
+          className="gsap-store-card bg-white/70 backdrop-blur-2xl rounded-2xl border border-white/50 p-4 sm:p-6 shadow-xl flex flex-col sm:flex-row gap-5 sm:gap-6 items-start sm:items-center relative"
+          style={{ boxShadow: `0 10px 40px -10px ${accent}20, 0 1px 3px ${accent}10` }}
+        >
+          {/* Decorative background elements (clipped to card radius) */}
+          <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
+            {/* Subtle gradient glow behind the card */}
+            <div className="absolute inset-0 opacity-10" style={{ background: `radial-gradient(circle at top left, ${accent}, transparent 70%)` }} />
+            
+            {/* Accent ink edge */}
+            <div className="absolute left-0 top-0 bottom-0 w-1.5" style={{ backgroundColor: accent }} aria-hidden="true" />
+          </div>
 
           {/* Logo */}
-          <div className="gsap-store-logo shrink-0 -mt-14 sm:-mt-20 lg:-mt-24 shadow-2xl rounded-3xl bg-white p-1.5">
-            <div className="rounded-2xl overflow-hidden size-24 sm:size-32 lg:size-40 bg-zinc-50 border border-zinc-100 flex items-center justify-center text-zinc-300">
+          <div className="gsap-store-logo shrink-0 -mt-10 sm:-mt-14 lg:-mt-16 shadow-lg rounded-2xl bg-white p-1 z-10">
+            <div className="rounded-xl overflow-hidden size-16 sm:size-24 lg:size-28 bg-zinc-50 border border-zinc-100 flex items-center justify-center text-zinc-300">
               {store.logoUrl ? (
                 <img src={store.logoUrl} alt="Store Logo" className="w-full h-full object-cover" />
               ) : (
-                <ImageIcon className="size-10 sm:size-12 opacity-50" />
+                <ImageIcon className="size-8 sm:size-10 opacity-50" />
               )}
             </div>
           </div>
 
           {/* Text Info */}
-          <div className="gsap-store-text flex-1 min-w-0">
-            <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] mb-2" style={{ color: accent }}>
-              <Sparkles className="size-3.5" aria-hidden="true" />
-              Your storefront
+          <div className="gsap-store-text flex-1 min-w-0 z-10">
+            <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.2em] mb-1.5" style={{ color: accent }}>
+              <Sparkles className="size-3" aria-hidden="true" />
+              {isOwner ? "Your storefront" : "Storefront"}
             </p>
-            <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-zinc-900 truncate pb-1">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-zinc-900 truncate pb-0.5">
               {store.name}
             </h1>
-            <p className="text-sm sm:text-base text-zinc-500 mt-1 mb-4 flex items-center gap-1.5">
-              curated <span className="font-editorial text-lg text-zinc-700">by {store.creator || "Anonymous"}</span>
+            <p className="text-sm text-zinc-500 mt-1 mb-2 flex items-center gap-1.5">
+              curated <span className="font-editorial text-base text-zinc-700">by {store.creator || "Anonymous"}</span>
             </p>
             {store.description && (
               <div className="border-l-2 border-zinc-200/60 pl-4 py-1">

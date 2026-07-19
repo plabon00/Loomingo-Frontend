@@ -323,35 +323,38 @@ export default function StoreManagerPage() {
 
       <main className="max-w-6xl mx-auto px-4 py-6">
         {/* ─── Tab Bar + Selection Controls ────────────────────────── */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 relative">
+          
           <div className="flex items-center gap-2">
             {/* Products / Collections tabs */}
-            <div className="flex bg-white rounded-xl border border-zinc-950/10 p-1 shadow-sm">
+            <div className="flex bg-white/80 backdrop-blur-md rounded-xl p-1 shadow-[0_2px_10px_rgb(0,0,0,0.04)] border border-zinc-100">
               <button
                 onClick={() => { setActiveTab("products"); handleExitSelectionMode(); }}
-                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ${
+                className={`px-4 py-1.5 rounded-lg text-[13px] font-bold transition-all duration-300 cursor-pointer ${
                   activeTab === "products"
-                    ? "bg-zinc-950 text-white shadow-sm"
-                    : "text-zinc-500 hover:text-zinc-800"
+                    ? "bg-zinc-900 text-white shadow-md"
+                    : "text-zinc-500 hover:text-zinc-900"
                 }`}
+                style={activeTab === "products" ? { backgroundColor: store.themeColor || '#18181b', color: '#ffffff' } : {}}
               >
-                All Products
+                Products
               </button>
               <button
                 onClick={() => { setActiveTab("collections"); handleExitSelectionMode(); }}
-                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
+                className={`px-4 py-1.5 rounded-lg text-[13px] font-bold transition-all duration-300 cursor-pointer flex items-center gap-1.5 ${
                   activeTab === "collections"
-                    ? "bg-zinc-950 text-white shadow-sm"
-                    : "text-zinc-500 hover:text-zinc-800"
+                    ? "bg-zinc-900 text-white shadow-md"
+                    : "text-zinc-500 hover:text-zinc-900"
                 }`}
+                style={activeTab === "collections" ? { backgroundColor: store.themeColor || '#18181b', color: '#ffffff' } : {}}
               >
                 <FolderOpen className="size-3.5" />
                 Collections
                 {collections.length > 0 && (
-                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                  <span className={`text-[10px] font-extrabold px-1.5 py-0.5 rounded-full ${
                     activeTab === "collections"
-                      ? "bg-white/20 text-white"
-                      : "bg-zinc-200 text-zinc-600"
+                      ? "bg-white/25 text-white"
+                      : "bg-zinc-100 text-zinc-500"
                   }`}>
                     {collections.length}
                   </span>
@@ -363,94 +366,123 @@ export default function StoreManagerPage() {
           {/* Selection mode toggle — only visible on products tab */}
           {activeTab === "products" && (
             <div className="flex items-center gap-2">
-              {selectionMode ? (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="flex items-center gap-2"
-                >
-                  <span className="text-sm font-semibold text-violet-700 bg-violet-50 px-3 py-1.5 rounded-lg border border-violet-200">
-                    {selectedIds.length} selected
-                  </span>
-                  <button
-                    onClick={handleExitSelectionMode}
-                    className="h-9 px-3 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-600 text-sm font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
+              <AnimatePresence mode="wait">
+                {selectionMode ? (
+                  <motion.div
+                    key="active"
+                    initial={{ opacity: 0, scale: 0.95, x: 10 }}
+                    animate={{ opacity: 1, scale: 1, x: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, x: 10 }}
+                    transition={{ duration: 0.2 }}
+                    className="flex items-center gap-2"
                   >
-                    <X className="size-3.5" />
-                    Cancel
-                  </button>
-                </motion.div>
-              ) : (
-                <button
-                  onClick={() => setSelectionMode(true)}
-                  className="h-9 px-4 rounded-lg bg-white border border-zinc-200 text-zinc-700 text-sm font-semibold flex items-center gap-2 hover:border-zinc-400 transition-colors cursor-pointer shadow-sm"
-                >
-                  <CheckSquare className="size-4" />
-                  <span className="hidden sm:inline">Select Products</span>
-                  <span className="sm:hidden">Select</span>
-                </button>
-              )}
+                    <span 
+                      className="text-[13px] font-bold px-3 py-1.5 rounded-lg border shadow-sm flex items-center gap-1.5"
+                      style={{ color: store.themeColor || '#18181b', borderColor: `${store.themeColor || '#18181b'}30`, backgroundColor: `${store.themeColor || '#18181b'}10` }}
+                    >
+                      <CheckSquare className="size-3.5" />
+                      {selectedIds.length} selected
+                    </span>
+                    <button
+                      onClick={handleExitSelectionMode}
+                      className="h-8 px-3 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-600 text-[13px] font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                    >
+                      <X className="size-3.5" />
+                      Cancel
+                    </button>
+                  </motion.div>
+                ) : (
+                  <motion.button
+                    key="inactive"
+                    initial={{ opacity: 0, scale: 0.95, x: 10 }}
+                    animate={{ opacity: 1, scale: 1, x: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, x: 10 }}
+                    transition={{ duration: 0.2 }}
+                    whileHover={{ y: -1 }}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => setSelectionMode(true)}
+                    className="h-8 px-3.5 rounded-lg bg-white border border-zinc-200/80 text-zinc-600 text-[13px] font-bold flex items-center gap-1.5 hover:border-zinc-300 hover:text-zinc-900 transition-all cursor-pointer shadow-[0_2px_8px_rgb(0,0,0,0.04)]"
+                  >
+                    <CheckSquare className="size-3.5" />
+                    Select
+                  </motion.button>
+                )}
+              </AnimatePresence>
             </div>
           )}
         </div>
 
-        {/* ─── Products Tab ───────────────────────────────────────── */}
-        {activeTab === "products" && (
-          <>
-            {/* Section header */}
-            <div className="flex items-baseline justify-between mb-4">
-              <h2 className="text-lg sm:text-xl font-bold tracking-tight text-zinc-950">
-                The Shelf
-                <span className="font-editorial font-normal text-zinc-400 text-base sm:text-lg ml-2">
-                  {optimisticProducts.length === 0
-                    ? "— waiting for its first product"
-                    : `— ${optimisticProducts.length} ${optimisticProducts.length === 1 ? "item" : "items"} on display`}
-                </span>
-              </h2>
-            </div>
+        {/* ─── Animated Tab Content ───────────────────────────────────────── */}
+        <AnimatePresence mode="wait">
+          {activeTab === "products" && (
+            <motion.div
+              key="products"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+            >
+              {/* Section header */}
+              <div className="flex items-baseline justify-between mb-4">
+                <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight text-zinc-900">
+                  The Shelf
+                  <span className="font-editorial font-normal text-zinc-400 text-lg sm:text-xl ml-2">
+                    {optimisticProducts.length === 0
+                      ? "— waiting for its first product"
+                      : `— ${optimisticProducts.length} ${optimisticProducts.length === 1 ? "item" : "items"} on display`}
+                  </span>
+                </h2>
+              </div>
 
-            <ResponsiveCategories
-              categories={categories as string[]}
-              activeCategory={activeCategory}
-              setActiveCategory={setActiveCategory}
-              themeColor={store.themeColor || '#dc2626'}
-            />
+              <ResponsiveCategories
+                categories={categories as string[]}
+                activeCategory={activeCategory}
+                setActiveCategory={setActiveCategory}
+                themeColor={store.themeColor || '#18181b'}
+              />
 
-            <ProductGrid
-              products={filteredProducts}
-              onEdit={selectionMode ? undefined : (p) => setConfirmAction({ type: 'edit', product: p })}
-              onDelete={selectionMode ? undefined : (id) => {
-                const p = store.products.find(x => x.id === id);
-                if (p) setConfirmAction({ type: 'delete', product: p });
-              }}
-              onAddProduct={selectionMode ? undefined : () => setIsAddingProduct(true)}
-              themeColor={store.themeColor}
-              selectionMode={selectionMode}
-              selectedIds={selectedIds}
-              onToggleSelect={handleToggleSelect}
-            />
-          </>
-        )}
+              <ProductGrid
+                products={filteredProducts}
+                onEdit={selectionMode ? undefined : (p) => setConfirmAction({ type: 'edit', product: p })}
+                onDelete={selectionMode ? undefined : (id) => {
+                  const p = store.products.find(x => x.id === id);
+                  if (p) setConfirmAction({ type: 'delete', product: p });
+                }}
+                onAddProduct={selectionMode ? undefined : () => setIsAddingProduct(true)}
+                themeColor={store.themeColor}
+                selectionMode={selectionMode}
+                selectedIds={selectedIds}
+                onToggleSelect={handleToggleSelect}
+              />
+            </motion.div>
+          )}
 
-        {/* ─── Collections Tab ────────────────────────────────────── */}
-        {activeTab === "collections" && (
-          <>
-            <div className="flex items-baseline justify-between mb-6">
-              <h2 className="text-lg sm:text-xl font-bold tracking-tight text-zinc-950">
-                Your Collections
-                <span className="font-editorial font-normal text-zinc-400 text-base sm:text-lg ml-2">
-                  — {collections.length} {collections.length === 1 ? "collection" : "collections"}
-                </span>
-              </h2>
-            </div>
+          {/* ─── Collections Tab ────────────────────────────────────── */}
+          {activeTab === "collections" && (
+            <motion.div
+              key="collections"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+            >
+              <div className="flex items-baseline justify-between mb-6">
+                <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight text-zinc-900">
+                  Your Collections
+                  <span className="font-editorial font-normal text-zinc-400 text-lg sm:text-xl ml-2">
+                    — {collections.length} {collections.length === 1 ? "collection" : "collections"}
+                  </span>
+                </h2>
+              </div>
 
-            <CollectionList
-              collections={collections}
-              onDelete={handleDeleteCollection}
-              themeColor={store.themeColor}
-            />
-          </>
-        )}
+              <CollectionList
+                collections={collections}
+                onDelete={handleDeleteCollection}
+                themeColor={store.themeColor}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
 
       {/* ─── Floating Action Bar (selection mode) ─────────────────── */}
