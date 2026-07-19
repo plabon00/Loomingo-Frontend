@@ -408,9 +408,6 @@ export default function AutoDMManager() {
   };
 
   const handleDelete = async (mediaId: string) => {
-    if (!confirm("Are you sure you want to delete this automation rule?"))
-      return;
-
     try {
       const user = auth.currentUser;
       if (!user) return;

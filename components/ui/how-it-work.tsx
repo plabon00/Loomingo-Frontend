@@ -1,6 +1,4 @@
 import { FocusIcon, MessageSquareDashed, Rocket } from "lucide-react";
-// Adjust this import path based on where you saved the BorderGlow file!
-import BorderGlow from "@/components/features/misc/BorderGlow"; 
 
 export default function AutomationSteps() {
   const steps = [
@@ -9,28 +7,18 @@ export default function AutomationSteps() {
       title: "Select Post",
       description: "Choose the specific Instagram post or Reel you want to automate.",
       icon: <FocusIcon className="size-6 text-red-600" />,
-      badgeTheme: "bg-red-50 text-red-700 border border-red-100",
-      // Brand-aligned Red Glow
-      glowColors: ['#fca5a5', '#dc2626', '#7f1d1d'], // red-300, red-600, red-900
-      glowHsl: '0 72 51', // HSL for red-600
     },
     {
       id: 2,
       title: "Set Keyword",
       description: "Define the trigger word (e.g., 'LINK') users need to comment.",
       icon: <MessageSquareDashed className="size-6 text-red-600" />,
-      badgeTheme: "bg-red-50 text-red-700 border border-red-100",
-      glowColors: ['#fca5a5', '#dc2626', '#7f1d1d'],
-      glowHsl: '0 72 51',
     },
     {
       id: 3,
       title: "Auto-DM",
       description: "Loomin instantly sends your custom message directly to their inbox.",
       icon: <Rocket className="size-6 text-red-600" />,
-      badgeTheme: "bg-red-50 text-red-700 border border-red-100",
-      glowColors: ['#fca5a5', '#dc2626', '#7f1d1d'],
-      glowHsl: '0 72 51',
     },
   ];
 
@@ -43,11 +31,7 @@ export default function AutomationSteps() {
         aria-hidden="true"
       />
 
-      {/* NEW WRAPPER SECTION:
-        - rounded-[2.5rem] matches your CTA and Profile Card curves
-        - border border-zinc-200 adds the clean, premium thin line
-        - bg-white/60 with backdrop-blur gives it the glassmorphic depth
-      */}
+      {/* Glassmorphic Section Wrapper */}
       <div className="max-w-6xl w-full border border-zinc-200 bg-white/60 backdrop-blur-md rounded-[2.5rem] p-8 md:p-16 relative z-10 shadow-sm">
         
         <div className="text-center mb-16 flex flex-col items-center">
@@ -65,35 +49,30 @@ export default function AutomationSteps() {
           </p>
         </div>
 
-        <div className="relative flex flex-col md:flex-row gap-8 lg:gap-12 items-center md:items-stretch justify-center">
+        <div className="relative flex flex-col md:flex-row gap-8 lg:gap-12 items-center md:items-stretch justify-center gsap-pill-row">
           
-          {/* --- DOTTED LINES (Updated to blend with the white/zinc aesthetic) --- */}
+          {/* --- DOTTED LINES --- */}
           <div className="hidden md:block absolute top-1/2 left-[10%] right-[10%] h-0 border-t-2 border-dashed border-red-900/15 -translate-y-1/2 -z-10" />
           <div className="block md:hidden absolute left-1/2 top-[5%] bottom-[5%] w-0 border-l-2 border-dashed border-red-900/15 -translate-x-1/2 -z-10" />
 
-          {/* --- BORDER GLOW CARDS --- */}
+          {/* --- PILL-STYLE GLASS CARDS --- */}
           {steps.map((step) => (
-            <BorderGlow 
+            <div 
               key={step.id} 
-              className="relative z-10 w-full max-w-sm flex flex-col shadow-sm"
-              colors={step.glowColors}
-              glowColor={step.glowHsl}
-              backgroundColor="#ffffff" // Ensures the inside of the card is pure white
-              borderRadius={24} 
-              animated={false} 
+              className="gsap-pill-item relative flex flex-col items-center bg-white/80 backdrop-blur-xl border border-zinc-200/60 rounded-[2rem] p-6 shadow-[0_2px_16px_rgba(0,0,0,0.06)] hover:shadow-[0_6px_28px_rgba(0,0,0,0.10)] transition-all duration-300 max-w-xs w-full"
             >
-              {/* Custom Card Header */}
-              <div className="flex flex-row items-center justify-between p-6 pb-4">
-                <div className="p-3 bg-zinc-50 border border-zinc-100 rounded-xl shadow-inner">
+              {/* Card Header */}
+              <div className="flex flex-row items-center justify-between w-full pb-4">
+                <div className="p-3 bg-zinc-50 border border-zinc-100 rounded-full shadow-inner">
                   {step.icon}
                 </div>
-                <span className={`px-3 py-1 text-[10px] font-bold rounded-full uppercase tracking-wider shadow-sm ${step.badgeTheme}`}>
-                  STEP {step.id}
+                <span className="flex items-center justify-center size-6 rounded-full bg-red-600 text-white text-[10px] font-bold">
+                  {step.id}
                 </span>
               </div>
               
-              {/* Custom Card Content */}
-              <div className="p-6 pt-0 flex-1">
+              {/* Card Content */}
+              <div className="pt-0 flex-1 w-full">
                 <h3 className="text-xl font-semibold text-red-950 tracking-tight mb-3">
                   {step.title}
                 </h3>
@@ -101,7 +80,7 @@ export default function AutomationSteps() {
                   {step.description}
                 </p>
               </div>
-            </BorderGlow>
+            </div>
           ))}
 
         </div>

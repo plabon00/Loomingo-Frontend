@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import { SuggestUsModal } from "@/components/modals/suggest-us-modal";
 import Link from "next/link";
 import { TransitionLink } from "@/components/ui/transition-link";
@@ -475,44 +476,66 @@ export function MobileNavbar() {
         <div className="fixed inset-0 z-40" onClick={() => setIsProfileOpen(false)} />
       )}
 
-      <div className="md:hidden fixed top-0 left-0 right-0 h-14 bg-white/80 backdrop-blur-md border-b border-zinc-100 z-50 flex items-center justify-between px-4">
-        
-        <div className="flex items-center">
-          <img 
-            src="/icon.png" 
-            alt="Loomingo Logo" 
-            className="h-7 w-auto object-contain" 
-          />
-        </div>
-
-        <h1 className="font-semibold text-base text-zinc-900 tracking-wide absolute left-1/2 -translate-x-1/2">
-          {pageTitle}
-        </h1>
-
-        <div className="flex items-center justify-end min-w-[24px] relative">
-          <button
-            onClick={() => setIsProfileOpen(!isProfileOpen)}
-            className="flex items-center justify-center size-8 rounded-full border border-zinc-200 bg-white hover:bg-zinc-50 transition-colors"
-          >
-            {customPhoto ? (
-              <img src={customPhoto} alt="Profile" className="size-full rounded-full object-cover" referrerPolicy="no-referrer" />
-            ) : (
-              <UserCircle className="size-5 text-zinc-500" />
-            )}
-          </button>
-
-          {isProfileOpen && (
-            <ProfileMenuPanel
-              user={user}
-              customPhoto={customPhoto}
-              className="absolute top-10 right-0 animate-in slide-in-from-top-2 fade-in zoom-in-95"
-              onManageAccount={() => handleProtectedAction("Manage Account")}
-              onHelp={() => handleProtectedAction("Help")}
-              onSuggest={() => handleProtectedAction("Suggestions")}
-              onSignOut={() => { setIsProfileOpen(false); setShowLogoutConfirm(true); }}
-              onSignIn={() => { setIsProfileOpen(false); setAuthMessage(""); setShowForm(true); setShowAuthModal(true); }}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-50">
+        <div className="h-14 bg-white/70 backdrop-blur-2xl border-b border-zinc-100/80 flex items-center justify-between px-4 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+          
+          {/* Logo */}
+          <div className="flex items-center gap-2">
+            <img 
+              src="/icon.png" 
+              alt="Loomingo Logo" 
+              className="h-7 w-auto object-contain" 
             />
-          )}
+          </div>
+
+          {/* Page Title — centered */}
+          <h1 className="font-bold text-[15px] text-zinc-900 tracking-tight absolute left-1/2 -translate-x-1/2">
+            {pageTitle}
+          </h1>
+
+          {/* Profile Avatar with Status Ring */}
+          <div className="flex items-center justify-end min-w-[24px] relative">
+            <button
+              onClick={() => setIsProfileOpen(!isProfileOpen)}
+              className={cn(
+                "flex items-center justify-center size-9 rounded-full transition-all duration-300 active:scale-95",
+                isProfileOpen
+                  ? "ring-2 ring-red-500 ring-offset-2 ring-offset-white"
+                  : "ring-2 ring-zinc-200 ring-offset-1 ring-offset-white hover:ring-zinc-300"
+              )}
+            >
+              {customPhoto ? (
+                <img src={customPhoto} alt="Profile" className="size-full rounded-full object-cover" referrerPolicy="no-referrer" />
+              ) : (
+                <span className="flex items-center justify-center size-full rounded-full bg-zinc-100 text-zinc-500">
+                  <UserCircle className="size-5" />
+                </span>
+              )}
+            </button>
+
+            {/* AnimatePresence Profile Dropdown */}
+            <AnimatePresence>
+              {isProfileOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -8, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -8, scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 26 }}
+                  className="absolute top-12 right-0 z-50"
+                >
+                  <ProfileMenuPanel
+                    user={user}
+                    customPhoto={customPhoto}
+                    onManageAccount={() => handleProtectedAction("Manage Account")}
+                    onHelp={() => handleProtectedAction("Help")}
+                    onSuggest={() => handleProtectedAction("Suggestions")}
+                    onSignOut={() => { setIsProfileOpen(false); setShowLogoutConfirm(true); }}
+                    onSignIn={() => { setIsProfileOpen(false); setAuthMessage(""); setShowForm(true); setShowAuthModal(true); }}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </div>
     </>

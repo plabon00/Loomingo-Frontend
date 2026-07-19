@@ -6,19 +6,19 @@ export default function UpcomingFeatures() {
       id: 1,
       title: "Winner Selector",
       description: "Pick a random winner from comments based on rules you set.",
-      icon: <Award className="size-6 text-zinc-400" />,
+      icon: <Award className="size-5 text-zinc-400" />,
     },
     {
       id: 2,
       title: "Link in Bio Store",
       description: "Turn your Instagram traffic into sales with a beautiful bio link.",
-      icon: <Store className="size-6 text-zinc-400" />,
+      icon: <Store className="size-5 text-zinc-400" />,
     },
     {
       id: 3,
       title: "Link Tree",
       description: "A gorgeous, custom landing page to host all your important links.",
-      icon: <TreeDeciduous className="size-6 text-zinc-400" />,
+      icon: <TreeDeciduous className="size-5 text-zinc-400" />,
     },
   ];
 
@@ -44,50 +44,34 @@ export default function UpcomingFeatures() {
             Upcoming <span className="text-red-600 italic font-serif">features</span>
           </h2>
           <p className="text-red-950/70 text-lg max-w-md">
-            We’re building more tools to boost your social media growth.
+            We&apos;re building more tools to boost your social media growth.
           </p>
         </div>
 
-        {/* --- CONTENT GRID --- */}
-        <div className="relative flex flex-col md:flex-row gap-8 lg:gap-12 items-center md:items-stretch justify-center">
+        {/* --- HORIZONTAL PILL ROW --- */}
+        <div className="relative flex flex-col sm:flex-row flex-wrap gap-4 items-center justify-center gsap-pill-row">
           
           {upcomingFeatures.map((feature) => (
             <div 
               key={feature.id} 
-              className="relative w-full max-w-sm flex flex-col border border-zinc-200 bg-white rounded-3xl shadow-sm overflow-hidden"
+              className="gsap-pill-item inline-flex items-center gap-3 px-5 py-3 rounded-full bg-white/60 backdrop-blur-md border border-zinc-200/50 opacity-50 cursor-not-allowed select-none w-full sm:w-auto"
             >
-              
-              {/* Central Locked Badge */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col items-center gap-3">
-                <div className="w-14 h-14 rounded-full bg-white border border-zinc-200 flex items-center justify-center shadow-lg ring-4 ring-zinc-50/80">
-                  <Lock className="size-5 text-zinc-400" />
-                </div>
-                <span className="px-3 py-1 text-[10px] font-bold tracking-wider rounded-full bg-zinc-100 text-zinc-500 border border-zinc-200 shadow-sm uppercase">
-                  Coming Soon
-                </span>
+              {/* Icon */}
+              <div className="p-2 bg-zinc-100/80 rounded-full shrink-0">
+                {feature.icon}
               </div>
               
-              {/* --- BLURRED & DIMMED LAYER --- */}
-              <div className="p-6 relative z-10 blur-[3px] opacity-40 flex-1 flex flex-col pointer-events-none select-none bg-zinc-50/50">
-                
-                {/* Feature Header */}
-                <div className="flex flex-row items-center justify-between pb-4">
-                  <div className="p-3 bg-zinc-100 border border-zinc-200/50 rounded-xl shadow-inner">
-                    {feature.icon}
-                  </div>
-                </div>
-                
-                {/* Feature Content */}
-                <div className="pt-0 flex-1">
-                  <h3 className="text-xl font-semibold text-red-950 tracking-tight mb-2">
-                    {feature.title}
-                  </h3>
-                  <p className="text-zinc-500 leading-relaxed text-sm font-medium">
-                    {feature.description}
-                  </p>
-                </div>
+              {/* Text */}
+              <div className="flex flex-col min-w-0">
+                <span className="text-sm font-semibold text-zinc-700 truncate">{feature.title}</span>
+                <span className="text-xs text-zinc-400 truncate hidden sm:block">{feature.description}</span>
               </div>
-              
+
+              {/* Lock Badge */}
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-500 text-[9px] font-bold uppercase tracking-wider shrink-0 ml-auto">
+                <Lock className="size-2.5" />
+                Soon
+              </span>
             </div>
           ))}
 

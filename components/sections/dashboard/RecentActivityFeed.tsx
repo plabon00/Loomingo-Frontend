@@ -88,19 +88,19 @@ export default function RecentActivityFeed() {
 
 
   return (
-    <div className="bg-white/80 backdrop-blur-md border border-zinc-200 rounded-[2rem] p-6 sm:p-8 shadow-sm flex flex-col h-full transition-all">
+    <div className="bg-white/80 backdrop-blur-md border border-zinc-200 rounded-[2rem] p-6 sm:p-8 shadow-[0_2px_20px_rgba(0,0,0,0.06)] flex flex-col h-full transition-all">
       
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-zinc-100 rounded-xl">
+          <div className="p-2 bg-zinc-100 rounded-full">
             <Activity className="size-4 text-zinc-700" />
           </div>
           <h3 className="text-lg font-semibold text-zinc-900 flex items-center gap-2">
             Recent Activity
           </h3>
         </div>
-        <Link href="/auto-dm" className="text-xs font-semibold text-zinc-500 hover:text-zinc-900 transition-colors bg-zinc-100 px-3 py-1.5 rounded-full">
+        <Link href="/auto-dm" className="px-4 py-1.5 rounded-full bg-zinc-100 text-zinc-600 text-xs font-semibold hover:bg-zinc-900 hover:text-white transition-all duration-300">
           View All
         </Link>
       </div>
@@ -125,7 +125,7 @@ export default function RecentActivityFeed() {
           
           /* Empty State (Shown if BOTH SSE and Database have 0 entries) */
           <div className="flex flex-col items-center justify-center flex-1 py-10 text-center">
-            <div className="w-12 h-12 bg-zinc-50 border border-zinc-100 rounded-2xl flex items-center justify-center mb-4 shadow-sm">
+            <div className="w-12 h-12 bg-zinc-50 border border-zinc-100 rounded-full flex items-center justify-center mb-4 shadow-sm">
               <Zap className="size-5 text-zinc-400" />
             </div>
             <p className="text-sm font-semibold text-zinc-900">No recent activity</p>
@@ -138,11 +138,11 @@ export default function RecentActivityFeed() {
           recentDMs.map((dm) => (
             <div 
               key={dm.id} 
-              className="flex items-center gap-4 p-3 hover:bg-zinc-50 rounded-2xl transition-all border border-transparent hover:border-zinc-200 hover:shadow-sm cursor-default"
+              className="flex items-center gap-4 px-3 py-2 hover:bg-zinc-50/80 rounded-full transition-all border border-transparent hover:border-zinc-200/60 hover:shadow-sm cursor-default"
             >
               
               {/* Brand-styled Icon */}
-              <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 border bg-white border-zinc-200 shadow-sm">
+              <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 border bg-white/70 backdrop-blur-sm border-zinc-200/60 shadow-sm">
                 <Send className="size-4 text-zinc-700" />
               </div>
               
@@ -152,12 +152,12 @@ export default function RecentActivityFeed() {
                   Sent to <span className="font-bold">{dm.username.startsWith('@') ? dm.username : `@${dm.username}`}</span>
                 </p>
                 <p className="text-xs font-medium text-zinc-500 truncate mt-0.5">
-                  Triggered by keyword <span className="text-zinc-700 font-semibold px-1.5 py-0.5 bg-zinc-100 rounded-md ml-1">"{dm.keyword}"</span>
+                  Triggered by keyword <span className="px-2 py-0.5 rounded-full bg-red-50 border border-red-100 text-red-700 text-[10px] font-semibold ml-1">&quot;{dm.keyword}&quot;</span>
                 </p>
               </div>
               
               {/* Timestamp calculated during render */}
-              <span className="text-[10px] font-bold text-zinc-400 flex items-center gap-1 shrink-0 whitespace-nowrap bg-zinc-100/50 px-2 py-1 rounded-lg">
+              <span className="text-[10px] font-bold text-zinc-400 flex items-center gap-1 shrink-0 whitespace-nowrap bg-zinc-100/80 px-2.5 py-1 rounded-full">
                 <Clock className="size-3"/> {formatTimeAgo(dm.rawTime)}
               </span>
               

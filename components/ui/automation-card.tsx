@@ -159,7 +159,7 @@ export default function AutomationMediaCard({
 
       {/* DELETE CONFIRMATION DIALOG */}
       <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-        <DialogContent className="max-w-md p-6 rounded-[2rem] border border-[#e6e1d6] shadow-xl text-center flex flex-col items-center">
+        <DialogContent className="max-w-md p-6 rounded-[2rem] border border-[#e6e1d6] bg-white/95 backdrop-blur-md shadow-xl text-center flex flex-col items-center">
           <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mb-2 border border-red-100">
             <AlertTriangle className="size-6 text-red-600" />
           </div>

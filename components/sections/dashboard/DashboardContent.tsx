@@ -141,7 +141,7 @@ export default function DashboardContent() {
 
       {/* DASHBOARD HEADER */}
       <div className="w-full flex flex-col items-center justify-center text-center mt-8 md:mt-10 mb-8 gap-3">
-        <div className="inline-flex items-center px-4 py-1.5 rounded-full border border-zinc-200 bg-white/80 text-zinc-900 text-xs font-semibold backdrop-blur-sm shadow-sm gap-2 uppercase tracking-wider">
+        <div className="inline-flex items-center px-4 py-1.5 rounded-full border border-zinc-200/60 bg-white/70 backdrop-blur-sm text-zinc-900 text-xs font-semibold shadow-sm gap-2 uppercase tracking-wider">
           <span className="text-sm">💎</span>
           {planName} Plan
         </div>
@@ -154,7 +154,7 @@ export default function DashboardContent() {
 
         {isConnected && (
           <TransitionLink href="/autodm" className="mt-3">
-            <Button className="rounded-full bg-zinc-900 hover:bg-zinc-800 text-white shadow-md h-11 px-6 text-sm font-medium transition-colors">
+            <Button className="rounded-full bg-zinc-900 hover:bg-zinc-800 text-white shadow-[0_4px_20px_rgba(0,0,0,0.15)] hover:shadow-[0_6px_28px_rgba(0,0,0,0.20)] h-11 px-6 text-sm font-medium transition-all duration-300">
               <Plus className="mr-2 size-4" /> New Automation
             </Button>
           </TransitionLink>
@@ -187,7 +187,7 @@ export default function DashboardContent() {
           {(!isConnected || !user) && (
             <div className="absolute inset-0 z-20 flex flex-col items-center justify-center rounded-[2.5rem] bg-white/10 backdrop-blur-md border border-white/60 shadow-xl p-6 mx-2 md:mx-0">
               
-              <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center mb-6 shadow-xl shadow-zinc-200/50 border border-zinc-100 relative">
+              <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-6 shadow-xl shadow-zinc-200/50 border border-zinc-100 relative">
                 <InstagramIcon className="size-10 text-black relative z-10" />
                 <div className="absolute -top-2 -right-2 bg-zinc-900 rounded-full p-1.5 border-2 border-white shadow-sm">
                   <Lock className="size-3.5 text-white" />
@@ -203,7 +203,7 @@ export default function DashboardContent() {
               <Button
                 onClick={handleConnect}
                 disabled={isConnecting}
-                className="w-full max-w-sm relative z-10 bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] hover:opacity-90 text-white border-0 rounded-xl h-14 text-base font-semibold transition-all shadow-lg hover:shadow-xl hover:scale-[1.02]"
+                className="w-full max-w-sm relative z-10 bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] hover:opacity-90 text-white border-0 rounded-full h-14 text-base font-semibold transition-all duration-300 shadow-[0_6px_30px_rgba(220,39,67,0.40)] hover:shadow-[0_8px_40px_rgba(220,39,67,0.55)] hover:scale-[1.02] active:scale-[0.98]"
               >
                 <InstagramIcon className="size-5 mr-3" />
                 {isConnecting ? "Connecting..." : "Connect Instagram"}
