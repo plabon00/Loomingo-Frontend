@@ -2,6 +2,10 @@ export type AutomationStatsDTO = {
   totalDmsSent: number;
   totalFollowersGained: number;
   totalCommentsTriggered: number;
+  totalComments: number;
+  commentRepliesSent: number;
+  finalGoalDmsSent: number;
+  linkClicks: number;
 };
 
 export type AutomationCardDTO = {
@@ -14,6 +18,11 @@ export type AutomationCardDTO = {
   mediaType?: string;
   followersGained: number;
   dmsSent: number;
+  commentsTriggered: number;
+  totalComments: number;
+  commentRepliesSent: number;
+  finalGoalDmsSent: number;
+  linkClicks: number;
 };
 
 export type CarouselElement = {
@@ -29,6 +38,9 @@ export const defaultFormData = {
   mediaId: "",
   triggerKeywords: [] as string[],
   keywordInput: "",
+
+  // Triggerless mode: reply to ANY comment, no keyword required
+  isTriggerless: false,
   
   replyPublicly: true,
   commentReplies: ["Thanks for commenting! Check your DMs 🚀"] as string[],

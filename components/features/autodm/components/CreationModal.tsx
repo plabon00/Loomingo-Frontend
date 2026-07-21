@@ -16,7 +16,8 @@ import {
   Upload,
   Eye,
   Loader2,
-  Globe
+  Globe,
+  Zap
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -319,43 +320,70 @@ export function CreationModal({
                     </div>
                   )}
 
-                  {/* Trigger Keywords */}
+                  {/* Trigger Mode */}
                   <div className="p-5 border border-zinc-200 rounded-2xl bg-white shadow-sm space-y-4">
-                    <div>
-                      <label className="text-sm font-semibold text-zinc-900 mb-1 block">
-                        Trigger Keywords
-                      </label>
-                      <p className="text-xs text-zinc-500 mb-4">
-                        Pro Tip: Emojis work perfectly! Users don't need to type the exact word—if they include your emoji anywhere in their comment, we'll catch it.
-                      </p>
-                      <div className="flex flex-wrap gap-2 mb-3">
-                        {formData.triggerKeywords.map((kw) => (
-                          <span
-                            key={kw}
-                            className="bg-zinc-100 border border-zinc-200 text-zinc-700 px-3 py-1 rounded-full text-xs flex items-center font-semibold shadow-sm"
-                          >
-                            {kw}{" "}
-                            <X
-                              className="size-3 ml-2 cursor-pointer hover:text-zinc-900"
-                              onClick={() => removeKeyword(kw)}
-                            />
-                          </span>
-                        ))}
+                    <div className="flex items-center justify-between">
+                      <div className="pr-4">
+                        <h4 className="text-sm font-semibold text-zinc-900 flex items-center gap-1.5">
+                          <Zap className="size-3.5 text-zinc-500" /> Reply to ANY comment
+                        </h4>
+                        <p className="text-xs text-zinc-500 mt-1">
+                          No keyword required — every comment on this post triggers the DM.
+                        </p>
                       </div>
-                      <Input
-                        value={formData.keywordInput}
-                        onChange={(e) =>
+                      <button
+                        onClick={() =>
                           setFormData({
                             ...formData,
-                            keywordInput: e.target.value,
+                            isTriggerless: !formData.isTriggerless,
                           })
                         }
-                        onKeyDown={handleAddKeyword}
-                        placeholder="Type a keyword or emoji (e.g. 'Link', 🎁, 🙌) and press Enter"
-                        /* FIXED VISIBILITY: Added !text-zinc-900 and placeholder:text-zinc-500 */
-                        className="!text-zinc-900 placeholder:text-zinc-500 bg-zinc-50 border-zinc-200 focus-visible:ring-zinc-300 rounded-xl"
-                      />
+                        className={`w-12 h-6 rounded-full transition-colors relative shadow-inner shrink-0 ${formData.isTriggerless ? "bg-zinc-900" : "bg-zinc-200"}`}
+                      >
+                        <div
+                          className={`w-5 h-5 bg-white rounded-full absolute top-0.5 shadow-sm transition-transform ${formData.isTriggerless ? "translate-x-6" : "translate-x-0.5"}`}
+                        />
+                      </button>
                     </div>
+
+                    {/* Keywords are irrelevant in triggerless mode — hide the input */}
+                    {!formData.isTriggerless && (
+                      <div className="pt-4 border-t border-zinc-100 animate-in fade-in slide-in-from-top-2 duration-200">
+                        <label className="text-sm font-semibold text-zinc-900 mb-1 block">
+                          Trigger Keywords
+                        </label>
+                        <p className="text-xs text-zinc-500 mb-4">
+                          Pro Tip: Emojis work perfectly! Users don't need to type the exact word—if they include your emoji anywhere in their comment, we'll catch it.
+                        </p>
+                        <div className="flex flex-wrap gap-2 mb-3">
+                          {formData.triggerKeywords.map((kw) => (
+                            <span
+                              key={kw}
+                              className="bg-zinc-100 border border-zinc-200 text-zinc-700 px-3 py-1 rounded-full text-xs flex items-center font-semibold shadow-sm"
+                            >
+                              {kw}{" "}
+                              <X
+                                className="size-3 ml-2 cursor-pointer hover:text-zinc-900"
+                                onClick={() => removeKeyword(kw)}
+                              />
+                            </span>
+                          ))}
+                        </div>
+                        <Input
+                          value={formData.keywordInput}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              keywordInput: e.target.value,
+                            })
+                          }
+                          onKeyDown={handleAddKeyword}
+                          placeholder="Type a keyword or emoji (e.g. 'Link', 🎁, 🙌) and press Enter"
+                          /* FIXED VISIBILITY: Added !text-zinc-900 and placeholder:text-zinc-500 */
+                          className="!text-zinc-900 placeholder:text-zinc-500 bg-zinc-50 border-zinc-200 focus-visible:ring-zinc-300 rounded-xl"
+                        />
+                      </div>
+                    )}
                   </div>
 
                   {/* Auto-Reply Comment Section */}

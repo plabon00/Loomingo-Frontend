@@ -4,6 +4,9 @@ import {
   UserPlus,
   Settings,
   MessageCircle,
+  MessagesSquare,
+  Reply,
+  MousePointerClick,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AutomationStatsDTO } from "../types";
@@ -20,7 +23,7 @@ export function AutomationHeader({
   onOpenCreationModal,
 }: AutomationHeaderProps) {
   const statItems = [
-    { label: "Total DMs sent", value: stats.totalDmsSent, icon: Send },
+    { label: "Final goal DMs", value: stats.finalGoalDmsSent, icon: Send },
     {
       label: "Followers gained",
       value: stats.totalFollowersGained,
@@ -30,6 +33,21 @@ export function AutomationHeader({
       label: "Comments triggered",
       value: stats.totalCommentsTriggered,
       icon: MessageCircle,
+    },
+    {
+      label: "Total comments",
+      value: stats.totalComments,
+      icon: MessagesSquare,
+    },
+    {
+      label: "Comments replied",
+      value: stats.commentRepliesSent,
+      icon: Reply,
+    },
+    {
+      label: "Link clicks",
+      value: stats.linkClicks,
+      icon: MousePointerClick,
     },
   ];
 
@@ -70,11 +88,15 @@ export function AutomationHeader({
       </div>
 
       {/* STATS ROW — divider columns, same treatment as dashboard MiniAnalytics */}
-      <div className="w-full grid grid-cols-3 divide-x divide-[var(--apple-hairline)] mb-4">
+      <div className="w-full grid grid-cols-3 gap-y-8 mb-4">
         {statItems.map((stat, i) => (
           <div
             key={stat.label}
-            className={`flex flex-col gap-1.5 py-2 ${i === 0 ? "pr-4 md:pr-6" : "px-4 md:px-6"}`}
+            className={`flex flex-col gap-1.5 py-2 ${
+              i % 3 === 0
+                ? "pr-4 md:pr-6"
+                : "px-4 md:px-6 border-l border-[var(--apple-hairline)]"
+            }`}
           >
             <div className="flex items-center gap-1.5 text-[var(--apple-gray-2)]">
               <stat.icon className="size-3.5 shrink-0" aria-hidden="true" />

@@ -45,6 +45,10 @@ export default function AutoDMManager() {
     totalDmsSent: 0,
     totalFollowersGained: 0,
     totalCommentsTriggered: 0,
+    totalComments: 0,
+    commentRepliesSent: 0,
+    finalGoalDmsSent: 0,
+    linkClicks: 0,
   });
 
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
@@ -93,6 +97,10 @@ export default function AutoDMManager() {
           totalDmsSent: data.stats?.totalDmsSent || 0,
           totalFollowersGained: data.stats?.totalFollowersGained || 0,
           totalCommentsTriggered: data.stats?.totalCommentsTriggered || 0,
+          totalComments: data.stats?.totalComments || 0,
+          commentRepliesSent: data.stats?.commentRepliesSent || 0,
+          finalGoalDmsSent: data.stats?.finalGoalDmsSent || 0,
+          linkClicks: data.stats?.linkClicks || 0,
         });
       }
     } catch (error) {
@@ -349,6 +357,7 @@ export default function AutoDMManager() {
           mediaId: automation.id || automation.mediaId,
           triggerKeywords: ruleData.triggerKeywords || [],
           keywordInput: "",
+          isTriggerless: ruleData.isTriggerless || ruleData.triggerless || false,
           
           replyPublicly: ruleData.commentReplies?.length > 0 ? true : (ruleData.commentText ? true : false),
           commentReplies: ruleData.commentReplies?.length > 0 ? ruleData.commentReplies : (ruleData.commentText ? [ruleData.commentText] : ["Thanks for commenting! Check your DMs 🚀"]),
@@ -476,12 +485,16 @@ export default function AutoDMManager() {
   };
 
   const handleSubmit = async () => {
-    if (formData.triggerKeywords.length === 0) {
-      alert("Please add at least one trigger keyword.");
+    const isGlobal = formData.mediaId === "GLOBAL";
+
+    // Keywords are only required when triggerless mode is OFF
+    if (!formData.isTriggerless && formData.triggerKeywords.length === 0) {
+      alert("Please add at least one trigger keyword, or enable 'Reply to ANY comment'.");
       return;
     }
 
-    if (!selectedMediaData || !selectedMediaData.id) {
+    // Global Automations have no media selected — skip the media check for them
+    if (!isGlobal && (!selectedMediaData || !selectedMediaData.id)) {
       alert("Error: No media selected. Please go back and select a post.");
       return;
     }
@@ -494,9 +507,9 @@ export default function AutoDMManager() {
       const token = await user.getIdToken();
 
       const activeInstagramId = localStorage.getItem("activeInstagramId") || "";
-      const safeMediaId = String(selectedMediaData.id || "");
+      const safeMediaId = isGlobal ? "" : String(selectedMediaData?.id || "");
 
-      const rawCaption = selectedMediaData.caption || "";
+      const rawCaption = isGlobal ? "" : (selectedMediaData?.caption || "");
       const truncatedCaption = rawCaption.split(/\s+/).slice(0, 30).join(" ");
 
       let finalElements: any[] = [];
@@ -555,15 +568,16 @@ export default function AutoDMManager() {
           };
 
       const payload = {
-        targetMediaId: formData.mediaId === "GLOBAL" ? null : safeMediaId,
+        targetMediaId: isGlobal ? null : safeMediaId,
         media: {
-          mediaId: safeMediaId,
+          mediaId: isGlobal ? null : safeMediaId,
           isActive: true,
           caption: truncatedCaption,
-          thumbnailUrl: selectedMediaData.url || "",
+          thumbnailUrl: isGlobal ? "" : (selectedMediaData?.url || ""),
           businessIgUserId: activeInstagramId,
         },
-        triggerKeywords: formData.triggerKeywords,
+        triggerKeywords: formData.isTriggerless ? [] : formData.triggerKeywords,
+        isTriggerless: Boolean(formData.isTriggerless),
         commentReplies: formData.replyPublicly ? formData.commentReplies : [],
         requireFollow: Boolean(formData.requireFollow),
 

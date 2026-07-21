@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import InstagramPortfolio from "@/components/features/instagram/instagram-profile";
 import InstagramIcon from "@/components/ui/icon/instagram-icon";
 import UserGreeting from "@/components/layout/user-greeting";
-import { Plus, Lock } from "lucide-react";
+import { ChevronRight, Lock } from "lucide-react";
 
 import QuickActionCTA from "@/components/sections/dashboard/QuickActionCTA";
 import MiniAnalytics from "@/components/sections/dashboard/MiniAnalytics";
@@ -151,14 +151,6 @@ export default function DashboardContent() {
           <p className="text-[17px] md:text-[21px] leading-relaxed text-[var(--apple-gray)] max-w-md">
             Here is what&apos;s happening with your account today.
           </p>
-
-          {isConnected && (
-            <TransitionLink href="/autodm">
-              <Button className="rounded-full bg-[var(--apple-blue)] hover:bg-[var(--apple-blue-hover)] text-white h-11 px-6 text-[15px] font-medium shadow-none transition-colors duration-[240ms]">
-                <Plus className="mr-2 size-4" /> New Automation
-              </Button>
-            </TransitionLink>
-          )}
         </div>
       </div>
 
@@ -179,6 +171,17 @@ export default function DashboardContent() {
               </div>
             </div>
             <div className="col-span-1 lg:col-span-2 flex flex-col gap-8">
+              {isConnected && (
+                <div className="flex items-center justify-between">
+                  <span className="text-[12px] font-semibold uppercase tracking-[0.14em] text-[var(--apple-gray-2)]">
+                    Overview
+                  </span>
+                  <TransitionLink href="/autodm" className="apple-link inline-flex items-center gap-1 text-[15px] shrink-0">
+                    View more details
+                    <ChevronRight className="size-4" aria-hidden="true" />
+                  </TransitionLink>
+                </div>
+              )}
               <MiniAnalytics />
               <RecentActivityFeed />
             </div>

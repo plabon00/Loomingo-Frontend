@@ -11,13 +11,13 @@ export default function UserGreeting({ name, className = "" }: UserGreetingProps
   return (
     <div className={`my-4 ${className}`}>
       {/* Used flex and items-center to keep the animation and text perfectly aligned */}
-      <div className="flex items-center justify-start flex-wrap text-3xl gap-3 font-medium">
+      <div className="flex items-end justify-start flex-wrap gap-3">
 
         {/* 1. The Apple Hello SVG (scaled down to fit the text) */}
-        <AppleHelloEffectEnglish className="h-10 text-red-950" />
+        <AppleHelloEffectEnglish className="h-14 md:h-20 text-red-950" />
 
         {/* 2. The new Animated Name component passed right in! */}
-        <AnimatedName name={name} className="mx-2 text-red-950 font-medium tracking-tight text-5xl" />
+        <AnimatedName name={name} className="apple-display mx-2 text-red-950 text-5xl md:text-6xl" />
 
       </div>
     </div>

@@ -11,6 +11,10 @@ import {
   Play,
   MessageCircle,
   UserPlus,
+  MessagesSquare,
+  Reply,
+  MousePointerClick,
+  Send,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -55,9 +59,28 @@ function AutomationRow({
   onToggle: () => void;
 }) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const { thumbnailUrl, caption, isActive, followersGained, dmsSent } =
-    automation;
+  const {
+    thumbnailUrl,
+    caption,
+    isActive,
+    followersGained,
+    finalGoalDmsSent,
+    commentsTriggered,
+    totalComments,
+    commentRepliesSent,
+    linkClicks,
+  } = automation;
   const keywords = automation.triggerKeyword || [];
+
+  // Media-level stats rendered on the row (hidden on mobile; secondary ones only on lg+)
+  const rowStats = [
+    { label: "DMs", value: finalGoalDmsSent, icon: Send, lgOnly: false },
+    { label: "Follows", value: followersGained, icon: UserPlus, lgOnly: false },
+    { label: "Triggered", value: commentsTriggered, icon: MessageCircle, lgOnly: false },
+    { label: "Comments", value: totalComments, icon: MessagesSquare, lgOnly: true },
+    { label: "Replied", value: commentRepliesSent, icon: Reply, lgOnly: true },
+    { label: "Clicks", value: linkClicks, icon: MousePointerClick, lgOnly: true },
+  ];
 
   return (
     <>
@@ -112,23 +135,20 @@ function AutomationRow({
         </div>
 
         {/* Stats */}
-        <div className="hidden sm:flex items-center gap-6 md:gap-10 shrink-0">
-          <div className="flex flex-col items-end">
-            <span className="flex items-center gap-1.5 text-[10px] md:text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--apple-gray-2)]">
-              <MessageCircle className="size-3" aria-hidden="true" /> DMs
-            </span>
-            <span className="text-[21px] md:text-[28px] font-semibold tracking-tight text-[var(--apple-ink)] tabular-nums">
-              {dmsSent || 0}
-            </span>
-          </div>
-          <div className="flex flex-col items-end">
-            <span className="flex items-center gap-1.5 text-[10px] md:text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--apple-gray-2)]">
-              <UserPlus className="size-3" aria-hidden="true" /> Follows
-            </span>
-            <span className="text-[21px] md:text-[28px] font-semibold tracking-tight text-[var(--apple-ink)] tabular-nums">
-              {followersGained || 0}
-            </span>
-          </div>
+        <div className="hidden sm:flex items-center gap-4 md:gap-7 shrink-0">
+          {rowStats.map((stat) => (
+            <div
+              key={stat.label}
+              className={`${stat.lgOnly ? "hidden lg:flex" : "flex"} flex-col items-end`}
+            >
+              <span className="flex items-center gap-1.5 text-[10px] md:text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--apple-gray-2)]">
+                <stat.icon className="size-3" aria-hidden="true" /> {stat.label}
+              </span>
+              <span className="text-[17px] md:text-[21px] font-semibold tracking-tight text-[var(--apple-ink)] tabular-nums">
+                {stat.value || 0}
+              </span>
+            </div>
+          ))}
         </div>
 
         {/* Actions */}
