@@ -476,7 +476,7 @@ export function MobileNavbar() {
         <div className="fixed inset-0 z-40" onClick={() => setIsProfileOpen(false)} />
       )}
 
-      <div className="md:hidden fixed top-0 left-0 right-0 z-50">
+      <div style={{ top: "var(--promo-h, 0px)" }} className="md:hidden fixed left-0 right-0 z-50">
         <div className="h-14 bg-white/70 backdrop-blur-2xl border-b border-zinc-100/80 flex items-center justify-between px-4 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
           
           {/* Logo */}
@@ -687,10 +687,10 @@ export function BottomDock() {
           href="/home-page" 
           className={cn(
             "relative flex flex-col items-center justify-center w-[4.5rem] h-12 rounded-full transition-all duration-300",
-            pathname === "/home-page" ? "bg-white shadow-md border border-black/5 scale-105" : "hover:bg-white/40"
+            pathname === "/home-page" ? "bg-zinc-950 shadow-md scale-105" : "hover:bg-white/40"
           )}
         >
-          <div className="flex flex-col items-center gap-1 text-zinc-900">
+          <div className={cn("flex flex-col items-center gap-1", pathname === "/home-page" ? "text-white" : "text-zinc-900")}>
             <Home className="size-[1.15rem]" strokeWidth={2.5} />
             <span className="text-[9px] font-semibold">Home</span>
           </div>
@@ -701,10 +701,10 @@ export function BottomDock() {
           onClick={handleAutoDMClick} 
           className={cn(
             "relative flex flex-col items-center justify-center w-[4.5rem] h-12 rounded-full transition-all duration-300",
-            pathname === "/autodm" ? "bg-white shadow-md border border-black/5 scale-105" : "hover:bg-white/40"
+            pathname === "/autodm" ? "bg-zinc-950 shadow-md scale-105" : "hover:bg-white/40"
           )}
         >
-          <div className="flex flex-col items-center gap-1 text-zinc-900">
+          <div className={cn("flex flex-col items-center gap-1", pathname === "/autodm" ? "text-white" : "text-zinc-900")}>
             <MessageSquare className="size-[1.15rem]" strokeWidth={2.5} />
             <span className="text-[9px] font-semibold">Auto-DM</span>
           </div>
@@ -714,10 +714,10 @@ export function BottomDock() {
           href="/store" 
           className={cn(
             "relative flex flex-col items-center justify-center w-[4.5rem] h-12 rounded-full transition-all duration-300",
-            pathname === "/store" ? "bg-white shadow-md border border-black/5 scale-105" : "hover:bg-white/40"
+            pathname === "/store" ? "bg-zinc-950 shadow-md scale-105" : "hover:bg-white/40"
           )}
         >
-          <div className="flex flex-col items-center gap-1 text-zinc-900">
+          <div className={cn("flex flex-col items-center gap-1", pathname === "/store" ? "text-white" : "text-zinc-900")}>
             <ShoppingBag className="size-[1.15rem]" strokeWidth={2.5} />
             <span className="text-[9px] font-semibold">Store</span>
           </div>
@@ -728,10 +728,10 @@ export function BottomDock() {
             onClick={() => setIsAppsOpen(!isAppsOpen)}
             className={cn(
               "relative flex flex-col items-center justify-center w-[4.5rem] h-12 rounded-full transition-all duration-300",
-              (isAppsOpen || pathname.startsWith("/apps")) ? "bg-white shadow-md border border-black/5 scale-105" : "hover:bg-white/40"
+              (isAppsOpen || pathname.startsWith("/apps")) ? "bg-zinc-950 shadow-md scale-105" : "hover:bg-white/40"
             )}
           >
-            <div className="flex flex-col items-center gap-1 text-zinc-900">
+            <div className={cn("flex flex-col items-center gap-1", (isAppsOpen || pathname.startsWith("/apps")) ? "text-white" : "text-zinc-900")}>
               <LayoutGrid className="size-[1.15rem]" strokeWidth={2.5} />
               <span className="text-[9px] font-semibold">Apps</span>
             </div>
@@ -767,7 +767,6 @@ export function DesktopSidebar() {
   const router = useRouter();
   const [showSuggestModal, setShowSuggestModal] = useState(false);
 
-  const [isCollapsed, setIsCollapsed] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   const [user, setUser] = useState<User | null>(null);
@@ -880,14 +879,14 @@ export function DesktopSidebar() {
     router.push("/autodm");
   };
 
-  const getSidebarItemClass = (path: string) => {
+  const getNavItemClass = (path: string) => {
     const isActive = pathname === path;
     return cn(
-      "w-full flex items-center gap-3 py-3 rounded-xl text-sm transition-all duration-200",
-      isCollapsed ? "justify-center px-0" : "px-4 font-medium",
+      "inline-flex items-center gap-2 h-8 px-3 rounded-full text-[13px] transition-colors duration-200",
+      "focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--apple-blue)] focus-visible:outline-offset-2",
       isActive
-        ? "bg-zinc-100 text-red-950 font-semibold shadow-sm border border-zinc-200/50"
-        : "text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900",
+        ? "bg-[var(--apple-surface-alt)] text-[var(--apple-ink)] font-semibold"
+        : "text-[var(--apple-gray)] hover:text-[var(--apple-ink)] font-medium",
     );
   };
 
@@ -903,86 +902,71 @@ export function DesktopSidebar() {
         <div className="fixed inset-0 z-30" onClick={() => setIsProfileOpen(false)} />
       )}
 
-      <div
-        className={cn(
-          "hidden md:flex flex-col h-screen fixed left-0 top-0 border-r border-zinc-200 bg-white z-40 transition-all duration-300 ease-in-out shadow-sm",
-          isCollapsed ? "w-20" : "w-64",
-        )}
-      >
-        <button
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className="absolute -right-3 top-7 bg-white border border-zinc-200 shadow-sm rounded-full p-1 text-zinc-400 hover:text-zinc-900 z-50 transition-transform"
-        >
-          {isCollapsed ? <ChevronRight className="size-4" /> : <ChevronLeft className="size-4" />}
-        </button>
-
-        <div
-          className={cn(
-            "flex items-center py-6 mb-2",
-            isCollapsed ? "justify-center px-0" : "px-6",
-          )}
-        >
-          <img 
-            src="/logo/Loomingo.png" 
-            alt="Loomingo Logo" 
-            className={cn("object-contain transition-all duration-300", isCollapsed ? "h-6" : "h-7")}
-          />
-        </div>
-
-        <nav className="flex-1 space-y-1.5 px-3">
-          <Link href="/home-page" className={getSidebarItemClass("/home-page")}>
-            <Home className="size-5 shrink-0" />
-            {!isCollapsed && <span>Home</span>}
+      {/* Apple-globalnav-style fixed top bar (desktop only) */}
+      <header style={{ top: "var(--promo-h, 0px)" }} className="font-apple hidden md:block fixed inset-x-0 z-40 bg-white/95 supports-[backdrop-filter]:bg-white/80 supports-[backdrop-filter]:backdrop-blur-md border-b border-[var(--apple-hairline)]">
+        <div className="mx-auto flex h-12 max-w-5xl items-center justify-between px-6">
+          {/* Brand */}
+          <Link
+            href="/home-page"
+            aria-label="Loomingo home"
+            className="flex items-center shrink-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--apple-blue)] focus-visible:outline-offset-2 rounded"
+          >
+            <img
+              src="/logo/Loomingo.png"
+              alt="Loomingo"
+              className="h-6 object-contain"
+            />
           </Link>
 
-          <Link href="/autodm" onClick={handleAutoDMClick} className={getSidebarItemClass("/autodm")}>
-            <MessageSquare className="size-5 shrink-0" />
-            {!isCollapsed && <span>Auto-DM</span>}
-          </Link>
-
-          <Link href="/store" className={getSidebarItemClass("/store")}>
-            <ShoppingBag className="size-5 shrink-0" />
-            {!isCollapsed && <span>Store</span>}
-          </Link>
-
-          <div className="pt-4 mt-4 border-t border-zinc-100">
-            {!isCollapsed && <p className="px-4 text-xs font-semibold text-zinc-400 mb-2 uppercase tracking-wider">Apps</p>}
-            <Link href="/apps/invoice-generator" className={getSidebarItemClass("/apps/invoice-generator")}>
-              <FileText className="size-5 shrink-0" />
-              {!isCollapsed && <span>Invoice Generator</span>}
+          {/* Primary links */}
+          <nav aria-label="Primary" className="flex items-center gap-1">
+            <Link href="/home-page" className={getNavItemClass("/home-page")}>
+              <Home className="size-4 shrink-0" aria-hidden="true" />
+              <span>Home</span>
             </Link>
-          </div>
-        </nav>
 
-        <div className="mt-auto border-t border-zinc-100 pt-4 pb-6 px-3 space-y-2">
-          <div className="relative">
+            <Link href="/autodm" onClick={handleAutoDMClick} className={getNavItemClass("/autodm")}>
+              <MessageSquare className="size-4 shrink-0" aria-hidden="true" />
+              <span>Auto-DM</span>
+            </Link>
+
+            <Link href="/store" className={getNavItemClass("/store")}>
+              <ShoppingBag className="size-4 shrink-0" aria-hidden="true" />
+              <span>Store</span>
+            </Link>
+
+            <Link href="/apps/invoice-generator" className={getNavItemClass("/apps/invoice-generator")}>
+              <FileText className="size-4 shrink-0" aria-hidden="true" />
+              <span>Invoices</span>
+            </Link>
+          </nav>
+
+          {/* Profile */}
+          <div className="relative shrink-0">
             <button
               onClick={() => setIsProfileOpen(!isProfileOpen)}
+              aria-label="Profile menu"
+              aria-expanded={isProfileOpen}
               className={cn(
-                "w-full flex items-center gap-3 py-2.5 rounded-xl text-sm font-medium transition-colors",
-                isCollapsed ? "justify-center px-0" : "px-3",
+                "flex items-center justify-center size-8 rounded-full transition-colors duration-200",
+                "focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--apple-blue)] focus-visible:outline-offset-2",
                 isProfileOpen
-                  ? "bg-zinc-100 text-zinc-900"
-                  : "text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900",
+                  ? "bg-[var(--apple-surface-alt)] text-[var(--apple-ink)]"
+                  : "text-[var(--apple-gray)] hover:text-[var(--apple-ink)]",
               )}
             >
               {customPhoto ? (
-                <img src={customPhoto} alt="Profile" className="size-5 shrink-0 rounded-full object-cover border border-zinc-200" referrerPolicy="no-referrer" />
+                <img src={customPhoto} alt="Profile" className="size-6 rounded-full object-cover border border-[var(--apple-hairline)]" referrerPolicy="no-referrer" />
               ) : (
-                <UserCircle className="size-5 shrink-0" />
+                <UserCircle className="size-5" aria-hidden="true" />
               )}
-
-              {!isCollapsed && <span className="truncate">Profile</span>}
             </button>
 
             {isProfileOpen && (
               <ProfileMenuPanel
                 user={user}
                 customPhoto={customPhoto}
-                className={cn(
-                  "absolute bottom-full mb-3 animate-in fade-in zoom-in-95 slide-in-from-bottom-2",
-                  isCollapsed ? "left-14" : "left-2",
-                )}
+                className="absolute right-0 top-full mt-3 animate-in fade-in zoom-in-95 slide-in-from-top-2"
                 onManageAccount={() => handleProtectedAction("Manage Account")}
                 onHelp={() => handleProtectedAction("Help")}
                 onSuggest={() => handleProtectedAction("Suggestions")}
@@ -992,7 +976,7 @@ export function DesktopSidebar() {
             )}
           </div>
         </div>
-      </div>
+      </header>
     </>
   );
 }

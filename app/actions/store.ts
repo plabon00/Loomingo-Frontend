@@ -72,6 +72,8 @@ export async function saveStoreAction(uid: string, store: Store) {
         bannerUrl: store.banner || store.bannerUrl,
         logoUrl: store.logoUrl,
         themeColor: store.themeColor,
+        layoutStyle: store.layoutStyle,
+        bgTemplate: store.bgTemplate,
       }),
     });
 

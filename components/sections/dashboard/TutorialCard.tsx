@@ -1,48 +1,50 @@
-import { Play, BookOpen, ArrowRight } from "lucide-react";
+import { Play, Clock3, ChevronRight } from "lucide-react";
 import Link from "next/link";
 
 export default function GettingStartedGuide() {
   return (
-    <div className="bg-white/80 backdrop-blur-md border border-zinc-200/50 rounded-[2rem] md:rounded-[2rem] p-2 shadow-[0_2px_20px_rgba(0,0,0,0.06)] flex flex-col md:flex-row gap-4 items-center overflow-hidden">
+    <div className="font-apple w-full max-w-5xl mx-auto px-6 text-center">
+      {/* Centered header — same pattern as every other band */}
+      <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-[var(--apple-gray-2)] mb-3">
+        Quick start
+      </p>
+      <h2 className="apple-display text-[34px] md:text-[48px]">
+        Set up your first auto-DM
+      </h2>
+      <p className="text-[17px] md:text-[21px] leading-relaxed text-[var(--apple-gray)] mt-4 max-w-xl mx-auto">
+        A two-minute crash course on connecting posts, setting keywords, and capturing leads while you sleep.
+      </p>
 
-      {/* Video Thumbnail Area - links to the getting started guide */}
+      {/* Video thumbnail — flat, centered */}
       <Link
         href="/help/getting-started"
         aria-label="Watch the getting started guide"
-        className="relative block w-full md:w-48 h-32 bg-zinc-100 rounded-3xl overflow-hidden shrink-0 group cursor-pointer ring-2 ring-white/60"
+        className="group relative block w-full max-w-2xl mx-auto aspect-video rounded-[18px] bg-[var(--apple-surface-alt)] overflow-hidden mt-12 md:mt-16 cursor-pointer transition-transform duration-[320ms] hover:-translate-y-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--apple-blue)] focus-visible:outline-offset-4"
       >
-        {/* Replace the src below with your actual thumbnail image */}
         <img
-          src="https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=800&auto=format&fit=crop"
-          alt="Video Thumbnail"
-          className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
+          src="https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=1200&auto=format&fit=crop"
+          alt="Getting started guide preview"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[1000ms]"
         />
-        <div className="absolute inset-0 bg-red-950/20 group-hover:bg-transparent transition-colors duration-300" />
+        <div className="absolute inset-0 bg-black/15 group-hover:bg-black/5 transition-colors duration-[320ms]" />
 
-        {/* Play Button */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-          <Play className="size-4 text-red-600 ml-1" />
+        <span className="absolute bottom-3 right-3 inline-flex items-center gap-1 rounded-full bg-black/60 px-2.5 py-1 text-[12px] font-medium text-white">
+          <Clock3 className="size-3" aria-hidden="true" />
+          2 min
+        </span>
+
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex size-16 items-center justify-center rounded-full bg-white/95 shadow-lg group-hover:scale-110 transition-transform duration-[320ms]">
+          <Play className="size-6 text-[var(--apple-ink)] ml-0.5 fill-current" aria-hidden="true" />
         </div>
       </Link>
 
-      {/* Text & Links Content */}
-      <div className="flex-1 p-4 md:p-2 md:pr-6 flex flex-col justify-center">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-50 border border-red-100 text-red-700 text-[10px] font-bold uppercase tracking-wider mb-2 w-fit">
-          <BookOpen className="size-3" /> Quick Start
-        </div>
-        <h3 className="text-lg font-medium text-red-950 mb-1">
-          How to set up your first auto-DM
-        </h3>
-        <p className="text-sm text-zinc-500 mb-4 line-clamp-2">
-          Watch our 2-minute crash course on connecting your posts, setting up keywords, and capturing leads while you sleep.
-        </p>
-
-        <Link href="/help/getting-started" className="inline-flex items-center px-4 py-1.5 rounded-full bg-zinc-900 text-white text-xs font-semibold hover:bg-red-600 transition-all duration-300 w-fit group">
-          Read the full guide
-          <ArrowRight className="size-4 ml-1.5 transition-transform group-hover:translate-x-1" />
-        </Link>
-      </div>
-
+      <Link
+        href="/help/getting-started"
+        className="apple-link inline-flex items-center gap-1 text-[17px] mt-8 group/link"
+      >
+        Read the full guide
+        <ChevronRight className="size-4 transition-transform duration-[240ms] group-hover/link:translate-x-1" aria-hidden="true" />
+      </Link>
     </div>
   );
 }

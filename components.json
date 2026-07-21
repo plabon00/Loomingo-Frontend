@@ -26,6 +26,7 @@
     "@tailark": "https://tailark.com/r/{name}.json",
     "@magicui": "https://magicui.design/r/{name}",
     "@react-bits": "https://reactbits.dev/r/{name}.json",
-    "@ncdai": "https://chanhdai.com/r/{name}.json"
+    "@ncdai": "https://chanhdai.com/r/{name}.json",
+    "@aceternity": "https://ui.aceternity.com/registry/{name}.json"
   }
 }

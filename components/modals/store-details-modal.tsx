@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { X, Upload, Loader2, Edit2, ImageIcon, Check } from "lucide-react";
-import { uploadImage, Store } from "@/lib/store";
+import { uploadImage, Store, BG_TEMPLATES } from "@/lib/store";
 import { ImageCropper } from "@/components/ui/image-cropper";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "motion/react";
@@ -24,6 +24,8 @@ export function StoreDetailsModal({
   const [description, setDescription] = useState(store.description || "");
   const [creator, setCreator] = useState(store.creator || "");
   const [themeColor, setThemeColor] = useState(store.themeColor || "#dc2626");
+  const [layoutStyle, setLayoutStyle] = useState<"card" | "flat">(store.layoutStyle || "card");
+  const [bgTemplate, setBgTemplate] = useState(store.bgTemplate || "sunset");
   const [nameError, setNameError] = useState<string | undefined>(undefined);
 
   const [bannerPreview, setBannerPreview] = useState(store.banner || store.bannerUrl || "");
@@ -90,7 +92,9 @@ export function StoreDetailsModal({
         banner: finalBannerUrl,
         bannerUrl: finalBannerUrl,
         logoUrl: finalLogoUrl,
-        themeColor
+        themeColor,
+        layoutStyle,
+        bgTemplate
       });
     } catch (err) {
       console.error(err);
@@ -289,6 +293,86 @@ export function StoreDetailsModal({
                   })}
                 </div>
                 <p className="text-[11px] text-zinc-400">Used for buttons, category pills, and accents across your storefront.</p>
+              </div>
+
+              {/* ————— STOREFRONT LOOK ————— */}
+              <div className="space-y-3 pt-2">
+                <label className="block text-sm font-medium text-zinc-700">Storefront Look</label>
+                <div className="grid grid-cols-2 gap-3">
+                  {([
+                    ["card", "Card view", "Products in a classic grid of cards"],
+                    ["flat", "Flat view", "Borderless products on a colored backdrop"],
+                  ] as const).map(([key, label, hint]) => {
+                    const active = layoutStyle === key;
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => setLayoutStyle(key)}
+                        aria-pressed={active}
+                        disabled={loading}
+                        className={`rounded-xl border p-3 text-left transition-all duration-200 cursor-pointer ${
+                          active ? "border-zinc-950 ring-1 ring-zinc-950 bg-white" : "border-zinc-200 bg-white hover:border-zinc-400"
+                        }`}
+                      >
+                        {/* mini preview */}
+                        {key === "card" ? (
+                          <div className="grid grid-cols-3 gap-1 mb-2.5" aria-hidden="true">
+                            {[0, 1, 2].map((i) => (
+                              <span key={i} className="h-7 rounded-md border border-zinc-200 bg-zinc-50" />
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="mb-2.5 rounded-md p-1.5" style={{ background: BG_TEMPLATES[bgTemplate]?.page }} aria-hidden="true">
+                            <span className="block h-1.5 w-3/4 rounded-full bg-white/80 mb-1" />
+                            <span className="block h-1.5 w-1/2 rounded-full bg-white/80" />
+                          </div>
+                        )}
+                        <span className="block text-sm font-semibold text-zinc-900">{label}</span>
+                        <span className="block text-[11px] text-zinc-400 mt-0.5">{hint}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Background templates — only for flat view */}
+                <AnimatePresence>
+                  {layoutStyle === "flat" && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+                      className="overflow-hidden"
+                    >
+                      <label className="block text-sm font-medium text-zinc-700 mt-1 mb-3">Background</label>
+                      <div className="flex flex-wrap gap-3">
+                        {Object.entries(BG_TEMPLATES).map(([key, t]) => {
+                          const isSelected = bgTemplate === key;
+                          return (
+                            <motion.button
+                              key={key}
+                              type="button"
+                              onClick={() => setBgTemplate(key)}
+                              whileHover={{ scale: 1.15 }}
+                              whileTap={{ scale: 0.9 }}
+                              animate={isSelected ? { scale: 1.12 } : { scale: 1 }}
+                              transition={{ type: "spring", stiffness: 420, damping: 20 }}
+                              style={{ background: t.swatch }}
+                              className={`size-11 sm:size-10 rounded-full shadow-sm cursor-pointer flex items-center justify-center ${isSelected ? "ring-2 ring-offset-2 ring-zinc-950" : "ring-1 ring-black/10"}`}
+                              aria-label={`Background ${t.label}`}
+                              aria-pressed={isSelected}
+                              title={t.label}
+                            >
+                              {isSelected && <Check className="size-4 text-white drop-shadow" />}
+                            </motion.button>
+                          );
+                        })}
+                      </div>
+                      <p className="text-[11px] text-zinc-400 mt-2">The backdrop shoppers see behind your products in flat view.</p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
           </div>

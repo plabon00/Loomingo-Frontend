@@ -18,6 +18,7 @@ export default function ProductGrid({
   selectionMode = false,
   selectedIds = [],
   onToggleSelect,
+  variant = "card",
 }: {
   products: Product[];
   onEdit?: (p: Product) => void;
@@ -28,6 +29,7 @@ export default function ProductGrid({
   selectionMode?: boolean;
   selectedIds?: string[];
   onToggleSelect?: (id: string) => void;
+  variant?: "card" | "flat";
 }) {
   const [previewProduct, setPreviewProduct] = useState<Product | null>(initialPreviewProduct || null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -102,15 +104,19 @@ export default function ProductGrid({
                   setPreviewProduct(p);
                 }
               }}
-              className={`group relative flex flex-col overflow-hidden bg-white transition-all duration-300 h-full cursor-pointer ${
-                selectionMode && selectedIds.includes(p.id)
-                  ? "border-2 rounded-xl shadow-md"
-                  : "border border-zinc-200 rounded-xl hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:-translate-y-1"
+              className={`group relative flex flex-col overflow-hidden transition-all duration-300 h-full cursor-pointer ${
+                variant === "flat"
+                  ? `bg-transparent rounded-xl ${selectionMode && selectedIds.includes(p.id) ? "ring-2 rounded-xl" : "hover:-translate-y-1"}`
+                  : `bg-white ${
+                      selectionMode && selectedIds.includes(p.id)
+                        ? "border-2 rounded-xl shadow-md"
+                        : "border border-zinc-200 rounded-xl hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:-translate-y-1"
+                    }`
               }`}
               style={selectionMode && selectedIds.includes(p.id) ? { borderColor: accent } : {}}
             >
               {/* Image Section */}
-              <div className="aspect-[4/5] bg-zinc-50 relative overflow-hidden">
+              <div className={`aspect-[4/5] relative overflow-hidden ${variant === "flat" ? "bg-white/40 rounded-xl" : "bg-zinc-50"}`}>
                 {/* Selection checkbox overlay */}
                 {selectionMode && (
                   <div 

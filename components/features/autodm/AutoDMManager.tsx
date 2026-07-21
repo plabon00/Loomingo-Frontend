@@ -29,7 +29,6 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import AutomationMediaCard from "@/components/ui/automation-card";
 import { auth } from "@/lib/firebase";
 import { InstagramSettingsModal } from "@/components/modals/instagram-settings-modal";
 import InstagramIcon from "@/components/ui/icon/instagram-icon";
@@ -40,12 +39,6 @@ import { CreationModal } from "./components/CreationModal";
 import { PreviewModal } from "./components/PreviewModal";
 import { defaultFormData, AutomationStatsDTO, AutomationCardDTO, CarouselElement } from "./types";
 import type { FormData } from "./types";
-
-
-// ————— Theme tokens —————
-const INK = "#152436";
-const PRIMARY = "#5742f5";
-const PAPER = "#f6f4ef";
 
 export default function AutoDMManager() {
   const [stats, setStats] = useState<AutomationStatsDTO>({
@@ -626,29 +619,28 @@ export default function AutoDMManager() {
 
   
   return (
-    <div className="min-h-screen relative pb-20 md:pb-0 z-10 flex flex-col font-sans text-zinc-900" style={{ backgroundColor: PAPER }}>
-      
+    <div className="font-apple min-h-screen relative pb-20 md:pb-0 z-10 flex flex-col bg-white">
+
       {/* LOCKED STATE OVERLAY */}
       {!isConnected && (
-        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center backdrop-blur-md rounded-tl-3xl p-6" style={{ backgroundColor: `${PAPER}cc` }}>
-          <div className="w-24 h-24 bg-white rounded-3xl flex items-center justify-center mb-8 shadow-xl border border-[#e6e1d6] relative">
-            <InstagramIcon className="size-12 text-black relative z-10" />
-            <div className="absolute -top-2 -right-2 rounded-full p-2 border-[3px] border-white shadow-sm" style={{ backgroundColor: INK }}>
-              <Lock className="size-4 text-white" />
+        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/80 p-6">
+          <div className="relative mb-6">
+            <InstagramIcon className="size-12 text-[var(--apple-ink)]" />
+            <div className="absolute -top-1.5 -right-2.5 bg-[var(--apple-ink)] rounded-full p-1.5">
+              <Lock className="size-3 text-white" />
             </div>
           </div>
-          
-          <h3 className="text-2xl md:text-3xl font-semibold mb-4 tracking-tight text-center" style={{ color: INK }}>Oops, it looks like you didn&apos;t Connect your Instagram account</h3>
-          
-          <p className="text-sm md:text-base text-zinc-500 mb-10 font-medium text-center max-w-lg">
-            You need to link your Instagram account with Loomingo to start setting up Auto DMs and growth automations.
+
+          <h3 className="apple-display text-[28px] md:text-[34px] mb-3 text-center">Connect to unlock</h3>
+
+          <p className="text-[17px] leading-relaxed text-[var(--apple-gray)] mb-8 text-center max-w-md">
+            Link your Instagram account with Loomingo to start setting up Auto DMs and growth automations.
           </p>
-          
+
           <Button
             onClick={handleConnect}
             disabled={isConnecting}
-            className="w-full max-w-sm relative z-10 text-white border-0 rounded-2xl h-14 text-base font-semibold transition-all shadow-lg hover:shadow-xl hover:scale-[1.02] hover:opacity-90"
-            style={{ backgroundColor: PRIMARY }}
+            className="w-full max-w-sm relative z-10 bg-[var(--apple-blue)] hover:bg-[var(--apple-blue-hover)] text-white border-0 rounded-full h-14 text-[17px] font-medium transition-colors duration-[240ms] shadow-none"
           >
             <InstagramIcon className="size-5 mr-3" />
             {isConnecting ? "Connecting..." : "Connect Instagram"}

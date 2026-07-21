@@ -63,7 +63,7 @@ export default function ProductDirectLinkPage({ params }: { params: Promise<{ ha
     : store.products.filter(p => p.category && p.category.split(",").map(s => s.trim()).includes(activeCategory));
 
   return (
-    <GridBackground themeColor={store.themeColor} className={`bg-zinc-200 ${inApp ? "pt-14 md:pt-0 pb-20 md:pb-0 md:pl-64" : "pb-0"}`}>
+    <GridBackground themeColor={store.themeColor} className={`bg-zinc-200 ${inApp ? "pt-[calc(3.5rem+var(--promo-h,0px))] md:pt-[calc(3rem+var(--promo-h,0px))] pb-20 md:pb-0" : "pb-0"}`}>
       {inApp && (
         <>
           <MobileNavbar />

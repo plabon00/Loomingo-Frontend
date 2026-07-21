@@ -16,7 +16,7 @@ export default function AboutPage() {
   return (
     <main
       className={`relative flex flex-col min-h-screen w-full bg-red-950 overflow-hidden ${
-        inApp ? "pt-14 md:pt-0 pb-20 md:pb-0 md:pl-64" : ""
+        inApp ? "pt-[calc(3.5rem+var(--promo-h,0px))] md:pt-[calc(3rem+var(--promo-h,0px))] pb-20 md:pb-0" : ""
       }`}
     >
       {/* Deep Red Radial Gradient Background (From Hero Section) */}

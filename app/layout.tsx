@@ -7,6 +7,7 @@ import { ServiceWorkerRegister } from "@/components/layout/ServiceWorkerRegister
 
 import { TransitionProvider } from "@/components/providers/transition-provider";
 import SplashTransition from "@/components/layout/splash-transition";
+import AnnouncementBar from "@/components/layout/announcement-bar";
 
 // 1. Import your font from the new file
 import { instrumentSerif } from "./fonts"; 
@@ -84,6 +85,7 @@ export default function RootLayout({
           enableColorScheme={false} 
         >
           <TransitionProvider>
+            <AnnouncementBar />
             {children}
             <ServiceWorkerRegister />
             <SplashTransition />

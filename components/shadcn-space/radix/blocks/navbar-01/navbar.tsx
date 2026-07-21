@@ -56,7 +56,7 @@ export default function Navbar({ forceSticky = false }: { forceSticky?: boolean 
   };
 
   return (
-    <header className="fixed top-0 w-full z-[90] p-4 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] flex justify-center">
+    <header style={{ top: "var(--promo-h, 0px)" }} className="fixed w-full z-[90] p-4 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] flex justify-center">
       {/* 
         The dynamic pill container.
         When sticky: shrinks to max-w-[200px], gets a shadow and a pill background.

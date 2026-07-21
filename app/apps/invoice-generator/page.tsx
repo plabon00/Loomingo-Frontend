@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { DesktopSidebar, MobileNavbar, BottomDock } from "@/components/layout/AppNavigation";
-import { Footer } from "@/components/layout/Footer";
+import Footer from "@/components/layout/dashboard-footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Toaster } from "@/components/ui/sonner";
@@ -35,17 +35,17 @@ const getCurrencySymbol = (c: string) => (c === "USD" ? "$" : c === "EUR" ? "€
 
 // ————— Ledger design tokens —————
 // Ink navy for primary actions, emerald for "money" moments, warm paper surfaces.
-const INK = "#152436";        // deep navy ink
+const INK = "#1d1d1f";        // Apple ink
 const INK_HOVER = "#1f3450";
-const MONEY = "#0b7a55";      // paid-green
-const PAPER = "#f6f4ef";      // warm ivory page
+const MONEY = "#0066cc";      // Apple blue accent
+const PAPER = "#ffffff";      // Apple white page
 
 // Shared control styles: explicit colors so inputs stay readable
 // regardless of the system dark-mode preference (page is light-locked).
-const inputCls = "h-10 sm:h-11 rounded-xl border-[#ddd8cd] bg-white text-zinc-900 text-base sm:text-sm placeholder:text-zinc-400 shadow-sm focus-visible:ring-2 focus-visible:ring-[#152436]/15 focus-visible:border-[#152436] transition-all duration-200";
-const selectCls = "w-full rounded-xl border border-[#ddd8cd] bg-white text-zinc-900 text-base sm:text-sm outline-none focus:border-[#152436] appearance-none shadow-sm h-10 sm:h-11 transition-colors";
-const cardCls = "bg-white border border-[#e6e1d6] rounded-2xl shadow-[0_1px_2px_rgb(21,36,54,0.04),0_12px_28px_-16px_rgb(21,36,54,0.10)]";
-const kickerCls = "text-[10px] font-bold uppercase tracking-[0.18em] text-[#0b7a55]";
+const inputCls = "h-10 sm:h-11 rounded-xl border-[var(--apple-hairline)] bg-white text-zinc-900 text-base sm:text-sm placeholder:text-zinc-400 shadow-sm focus-visible:ring-2 focus-visible:ring-[var(--apple-blue)]/25 focus-visible:border-[var(--apple-ink)] transition-all duration-200";
+const selectCls = "w-full rounded-xl border border-[var(--apple-hairline)] bg-white text-zinc-900 text-base sm:text-sm outline-none focus:border-[var(--apple-ink)] appearance-none shadow-sm h-10 sm:h-11 transition-colors";
+const cardCls = "border-t border-[var(--apple-hairline)]"; // flat section divider, no card
+const kickerCls = "text-[12px] font-semibold uppercase tracking-[0.14em] text-[var(--apple-gray-2)]";
 
 const sectionReveal = {
   initial: { opacity: 0, y: 16 },
@@ -475,120 +475,78 @@ export default function InvoiceGeneratorDashboard() {
       <DesktopSidebar />
       <MobileNavbar />
 
-      <main className="flex-1 md:ml-20 lg:ml-64 pt-16 md:pt-0 pb-24 md:pb-8 w-full overflow-x-hidden">
+      <main className="font-apple flex-1 pt-[calc(4rem+var(--promo-h,0px))] md:pt-[calc(3rem+var(--promo-h,0px))] pb-24 md:pb-8 w-full overflow-x-hidden">
 
-        {/* ————— DESKTOP HEADER: navy ledger masthead ————— */}
-        <div className="relative w-full pb-28 pt-8 px-4 lg:px-8 overflow-hidden max-md:hidden" style={{ backgroundColor: INK }}>
-          {/* Fine ruled-paper lines, like a ledger book */}
-          <div
-            className="absolute inset-0 opacity-[0.06] pointer-events-none"
-            style={{ backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 27px, #fff 27px, #fff 28px)" }}
-            aria-hidden="true"
-          />
-          {/* Emerald money-glow */}
-          <div
-            className="absolute -top-24 right-[10%] w-[500px] h-[300px] rounded-full opacity-[0.14] blur-[100px] pointer-events-none"
-            style={{ backgroundColor: MONEY }}
-            aria-hidden="true"
-          />
+        {/* ————— HEADER: flat, same pattern as autodm ————— */}
+        <div className="w-full max-w-5xl mx-auto px-6">
+          <div className="w-full flex flex-col items-start text-left mt-10 md:mt-16 mb-12 gap-3">
+            <p className={kickerCls}>Creator billing desk</p>
+            <h1 className="apple-display text-[34px] md:text-[48px]">Get paid properly.</h1>
 
-          <div className="relative z-10 max-w-7xl mx-auto flex flex-col">
-            <div className="hidden md:flex items-center justify-end w-full gap-3">
-              <Link href="/apps/invoice-generator/creator-details">
-                <Button variant="outline" className="h-10 rounded-full border-white/20 bg-white/5 text-white hover:bg-white/15 hover:text-white px-5 backdrop-blur transition-colors" disabled={isLoading}>
-                  <Settings className="mr-2 size-4" /> Creator Details
+            <div className="w-full flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+              <p className="text-[17px] md:text-[21px] leading-relaxed text-[var(--apple-gray)] max-w-md">
+                Brand-deal invoices that look as professional as your content, drafted and delivered in minutes.
+              </p>
+
+              <div className="flex items-center gap-3 shrink-0">
+                <Link href="/apps/invoice-generator/creator-details">
+                  <Button variant="outline" className="rounded-full border-[var(--apple-hairline)] bg-transparent text-[var(--apple-ink)] hover:bg-[var(--apple-surface-alt)] hover:text-[var(--apple-ink)] h-11 px-5 text-[15px] font-medium transition-colors duration-[240ms] shadow-none" disabled={isLoading}>
+                    <Settings className="mr-2 size-4" /> Creator Details
+                  </Button>
+                </Link>
+                <Button onClick={() => openNewInvoiceWizard()} disabled={isLoading} className="rounded-full bg-[var(--apple-blue)] hover:bg-[var(--apple-blue-hover)] text-white h-11 px-6 text-[15px] font-medium transition-colors duration-[240ms] shadow-none">
+                  <Plus className="mr-2 size-4" /> Create Invoice
                 </Button>
-              </Link>
-
-              <Button onClick={() => openNewInvoiceWizard()} disabled={isLoading} className="rounded-full text-white shadow-lg h-10 px-6 text-sm font-semibold transition-all hover:brightness-110" style={{ backgroundColor: MONEY }}>
-                <Plus className="mr-2 size-4" /> Create Invoice
-              </Button>
-            </div>
-
-            <motion.div {...sectionReveal} className="flex flex-col items-start justify-center mt-10 mb-2 text-left">
-              <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em] mb-4" style={{ color: "#7fd6b5" }}>
-                <Receipt className="size-3.5" /> Creator Billing Desk
-              </p>
-              <h1 className="text-4xl md:text-5xl font-semibold text-white mb-3 tracking-tight">
-                Get paid <span className="font-editorial font-normal" style={{ color: "#9ae2c4" }}>properly.</span>
-              </h1>
-              <p className="text-sm md:text-base text-white/60 font-normal max-w-xl">
-                Brand-deal invoices that look as professional as your content — drafted, previewed, and delivered in minutes.
-              </p>
-
-              {/* Ledger stats strip */}
-              <div className="flex items-center gap-6 mt-7 text-white/80">
-                <div>
-                  <p className="text-2xl font-bold text-white tabular-nums">{isLoading ? "—" : invoices.length}</p>
-                  <p className="text-[11px] uppercase tracking-wider text-white/50 font-semibold">Invoices raised</p>
-                </div>
-                <div className="w-px h-9 bg-white/15" aria-hidden="true" />
-                <div>
-                  <p className="text-2xl font-bold text-white tabular-nums">{isLoading ? "—" : brands.length}</p>
-                  <p className="text-[11px] uppercase tracking-wider text-white/50 font-semibold">Brands on file</p>
-                </div>
-                <div className="w-px h-9 bg-white/15" aria-hidden="true" />
-                <div>
-                  <p className="text-2xl font-bold text-white tabular-nums">{TEMPLATES.length}</p>
-                  <p className="text-[11px] uppercase tracking-wider text-white/50 font-semibold">Templates</p>
-                </div>
               </div>
-            </motion.div>
+            </div>
+          </div>
+
+          {/* Stats row — divider columns, same as dashboard/autodm */}
+          <div className="w-full grid grid-cols-3 divide-x divide-[var(--apple-hairline)] mb-4">
+            {[
+              { value: isLoading ? "—" : invoices.length, label: "Invoices raised" },
+              { value: isLoading ? "—" : brands.length, label: "Brands on file" },
+              { value: TEMPLATES.length, label: "Templates" },
+            ].map((stat, i) => (
+              <div key={stat.label} className={`flex flex-col gap-1.5 py-2 ${i === 0 ? "pr-4 md:pr-6" : "px-4 md:px-6"}`}>
+                <span className="text-[10px] md:text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--apple-gray-2)] truncate">
+                  {stat.label}
+                </span>
+                <span className="apple-display text-[28px] md:text-[40px] tabular-nums">{stat.value}</span>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* ————— MOBILE HEADER ————— */}
-        <div className="md:hidden px-4 pt-6 pb-2">
-          <div className="flex flex-col gap-4">
-            <div>
-              <p className={kickerCls}>Creator Billing Desk</p>
-              <h1 className="text-2xl font-bold tracking-tight text-zinc-950 mt-1.5">
-                Get paid <span className="font-editorial font-normal" style={{ color: MONEY }}>properly.</span>
-              </h1>
-              <p className="text-zinc-500 mt-1 text-sm">Brand-deal invoices, drafted and delivered in minutes.</p>
-            </div>
-            <div className="flex flex-wrap gap-2.5">
-              <Button onClick={() => openNewInvoiceWizard()} size="sm" disabled={isLoading} className="rounded-full text-white h-10 px-5 font-semibold shadow-md" style={{ backgroundColor: MONEY }}>
-                <Plus className="size-4 mr-1.5" /> New Invoice
-              </Button>
-              <Link href="/apps/invoice-generator/creator-details">
-                <Button variant="outline" size="sm" className="rounded-full border-[#ddd8cd] bg-white text-zinc-800 h-10 px-4" disabled={isLoading}>
-                  <Settings className="size-4 mr-1.5" /> Creator Details
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        <div className="max-w-6xl mx-auto px-4 md:px-8 mt-4 md:-mt-14 relative z-20 space-y-6 md:space-y-8">
+        <div className="max-w-5xl mx-auto px-6 mt-8 md:mt-12 space-y-14 md:space-y-20">
 
           {isLoading || !user ? (
             <div className="space-y-6 animate-pulse mt-8">
               {/* History Skeleton */}
-              <div className={`${cardCls} p-4 md:p-6`}>
-                <div className="h-6 w-32 bg-[#ece8df] rounded-full mb-4"></div>
+              <div className={`${cardCls} pt-8 md:pt-10`}>
+                <div className="h-6 w-32 bg-[var(--apple-surface-alt)] rounded-full mb-4"></div>
                 <div className="flex gap-3 overflow-hidden">
-                  <div className="w-full sm:w-48 h-[220px] bg-[#f1eee6] rounded-2xl shrink-0"></div>
-                  <div className="w-full sm:w-48 h-[220px] bg-[#f1eee6] rounded-2xl shrink-0"></div>
-                  <div className="w-full sm:w-48 h-[220px] bg-[#f1eee6] rounded-2xl shrink-0 hidden sm:block"></div>
-                  <div className="w-full sm:w-48 h-[220px] bg-[#f1eee6] rounded-2xl shrink-0 hidden md:block"></div>
+                  <div className="w-full sm:w-48 h-[220px] bg-[var(--apple-surface-alt)] rounded-2xl shrink-0"></div>
+                  <div className="w-full sm:w-48 h-[220px] bg-[var(--apple-surface-alt)] rounded-2xl shrink-0"></div>
+                  <div className="w-full sm:w-48 h-[220px] bg-[var(--apple-surface-alt)] rounded-2xl shrink-0 hidden sm:block"></div>
+                  <div className="w-full sm:w-48 h-[220px] bg-[var(--apple-surface-alt)] rounded-2xl shrink-0 hidden md:block"></div>
                 </div>
               </div>
 
               {/* Brands Skeleton */}
-              <div className={`${cardCls} p-4 md:p-6`}>
-                <div className="h-6 w-32 bg-[#ece8df] rounded-full mb-4"></div>
+              <div className={`${cardCls} pt-8 md:pt-10`}>
+                <div className="h-6 w-32 bg-[var(--apple-surface-alt)] rounded-full mb-4"></div>
                 <div className="flex gap-3 overflow-hidden">
-                  <div className="w-full sm:w-64 h-[120px] bg-[#f1eee6] rounded-2xl shrink-0"></div>
-                  <div className="w-full sm:w-64 h-[120px] bg-[#f1eee6] rounded-2xl shrink-0"></div>
-                  <div className="w-full sm:w-64 h-[120px] bg-[#f1eee6] rounded-2xl shrink-0 hidden md:block"></div>
+                  <div className="w-full sm:w-64 h-[120px] bg-[var(--apple-surface-alt)] rounded-2xl shrink-0"></div>
+                  <div className="w-full sm:w-64 h-[120px] bg-[var(--apple-surface-alt)] rounded-2xl shrink-0"></div>
+                  <div className="w-full sm:w-64 h-[120px] bg-[var(--apple-surface-alt)] rounded-2xl shrink-0 hidden md:block"></div>
                 </div>
               </div>
             </div>
           ) : (
             <>
               {/* Mobile Tabs — sliding ink pill */}
-              <div className="flex sm:hidden p-1 bg-white border border-[#e6e1d6] rounded-full shadow-sm mt-2">
+              <div className="flex sm:hidden p-1 bg-white border border-[var(--apple-hairline)] rounded-full shadow-sm mt-2">
                 {([["history", "History"], ["brands", "Brands"], ["templates", "Templates"]] as const).map(([key, label]) => (
                   <button
                     key={key}
@@ -609,15 +567,15 @@ export default function InvoiceGeneratorDashboard() {
               </div>
 
               {/* ————— HISTORY: The Paper Trail ————— */}
-              <motion.section {...sectionReveal} className={`${cardCls} p-4 md:p-6 ${activeMobileTab === "history" ? "block" : "hidden sm:block"}`}>
+              <motion.section {...sectionReveal} className={`${cardCls} pt-8 md:pt-10 ${activeMobileTab === "history" ? "block" : "hidden sm:block"}`}>
                 <div className="flex items-center justify-between mb-4 gap-3">
                   <div>
-                    <p className={kickerCls}>The paper trail</p>
-                    <h2 className="text-lg font-bold text-zinc-950 mt-0.5">Recent Invoices</h2>
+                    <p className={kickerCls}>History</p>
+                    <h2 className="text-[21px] md:text-[28px] font-semibold tracking-tight text-[var(--apple-ink)] mt-0.5">Recent invoices</h2>
                   </div>
                   <div className="flex items-center gap-3">
                     <Link href="/apps/invoice-generator/history">
-                      <span className="text-sm font-semibold whitespace-nowrap hover:underline underline-offset-4" style={{ color: MONEY }}>View All</span>
+                      <span className="apple-link text-[14px] whitespace-nowrap">View all ›</span>
                     </Link>
                     <Button onClick={() => openNewInvoiceWizard()} size="sm" className="rounded-full text-white shadow-sm hidden sm:flex hover:brightness-110 transition-all" style={{ backgroundColor: INK }}>
                       <Plus className="size-4 mr-1" /> Create New
@@ -630,18 +588,18 @@ export default function InvoiceGeneratorDashboard() {
                     whileHover={{ y: -3 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => openNewInvoiceWizard()}
-                    className="w-full sm:w-48 sm:snap-start shrink-0 rounded-2xl border-2 border-dashed border-[#0b7a55]/35 bg-[#0b7a55]/[0.04] hover:bg-[#0b7a55]/[0.08] hover:border-[#0b7a55]/60 transition-colors flex flex-col items-center justify-center gap-2.5 min-h-[180px] sm:min-h-[220px] cursor-pointer group"
+                    className="w-full sm:w-48 sm:snap-start shrink-0 rounded-[18px] border-2 border-dashed border-[var(--apple-blue)]/35 bg-[var(--apple-blue)]/[0.04] hover:bg-[var(--apple-blue)]/[0.08] hover:border-[var(--apple-blue)]/60 transition-colors flex flex-col items-center justify-center gap-2.5 min-h-[180px] sm:min-h-[220px] cursor-pointer group"
                   >
                     <span className="size-11 rounded-full text-white flex items-center justify-center shadow-md transition-transform duration-300 group-hover:rotate-90" style={{ backgroundColor: MONEY }}>
                       <Plus className="size-5" />
                     </span>
                     <span className="text-sm font-bold" style={{ color: MONEY }}>New Invoice</span>
-                    <span className="font-editorial text-sm text-zinc-500 -mt-1">bill the next deal</span>
+                    <span className="text-[12px] text-[var(--apple-gray-2)] -mt-1">bill the next deal</span>
                   </motion.button>
 
                   {invoices.length === 0 ? (
                     <div className="flex flex-col justify-center px-4">
-                      <p className="font-editorial text-lg text-zinc-500">A blank ledger, for now.</p>
+                      <p className="text-[17px] font-semibold text-[var(--apple-ink)]">No invoices yet</p>
                       <p className="text-xs text-zinc-400 mt-1">Your saved invoices will appear here.</p>
                     </div>
                   ) : (
@@ -653,10 +611,10 @@ export default function InvoiceGeneratorDashboard() {
                           initial={{ opacity: 0, y: 14 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: Math.min(i * 0.05, 0.35), duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-                          className="w-full sm:w-48 sm:snap-start shrink-0 rounded-2xl border border-[#e6e1d6] bg-white shadow-sm hover:shadow-[0_14px_28px_-14px_rgb(21,36,54,0.25)] hover:border-[#152436]/25 hover:-translate-y-0.5 transition-all duration-300 overflow-hidden group"
+                          className="w-full sm:w-48 sm:snap-start shrink-0 rounded-[18px] bg-[var(--apple-surface-alt)] hover:bg-[#efeff1] hover:-translate-y-0.5 transition-all duration-300 overflow-hidden group"
                         >
                           {/* Exact invoice preview (top of the document) */}
-                          <div onClick={() => openPreviewFromHistory(inv)} className="relative h-28 sm:h-36 overflow-hidden cursor-pointer bg-[#faf9f5] border-b border-[#eee9df]">
+                          <div onClick={() => openPreviewFromHistory(inv)} className="relative h-28 sm:h-36 overflow-hidden cursor-pointer bg-white border-b border-[var(--apple-hairline)]">
                             {thumb ? (
                               <ScaledA4 className="pointer-events-none select-none">
                                 <InvoiceHtmlPreview invoiceData={thumb.invoiceData} lineItems={thumb.lineItems} creatorSettings={creatorSettings} />
@@ -670,11 +628,11 @@ export default function InvoiceGeneratorDashboard() {
                           </div>
                           <div className="p-3">
                             <div className="flex items-center justify-between gap-2 mb-1">
-                              <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded truncate" style={{ backgroundColor: "#1524360d", color: INK }}>{inv.invoiceNumber}</span>
+                              <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded truncate" style={{ backgroundColor: "#1d1d1f0d", color: INK }}>{inv.invoiceNumber}</span>
                               <button
                                 onClick={(e) => { e.stopPropagation(); openEditDate(inv); }}
                                 title="Edit invoice date"
-                                className="shrink-0 p-1.5 rounded-full bg-[#f1eee6] text-zinc-600 hover:text-white transition-colors cursor-pointer"
+                                className="shrink-0 p-1.5 rounded-full bg-[var(--apple-surface-alt)] text-zinc-600 hover:text-white transition-colors cursor-pointer"
                                 onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = INK)}
                                 onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "")}
                               >
@@ -693,17 +651,17 @@ export default function InvoiceGeneratorDashboard() {
               </motion.section>
 
               {/* ————— SAVED BRANDS: The Rolodex ————— */}
-              <motion.section {...sectionReveal} className={`${cardCls} p-4 md:p-6 ${activeMobileTab === "brands" ? "block" : "hidden sm:block"}`}>
+              <motion.section {...sectionReveal} className={`${cardCls} pt-8 md:pt-10 ${activeMobileTab === "brands" ? "block" : "hidden sm:block"}`}>
                 <div className="mb-4">
-                  <p className={kickerCls}>The rolodex</p>
-                  <h2 className="text-lg font-bold text-zinc-950 mt-0.5">Saved Brands</h2>
+                  <p className={kickerCls}>Brands</p>
+                  <h2 className="text-[21px] md:text-[28px] font-semibold tracking-tight text-[var(--apple-ink)] mt-0.5">Saved brands</h2>
                 </div>
                 <div className="grid grid-cols-2 gap-3 sm:flex sm:overflow-x-auto sm:gap-4 sm:pb-2 sm:snap-x sm:snap-mandatory sm:scrollbar-hide">
                   <motion.div
                     whileHover={{ y: -2 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => { setEditingBrand({ name: "", address: "", gstin: "", pan: "", contact: "", email: "" }); setIsBrandModalOpen(true); }}
-                    className="w-full sm:w-64 sm:snap-start shrink-0 p-3 sm:p-4 rounded-2xl border-2 border-dashed border-[#d8d2c4] bg-[#faf9f5] flex flex-col items-center justify-center cursor-pointer hover:border-[#152436]/50 transition-colors h-[120px] group"
+                    className="w-full sm:w-64 sm:snap-start shrink-0 p-3 sm:p-4 rounded-[18px] border-2 border-dashed border-[var(--apple-hairline)] bg-white flex flex-col items-center justify-center cursor-pointer hover:border-[var(--apple-ink)]/50 transition-colors h-[120px] group"
                   >
                     <Plus className="size-6 text-zinc-400 mb-2 transition-transform duration-300 group-hover:rotate-90" />
                     <span className="text-sm font-semibold text-zinc-700">Add New Brand</span>
@@ -714,7 +672,7 @@ export default function InvoiceGeneratorDashboard() {
                       initial={{ opacity: 0, y: 12 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: Math.min(i * 0.04, 0.3), duration: 0.3 }}
-                      className="w-full sm:w-64 sm:snap-start shrink-0 p-3 sm:p-4 rounded-2xl border border-[#e6e1d6] bg-white shadow-sm hover:shadow-md hover:border-[#152436]/20 transition-all duration-300 flex flex-col justify-between h-[120px] relative"
+                      className="w-full sm:w-64 sm:snap-start shrink-0 p-3 sm:p-4 rounded-[18px] bg-[var(--apple-surface-alt)] hover:bg-[#efeff1] transition-all duration-300 flex flex-col justify-between h-[120px] relative"
                     >
                       <div>
                         {/* Brand monogram */}
@@ -731,7 +689,7 @@ export default function InvoiceGeneratorDashboard() {
                           </p>
                         )}
                       </div>
-                      <button onClick={() => { setEditingBrand(b); setIsBrandModalOpen(true); }} className="absolute top-3 right-3 bg-[#f1eee6] p-2 rounded-full hover:bg-[#e6e1d6] transition-colors cursor-pointer" title="Edit brand">
+                      <button onClick={() => { setEditingBrand(b); setIsBrandModalOpen(true); }} className="absolute top-3 right-3 bg-[var(--apple-surface-alt)] p-2 rounded-full hover:bg-[var(--apple-hairline)] transition-colors cursor-pointer" title="Edit brand">
                         <Edit3 className="size-3.5 text-zinc-600" />
                       </button>
                     </motion.div>
@@ -740,13 +698,13 @@ export default function InvoiceGeneratorDashboard() {
               </motion.section>
 
               {/* ————— TEMPLATES: The Stationery Drawer ————— */}
-              <motion.section {...sectionReveal} className={`${cardCls} p-4 md:p-6 ${activeMobileTab === "templates" ? "block" : "hidden sm:block"}`}>
+              <motion.section {...sectionReveal} className={`${cardCls} pt-8 md:pt-10 ${activeMobileTab === "templates" ? "block" : "hidden sm:block"}`}>
                 <div className="flex items-end justify-between mb-4">
                   <div>
-                    <p className={kickerCls}>The stationery drawer</p>
-                    <h2 className="text-lg font-bold text-zinc-950 mt-0.5">Templates</h2>
+                    <p className={kickerCls}>Templates</p>
+                    <h2 className="text-[21px] md:text-[28px] font-semibold tracking-tight text-[var(--apple-ink)] mt-0.5">Templates</h2>
                   </div>
-                  <p className="font-editorial text-sm text-zinc-400 hidden sm:block">pick one, start billing</p>
+                  <p className="text-[14px] text-[var(--apple-gray-2)] hidden sm:block">pick one, start billing</p>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4 pb-2">
                   {TEMPLATES.map((t, i) => (
@@ -757,9 +715,9 @@ export default function InvoiceGeneratorDashboard() {
                       transition={{ delay: Math.min(i * 0.04, 0.25), duration: 0.3 }}
                       whileHover={{ y: -3 }}
                       onClick={() => openNewInvoiceWizard(t.id)}
-                      className="w-full text-left rounded-2xl border border-[#e6e1d6] bg-white overflow-hidden shadow-sm hover:shadow-[0_14px_28px_-14px_rgb(21,36,54,0.3)] hover:border-[#152436]/30 transition-all duration-300 cursor-pointer group focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#152436]"
+                      className="w-full text-left rounded-[18px] bg-[var(--apple-surface-alt)] overflow-hidden hover:bg-[#efeff1] hover:-translate-y-0.5 transition-all duration-300 cursor-pointer group focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--apple-blue)]"
                     >
-                      <div className="border-b border-[#eee9df]">
+                      <div className="border-b border-[var(--apple-hairline)]">
                         <TemplateThumbnail templateId={t.id} />
                       </div>
                       <div className="px-3 py-2 flex items-center justify-between gap-1">
@@ -785,7 +743,7 @@ export default function InvoiceGeneratorDashboard() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-50 bg-[#152436]/70 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4 pb-20 sm:pb-4"
+            className="fixed inset-0 z-50 bg-[var(--apple-ink)]/70 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4 pb-20 sm:pb-4"
           >
             <motion.div
               initial={{ opacity: 0, y: 40 }}
@@ -795,28 +753,28 @@ export default function InvoiceGeneratorDashboard() {
               className="bg-white w-full h-auto max-h-[82dvh] sm:max-h-[90vh] max-w-2xl rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden"
             >
               {/* Header with step progress */}
-              <div className="p-4 sm:p-6 pb-0 sm:pb-0 border-b border-[#eee9df]">
+              <div className="p-4 sm:p-6 pb-0 sm:pb-0 border-b border-[var(--apple-hairline)]">
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="font-bold text-xl text-zinc-950 tracking-tight">New Invoice</h3>
-                    <p className="font-editorial text-sm text-zinc-400 mt-0.5">
+                    <p className="font-semibold tracking-tight text-sm text-zinc-400 mt-0.5">
                       {wizardStep === 1 ? "who's paying, and for what" : "name your price"}
                     </p>
                   </div>
-                  <Button variant="ghost" size="icon" onClick={() => setIsWizardOpen(false)} className="rounded-full text-zinc-500 hover:bg-[#f1eee6] cursor-pointer"><X className="size-5" /></Button>
+                  <Button variant="ghost" size="icon" onClick={() => setIsWizardOpen(false)} className="rounded-full text-zinc-500 hover:bg-[var(--apple-surface-alt)] cursor-pointer"><X className="size-5" /></Button>
                 </div>
                 {/* Progress rail */}
                 <div className="flex gap-1.5 mt-4 mb-4">
-                  <div className="h-1 flex-1 rounded-full overflow-hidden bg-[#ece8df]">
+                  <div className="h-1 flex-1 rounded-full overflow-hidden bg-[var(--apple-surface-alt)]">
                     <motion.div className="h-full rounded-full" style={{ backgroundColor: MONEY }} initial={false} animate={{ width: "100%" }} />
                   </div>
-                  <div className="h-1 flex-1 rounded-full overflow-hidden bg-[#ece8df]">
+                  <div className="h-1 flex-1 rounded-full overflow-hidden bg-[var(--apple-surface-alt)]">
                     <motion.div className="h-full rounded-full" style={{ backgroundColor: MONEY }} initial={false} animate={{ width: wizardStep === 2 ? "100%" : "0%" }} transition={{ duration: 0.35, ease: "easeOut" }} />
                   </div>
                 </div>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar bg-[#faf9f5]">
+              <div className="flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar bg-white">
 
                 <AnimatePresence mode="wait" initial={false}>
                   {/* STEP 1: Campaign Details */}
@@ -840,7 +798,7 @@ export default function InvoiceGeneratorDashboard() {
                               <Input
                                 autoFocus
                                 placeholder="Search..."
-                                className="h-8 text-xs pr-8 rounded-lg border-[#ddd8cd]"
+                                className="h-8 text-xs pr-8 rounded-lg border-[var(--apple-hairline)]"
                                 value={brandSearchQuery}
                                 onChange={(e) => setBrandSearchQuery(e.target.value)}
                               />
@@ -849,14 +807,14 @@ export default function InvoiceGeneratorDashboard() {
                               </button>
                             </div>
                           ) : (
-                            <button onClick={() => setIsBrandSearchOpen(true)} className="p-1.5 text-zinc-400 hover:bg-[#f1eee6] rounded-full transition-colors cursor-pointer" aria-label="Search brands">
+                            <button onClick={() => setIsBrandSearchOpen(true)} className="p-1.5 text-zinc-400 hover:bg-[var(--apple-surface-alt)] rounded-full transition-colors cursor-pointer" aria-label="Search brands">
                               <Search className="size-4" />
                             </button>
                           )}
                         </div>
 
                         {brands.length === 0 ? (
-                          <div className="p-4 border border-dashed border-[#d8d2c4] rounded-xl text-center text-sm text-zinc-500 bg-white">
+                          <div className="p-4 border border-dashed border-[var(--apple-hairline)] rounded-xl text-center text-sm text-zinc-500 bg-white">
                             No saved brands found. You can add them from the Dashboard.
                           </div>
                         ) : (
@@ -871,7 +829,7 @@ export default function InvoiceGeneratorDashboard() {
                                     onClick={() => {
                                       setFormData({...formData, brandName: b.name, billingAddress: b.address || "", gstin: b.gstin || "", pan: b.pan || "", contact: b.contact || "", brandEmail: b.email || ""});
                                     }}
-                                    className={`snap-start shrink-0 w-40 sm:w-48 text-left p-3 rounded-xl border-2 transition-all duration-200 cursor-pointer relative ${isSelected ? 'bg-white shadow-md' : 'bg-white border-[#e6e1d6] hover:border-[#152436]/30 shadow-sm'}`}
+                                    className={`snap-start shrink-0 w-40 sm:w-48 text-left p-3 rounded-xl border-2 transition-all duration-200 cursor-pointer relative ${isSelected ? 'bg-white shadow-md' : 'bg-white border-[var(--apple-hairline)] hover:border-[var(--apple-ink)]/30 shadow-sm'}`}
                                     style={isSelected ? { borderColor: MONEY } : undefined}
                                   >
                                     {isSelected && (
@@ -946,7 +904,7 @@ export default function InvoiceGeneratorDashboard() {
                             <button
                               key={opt}
                               onClick={() => toggleDeliverable(opt)}
-                              className={`px-3 py-1.5 rounded-full text-[11px] font-semibold border transition-all duration-200 cursor-pointer active:scale-95 ${selectedDeliverables.includes(opt) ? 'text-white shadow-sm' : 'bg-white text-zinc-700 border-[#ddd8cd] hover:border-[#152436]/40'}`}
+                              className={`px-3 py-1.5 rounded-full text-[11px] font-semibold border transition-all duration-200 cursor-pointer active:scale-95 ${selectedDeliverables.includes(opt) ? 'text-white shadow-sm' : 'bg-white text-zinc-700 border-[var(--apple-hairline)] hover:border-[var(--apple-ink)]/40'}`}
                               style={selectedDeliverables.includes(opt) ? { backgroundColor: MONEY, borderColor: MONEY } : undefined}
                             >
                               {selectedDeliverables.includes(opt) ? <Check className="size-3 inline mr-1" /> : <Plus className="size-3 inline mr-1" />}
@@ -955,7 +913,7 @@ export default function InvoiceGeneratorDashboard() {
                           ))}
                           <button
                             onClick={() => setShowOtherDeliverableInput(!showOtherDeliverableInput)}
-                            className={`px-3 py-1.5 rounded-full text-[11px] font-semibold border transition-all duration-200 cursor-pointer active:scale-95 ${showOtherDeliverableInput ? 'bg-[#f1eee6] text-zinc-900 border-[#d8d2c4]' : 'bg-white text-zinc-700 border-[#ddd8cd] hover:border-[#152436]/40'}`}
+                            className={`px-3 py-1.5 rounded-full text-[11px] font-semibold border transition-all duration-200 cursor-pointer active:scale-95 ${showOtherDeliverableInput ? 'bg-[var(--apple-surface-alt)] text-zinc-900 border-[var(--apple-hairline)]' : 'bg-white text-zinc-700 border-[var(--apple-hairline)] hover:border-[var(--apple-ink)]/40'}`}
                           >
                             {showOtherDeliverableInput ? <X className="size-3 inline mr-1" /> : <Plus className="size-3 inline mr-1" />}
                             Other
@@ -995,7 +953,7 @@ export default function InvoiceGeneratorDashboard() {
                       transition={{ duration: 0.2 }}
                       className="space-y-4 sm:space-y-6"
                     >
-                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-3 sm:p-4 rounded-xl border border-[#e6e1d6] gap-3 mb-4 shadow-sm">
+                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-3 sm:p-4 rounded-xl border border-[var(--apple-hairline)] gap-3 mb-4 shadow-sm">
                         <div className="w-full sm:flex-1 sm:mr-4">
                           <label className="text-xs font-semibold text-zinc-600 mb-1.5 block">Template</label>
                           <div className="relative">
@@ -1008,7 +966,7 @@ export default function InvoiceGeneratorDashboard() {
                         <div className="w-full sm:w-28 flex-shrink-0 flex items-center justify-between sm:block">
                           <label className="text-xs font-semibold text-zinc-600 mb-0 sm:mb-1.5 block sm:text-right">Currency</label>
                           <div className="relative flex sm:justify-end">
-                            <select className="bg-[#f1eee6] hover:bg-[#ece8df] border border-[#e6e1d6] outline-none rounded-full px-3 py-1.5 text-xs font-bold cursor-pointer appearance-none pr-8 transition-colors text-zinc-800 w-28 text-center shadow-sm" value={formData.currency} onChange={(e) => setFormData({...formData, currency: e.target.value})}>
+                            <select className="bg-[var(--apple-surface-alt)] hover:bg-[var(--apple-surface-alt)] border border-[var(--apple-hairline)] outline-none rounded-full px-3 py-1.5 text-xs font-bold cursor-pointer appearance-none pr-8 transition-colors text-zinc-800 w-28 text-center shadow-sm" value={formData.currency} onChange={(e) => setFormData({...formData, currency: e.target.value})}>
                               <option value="INR">🇮🇳 INR</option>
                               <option value="USD">🇺🇸 USD</option>
                               <option value="EUR">🇪🇺 EUR</option>
@@ -1029,11 +987,11 @@ export default function InvoiceGeneratorDashboard() {
                               animate={{ opacity: 1, y: 0, scale: 1 }}
                               exit={{ opacity: 0, scale: 0.96, transition: { duration: 0.15 } }}
                               transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                              className="p-3 sm:p-4 rounded-xl border border-[#e6e1d6] bg-white shadow-sm space-y-3 relative group"
+                              className="p-3 sm:p-4 rounded-xl border border-[var(--apple-hairline)] bg-white shadow-sm space-y-3 relative group"
                             >
                               {/* Item number stamp + delete */}
                               <div className="flex items-center justify-between">
-                                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md" style={{ backgroundColor: "#15243610", color: INK }}>
+                                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md" style={{ backgroundColor: "#1d1d1f10", color: INK }}>
                                   ITEM {String(index + 1).padStart(2, "0")}
                                 </span>
                                 <Button variant="ghost" size="icon" onClick={() => removeLineItem(index)} className="size-7 rounded-md text-red-500 hover:bg-red-50 hover:text-red-600 cursor-pointer"><Trash2 className="size-3.5" /></Button>
@@ -1044,7 +1002,7 @@ export default function InvoiceGeneratorDashboard() {
                                 {/* Type */}
                                 <div className="relative shrink-0 w-full sm:w-36">
                                   <select
-                                    className="w-full h-10 pl-3 pr-8 rounded-xl border border-[#ddd8cd] bg-[#faf9f5] text-zinc-900 text-sm font-semibold outline-none appearance-none focus:border-[#152436] transition-all shadow-sm cursor-pointer"
+                                    className="w-full h-10 pl-3 pr-8 rounded-xl border border-[var(--apple-hairline)] bg-white text-zinc-900 text-sm font-semibold outline-none appearance-none focus:border-[var(--apple-ink)] transition-all shadow-sm cursor-pointer"
                                     value={item.type}
                                     onChange={(e) => updateLineItem(index, "type", e.target.value)}
                                   >
@@ -1056,7 +1014,7 @@ export default function InvoiceGeneratorDashboard() {
                                 {/* Name */}
                                 <div className="flex-1 min-w-0">
                                   {item.type === "Ad Rights" ? (
-                                    <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl border h-10 px-2 shadow-sm" style={{ backgroundColor: "#0b7a5508", borderColor: "#0b7a5530" }}>
+                                    <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl border h-10 px-2 shadow-sm" style={{ backgroundColor: "#0066cc08", borderColor: "#0066cc30" }}>
                                       <div className="relative">
                                         <select
                                           className="h-7 pl-1.5 pr-5 rounded-md border-none bg-white/80 text-xs font-semibold outline-none appearance-none cursor-pointer hover:bg-white transition-colors text-center w-[60px]"
@@ -1067,9 +1025,9 @@ export default function InvoiceGeneratorDashboard() {
                                           <option value="" disabled>Mon</option>
                                           {MONTHS.map(m => <option key={m} value={m}>{m}</option>)}
                                         </select>
-                                        <ChevronDown className="absolute right-1 top-2 size-3 pointer-events-none" style={{ color: "#0b7a5570" }} />
+                                        <ChevronDown className="absolute right-1 top-2 size-3 pointer-events-none" style={{ color: "#0066cc70" }} />
                                       </div>
-                                      <span className="font-bold text-xs" style={{ color: "#0b7a5550" }}>–</span>
+                                      <span className="font-bold text-xs" style={{ color: "#0066cc50" }}>–</span>
                                       <div className="relative">
                                         <select
                                           className="h-7 pl-1.5 pr-5 rounded-md border-none bg-white/80 text-xs font-semibold outline-none appearance-none cursor-pointer hover:bg-white transition-colors text-center w-[60px]"
@@ -1080,7 +1038,7 @@ export default function InvoiceGeneratorDashboard() {
                                           <option value="" disabled>Mon</option>
                                           {MONTHS.map(m => <option key={m} value={m}>{m}</option>)}
                                         </select>
-                                        <ChevronDown className="absolute right-1 top-2 size-3 pointer-events-none" style={{ color: "#0b7a5570" }} />
+                                        <ChevronDown className="absolute right-1 top-2 size-3 pointer-events-none" style={{ color: "#0066cc70" }} />
                                       </div>
                                       <div className="relative ml-auto">
                                         <select
@@ -1091,7 +1049,7 @@ export default function InvoiceGeneratorDashboard() {
                                         >
                                           {Array.from({length: 21}, (_, i) => (new Date().getFullYear() + i).toString()).map(y => <option key={y} value={y}>{y}</option>)}
                                         </select>
-                                        <ChevronDown className="absolute right-1 top-2 size-3 pointer-events-none" style={{ color: "#0b7a5570" }} />
+                                        <ChevronDown className="absolute right-1 top-2 size-3 pointer-events-none" style={{ color: "#0066cc70" }} />
                                       </div>
                                     </div>
                                   ) : (
@@ -1100,19 +1058,19 @@ export default function InvoiceGeneratorDashboard() {
                                       onChange={(e) => updateLineItem(index, "name", e.target.value)}
                                       disabled={item.type !== "Others"}
                                       placeholder="Item description..."
-                                      className="h-10 w-full rounded-xl border-[#ddd8cd] text-sm bg-white text-zinc-900 placeholder:text-zinc-400 disabled:bg-[#faf9f5] disabled:text-zinc-500 shadow-sm focus-visible:ring-[#152436]/15"
+                                      className="h-10 w-full rounded-xl border-[var(--apple-hairline)] text-sm bg-white text-zinc-900 placeholder:text-zinc-400 disabled:bg-white disabled:text-zinc-500 shadow-sm focus-visible:ring-[var(--apple-blue)]/25"
                                     />
                                   )}
                                 </div>
                               </div>
 
                               {/* Row 2: Qty and Price side by side, aligned to the right */}
-                              <div className="flex justify-end gap-2 mt-2 pt-2 border-t border-[#f1eee6]">
+                              <div className="flex justify-end gap-2 mt-2 pt-2 border-t border-[var(--apple-surface-alt)]">
                                 {/* Quantity */}
-                                <div className="flex items-center gap-1.5 bg-[#faf9f5] rounded-full px-2 py-1 border border-[#e6e1d6]">
+                                <div className="flex items-center gap-1.5 bg-white rounded-full px-2 py-1 border border-[var(--apple-hairline)]">
                                   <span className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider ml-1">Qty</span>
                                   <div className="relative">
-                                    <select className="h-7 pl-2 pr-6 rounded-full border-none bg-white text-zinc-900 text-xs outline-none appearance-none font-bold shadow-sm cursor-pointer hover:bg-[#f1eee6] transition-colors" value={item.quantity || 1} onChange={(e) => updateLineItem(index, "quantity", parseInt(e.target.value) || 1)}>
+                                    <select className="h-7 pl-2 pr-6 rounded-full border-none bg-white text-zinc-900 text-xs outline-none appearance-none font-bold shadow-sm cursor-pointer hover:bg-[var(--apple-surface-alt)] transition-colors" value={item.quantity || 1} onChange={(e) => updateLineItem(index, "quantity", parseInt(e.target.value) || 1)}>
                                       {[1,2,3,4,5,6,7,8,9,10,15,20].map(n => <option key={n} value={n}>{n}</option>)}
                                     </select>
                                     <ChevronDown className="absolute right-1.5 top-1/2 -translate-y-1/2 size-3 text-zinc-400 pointer-events-none" />
@@ -1120,7 +1078,7 @@ export default function InvoiceGeneratorDashboard() {
                                 </div>
 
                                 {/* Price */}
-                                <div className="flex items-center border rounded-full px-3 h-9 bg-white w-28 sm:w-32 shadow-sm focus-within:ring-2 focus-within:ring-[#0b7a55]/25 transition-all" style={{ borderColor: "#0b7a5540" }}>
+                                <div className="flex items-center border rounded-full px-3 h-9 bg-white w-28 sm:w-32 shadow-sm focus-within:ring-2 focus-within:ring-[var(--apple-blue)]/25 transition-all" style={{ borderColor: "#0066cc40" }}>
                                   <span className="text-sm font-bold mr-1.5" style={{ color: MONEY }}>{getCurrencySymbol(formData.currency)}</span>
                                   <Input
                                     type="number"
@@ -1136,7 +1094,7 @@ export default function InvoiceGeneratorDashboard() {
                           ))}
                         </AnimatePresence>
 
-                        <Button variant="outline" onClick={addLineItem} className="w-full border-dashed border-[#d8d2c4] bg-white text-zinc-700 hover:border-[#152436]/40 hover:bg-[#faf9f5] rounded-xl h-11 cursor-pointer transition-colors">
+                        <Button variant="outline" onClick={addLineItem} className="w-full border-dashed border-[var(--apple-hairline)] bg-white text-zinc-700 hover:border-[var(--apple-ink)]/40 hover:bg-white rounded-xl h-11 cursor-pointer transition-colors">
                           <Plus className="size-4 mr-2" /> Add Another Item
                         </Button>
 
@@ -1153,19 +1111,19 @@ export default function InvoiceGeneratorDashboard() {
                 </AnimatePresence>
               </div>
 
-              <div className="p-4 sm:p-6 border-t border-[#eee9df] flex items-center justify-between gap-2 bg-white">
+              <div className="p-4 sm:p-6 border-t border-[var(--apple-hairline)] flex items-center justify-between gap-2 bg-white">
                 {wizardStep === 1 ? (
                   <>
-                    <Button variant="ghost" onClick={() => setIsWizardOpen(false)} className="rounded-full text-zinc-600 hover:bg-[#f1eee6] cursor-pointer h-11">Cancel</Button>
+                    <Button variant="ghost" onClick={() => setIsWizardOpen(false)} className="rounded-full text-zinc-600 hover:bg-[var(--apple-surface-alt)] cursor-pointer h-11">Cancel</Button>
                     <Button onClick={() => setWizardStep(2)} disabled={!formData.brandName} className="rounded-full text-white shadow-md h-11 px-6 font-semibold hover:brightness-110 transition-all cursor-pointer" style={{ backgroundColor: INK }}>
                       Next Step <ArrowRight className="size-4 ml-2" />
                     </Button>
                   </>
                 ) : (
                   <>
-                    <Button variant="ghost" onClick={() => setWizardStep(1)} className="rounded-full text-zinc-600 hover:bg-[#f1eee6] cursor-pointer h-11"><ArrowLeft className="size-4 mr-2" /> Back</Button>
+                    <Button variant="ghost" onClick={() => setWizardStep(1)} className="rounded-full text-zinc-600 hover:bg-[var(--apple-surface-alt)] cursor-pointer h-11"><ArrowLeft className="size-4 mr-2" /> Back</Button>
                     <div className="flex gap-2">
-                      <Button variant="outline" onClick={handleGenerate} className="rounded-full font-semibold shadow-sm h-11 cursor-pointer border-[#15243630] hover:bg-[#f1eee6] transition-colors" style={{ color: INK }}>Preview</Button>
+                      <Button variant="outline" onClick={handleGenerate} className="rounded-full font-semibold shadow-sm h-11 cursor-pointer border-[var(--apple-hairline)] hover:bg-[var(--apple-surface-alt)] transition-colors" style={{ color: INK }}>Preview</Button>
                       <Button onClick={handleSaveInvoice} disabled={isSaving} className="rounded-full text-white shadow-md h-11 px-6 font-semibold hover:brightness-110 transition-all cursor-pointer" style={{ backgroundColor: MONEY }}>
                         {isSaving ? <Loader2 className="size-4 animate-spin mr-2" /> : <Save className="size-4 mr-2" />} Save
                       </Button>
@@ -1186,17 +1144,17 @@ export default function InvoiceGeneratorDashboard() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.18 }}
-            className="fixed inset-0 z-50 bg-[#152436]/70 backdrop-blur-sm flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 bg-[var(--apple-ink)]/70 backdrop-blur-sm flex items-center justify-center p-4"
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 12 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.96, y: 8 }}
               transition={{ type: "spring", stiffness: 380, damping: 30 }}
-              className="bg-white w-full max-w-md rounded-2xl shadow-2xl p-5 sm:p-6 max-h-[90dvh] overflow-y-auto border border-[#e6e1d6]"
+              className="bg-white w-full max-w-md rounded-2xl shadow-2xl p-5 sm:p-6 max-h-[90dvh] overflow-y-auto border border-[var(--apple-hairline)]"
             >
               <h3 className="font-bold text-lg text-zinc-950 tracking-tight">{editingBrand.id ? 'Edit Brand' : 'Add Brand'}</h3>
-              <p className="font-editorial text-sm text-zinc-400 mb-4">{editingBrand.id ? 'keep the rolodex current' : 'a new name for the rolodex'}</p>
+              <p className="font-semibold tracking-tight text-sm text-zinc-400 mb-4">{editingBrand.id ? 'keep the rolodex current' : 'a new name for the rolodex'}</p>
               <div className="space-y-3 sm:space-y-4">
                 <div>
                   <label className="text-xs font-semibold text-zinc-600 block mb-1.5">Brand Name <span className="text-red-500">*</span></label>
@@ -1236,7 +1194,7 @@ export default function InvoiceGeneratorDashboard() {
                   <div />
                 )}
                 <div className="flex gap-2">
-                  <Button disabled={isDeletingBrand || isSavingBrand} variant="ghost" className="rounded-full text-zinc-600 hover:bg-[#f1eee6] cursor-pointer" onClick={() => setIsBrandModalOpen(false)}>Cancel</Button>
+                  <Button disabled={isDeletingBrand || isSavingBrand} variant="ghost" className="rounded-full text-zinc-600 hover:bg-[var(--apple-surface-alt)] cursor-pointer" onClick={() => setIsBrandModalOpen(false)}>Cancel</Button>
                   <Button disabled={isSavingBrand || isDeletingBrand} onClick={handleBrandSave} className="rounded-full text-white cursor-pointer hover:brightness-110 transition-all font-semibold" style={{ backgroundColor: INK }}>
                     {isSavingBrand ? <Loader2 className="size-4 mr-2 animate-spin" /> : null} Save Brand
                   </Button>
@@ -1255,14 +1213,14 @@ export default function InvoiceGeneratorDashboard() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
-            className="fixed inset-0 z-[80] bg-[#152436]/70 backdrop-blur-sm flex items-center justify-center p-4"
+            className="fixed inset-0 z-[80] bg-[var(--apple-ink)]/70 backdrop-blur-sm flex items-center justify-center p-4"
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.94 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.96 }}
               transition={{ type: "spring", stiffness: 400, damping: 28 }}
-              className="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 border border-[#e6e1d6]"
+              className="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 border border-[var(--apple-hairline)]"
             >
               <div className="flex items-center gap-3 mb-4 text-red-600">
                 <div className="p-2 bg-red-100 rounded-full">
@@ -1272,7 +1230,7 @@ export default function InvoiceGeneratorDashboard() {
               </div>
               <p className="text-sm text-zinc-600 mb-6">Are you sure you want to permanently delete <strong>{editingBrand?.name}</strong>? This action cannot be undone and will remove it from your saved list.</p>
               <div className="flex gap-2 justify-end">
-                <Button disabled={isDeletingBrand} variant="ghost" className="rounded-full text-zinc-600 hover:bg-[#f1eee6] cursor-pointer" onClick={() => setShowDeleteConfirm(false)}>Cancel</Button>
+                <Button disabled={isDeletingBrand} variant="ghost" className="rounded-full text-zinc-600 hover:bg-[var(--apple-surface-alt)] cursor-pointer" onClick={() => setShowDeleteConfirm(false)}>Cancel</Button>
                 <Button disabled={isDeletingBrand} onClick={handleBrandDelete} className="rounded-full bg-red-600 hover:bg-red-700 text-white cursor-pointer">
                   {isDeletingBrand ? <Loader2 className="size-4 animate-spin mr-2" /> : <Trash2 className="size-4 mr-2" />} Yes, Delete
                 </Button>
@@ -1290,14 +1248,14 @@ export default function InvoiceGeneratorDashboard() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
-            className="fixed inset-0 z-[70] bg-[#152436]/70 backdrop-blur-sm flex items-center justify-center p-4"
+            className="fixed inset-0 z-[70] bg-[var(--apple-ink)]/70 backdrop-blur-sm flex items-center justify-center p-4"
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.96 }}
               transition={{ type: "spring", stiffness: 400, damping: 28 }}
-              className="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 border border-[#e6e1d6]"
+              className="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 border border-[var(--apple-hairline)]"
             >
               <h3 className="font-bold text-lg text-zinc-950 tracking-tight">Edit Invoice</h3>
               <p className="text-sm text-zinc-500 mb-4 font-mono">{editingInvoice.invoiceNumber} · {editingInvoice.brandName}</p>
@@ -1313,7 +1271,7 @@ export default function InvoiceGeneratorDashboard() {
               </div>
 
               <div className="flex gap-2 justify-end mt-6">
-                <Button variant="ghost" className="rounded-full text-zinc-600 hover:bg-[#f1eee6] cursor-pointer" onClick={() => setEditingInvoice(null)}>Cancel</Button>
+                <Button variant="ghost" className="rounded-full text-zinc-600 hover:bg-[var(--apple-surface-alt)] cursor-pointer" onClick={() => setEditingInvoice(null)}>Cancel</Button>
                 <Button onClick={handleUpdateInvoiceDate} disabled={isSavingDate || !editDate} className="rounded-full text-white cursor-pointer hover:brightness-110 transition-all font-semibold" style={{ backgroundColor: INK }}>
                   {isSavingDate ? <Loader2 className="size-4 animate-spin mr-2" /> : <Save className="size-4 mr-2" />} Save Date
                 </Button>
@@ -1332,7 +1290,7 @@ export default function InvoiceGeneratorDashboard() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             className="fixed inset-0 z-[60] backdrop-blur-sm flex flex-col p-3 sm:p-6"
-            style={{ backgroundColor: "#152436f0" }}
+            style={{ backgroundColor: "#1d1d1ff0" }}
           >
             <div className="flex items-center justify-between mb-3 sm:mb-4 gap-2">
               <h3 className="text-white font-bold text-base sm:text-xl truncate">
@@ -1367,7 +1325,7 @@ export default function InvoiceGeneratorDashboard() {
               ) : isPreviewLoading ? (
                 <div className="h-full flex flex-col items-center justify-center text-zinc-500">
                   <Loader2 className="size-10 animate-spin mb-4" />
-                  <p className="font-editorial text-lg">preparing your paperwork…</p>
+                  <p className="font-semibold tracking-tight text-lg">preparing your paperwork…</p>
                 </div>
               ) : previewPdfUrl ? (
                 <iframe src={`${previewPdfUrl}#view=FitH`} className="w-full h-full border-0" />

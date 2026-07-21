@@ -37,7 +37,7 @@ export function CollectionViewClient({ collection }: { collection: ProductCollec
   };
 
   return (
-    <GridBackground themeColor={accent} className={`bg-zinc-200 min-h-screen ${inApp ? "pt-14 md:pt-0 pb-20 md:pb-0 md:pl-64" : "pb-8"}`}>
+    <GridBackground themeColor={accent} className={`bg-zinc-200 min-h-screen ${inApp ? "pt-[calc(3.5rem+var(--promo-h,0px))] md:pt-[calc(3rem+var(--promo-h,0px))] pb-20 md:pb-0" : "pb-8"}`}>
       {inApp && (
         <>
           <MobileNavbar />

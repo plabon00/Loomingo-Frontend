@@ -140,44 +140,45 @@ export default function DashboardContent() {
       <TopAlert message={topAlert} onClose={() => setTopAlert("")} />
 
       {/* DASHBOARD HEADER */}
-      <div className="w-full flex flex-col items-center justify-center text-center mt-8 md:mt-10 mb-8 gap-3">
-        <div className="inline-flex items-center px-4 py-1.5 rounded-full border border-zinc-200/60 bg-white/70 backdrop-blur-sm text-zinc-900 text-xs font-semibold shadow-sm gap-2 uppercase tracking-wider">
-          <span className="text-sm">💎</span>
-          {planName} Plan
-        </div>
-        
-        <UserGreeting name={userName} />
-        
-        <p className="text-sm md:text-base text-zinc-500 max-w-sm font-medium">
-          Here is what's happening with your account today.
-        </p>
+      <div className="font-apple w-full flex flex-col items-start text-left mt-10 md:mt-16 mb-10 gap-3">
+        <span className="text-[12px] font-semibold uppercase tracking-[0.14em] text-[var(--apple-gray-2)]">
+          {planName} plan
+        </span>
 
-        {isConnected && (
-          <TransitionLink href="/autodm" className="mt-3">
-            <Button className="rounded-full bg-zinc-900 hover:bg-zinc-800 text-white shadow-[0_4px_20px_rgba(0,0,0,0.15)] hover:shadow-[0_6px_28px_rgba(0,0,0,0.20)] h-11 px-6 text-sm font-medium transition-all duration-300">
-              <Plus className="mr-2 size-4" /> New Automation
-            </Button>
-          </TransitionLink>
-        )}
+        <UserGreeting name={userName} />
+
+        <div className="w-full flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+          <p className="text-[17px] md:text-[21px] leading-relaxed text-[var(--apple-gray)] max-w-md">
+            Here is what&apos;s happening with your account today.
+          </p>
+
+          {isConnected && (
+            <TransitionLink href="/autodm">
+              <Button className="rounded-full bg-[var(--apple-blue)] hover:bg-[var(--apple-blue-hover)] text-white h-11 px-6 text-[15px] font-medium shadow-none transition-colors duration-[240ms]">
+                <Plus className="mr-2 size-4" /> New Automation
+              </Button>
+            </TransitionLink>
+          )}
+        </div>
       </div>
 
       {isLoadingStatus ? (
         <div className="w-full flex flex-col md:flex-row gap-6 mb-10">
-          <div className="animate-pulse h-64 w-full md:w-1/3 bg-white/60 border border-zinc-200 rounded-[2rem] shadow-sm"></div>
-          <div className="animate-pulse h-64 w-full md:w-2/3 bg-white/60 border border-zinc-200 rounded-[2rem] shadow-sm"></div>
+          <div className="animate-pulse h-64 w-full md:w-1/3 rounded-[18px] bg-[var(--apple-surface-alt)]"></div>
+          <div className="animate-pulse h-64 w-full md:w-2/3 rounded-[18px] bg-[var(--apple-surface-alt)]"></div>
         </div>
       ) : (
         <div className="relative w-full mb-10">
-          
+
           {/* MAIN DASHBOARD GRID */}
-          <div className={`w-full grid grid-cols-1 lg:grid-cols-3 gap-6 transition-all duration-700 ease-in-out ${(!isConnected || !user) ? 'blur-[10px] opacity-30 select-none pointer-events-none scale-[0.98]' : 'blur-0 opacity-100 scale-100'}`}>
+          <div className={`w-full grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12 transition-all duration-700 ease-in-out ${(!isConnected || !user) ? 'blur-[10px] opacity-30 select-none pointer-events-none scale-[0.98]' : 'blur-0 opacity-100 scale-100'}`}>
             <div className="col-span-1 flex flex-col gap-6">
               <InstagramPortfolio />
               <div className="md:hidden">
                 <QuickActionCTA />
               </div>
             </div>
-            <div className="col-span-1 lg:col-span-2 flex flex-col gap-6">
+            <div className="col-span-1 lg:col-span-2 flex flex-col gap-8">
               <MiniAnalytics />
               <RecentActivityFeed />
             </div>
@@ -185,25 +186,32 @@ export default function DashboardContent() {
 
           {/* LOCKED STATE OVERLAY */}
           {(!isConnected || !user) && (
-            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center rounded-[2.5rem] bg-white/10 backdrop-blur-md border border-white/60 shadow-xl p-6 mx-2 md:mx-0">
-              
-              <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-6 shadow-xl shadow-zinc-200/50 border border-zinc-100 relative">
-                <InstagramIcon className="size-10 text-black relative z-10" />
-                <div className="absolute -top-2 -right-2 bg-zinc-900 rounded-full p-1.5 border-2 border-white shadow-sm">
-                  <Lock className="size-3.5 text-white" />
+            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-white/80 rounded-3xl border border-zinc-200/70 p-6 mx-2 md:mx-0">
+
+              <div className="relative mb-6">
+                <span className="flex size-16 items-center justify-center rounded-2xl bg-white shadow-[0_1px_2px_rgba(24,24,27,0.04)] border border-zinc-200">
+                  <InstagramIcon className="size-8 text-zinc-900" />
+                </span>
+                <div className="absolute -top-1.5 -right-2.5 bg-zinc-900 rounded-full p-1.5 border-2 border-white">
+                  <Lock className="size-3 text-white" />
                 </div>
               </div>
-              
-              <h3 className="text-2xl md:text-3xl font-semibold text-zinc-900 mb-3 tracking-tight">Connect to Unlock</h3>
-              
-              <p className="text-sm md:text-base text-zinc-500 mb-8 font-medium text-center max-w-md">
+
+              <span className="font-apple inline-flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-[0.14em] text-[var(--apple-gray-2)] mb-4">
+                <span className="size-1.5 rounded-full bg-[var(--apple-blue)]" />
+                Not connected
+              </span>
+
+              <h3 className="apple-display text-[28px] md:text-[34px] mb-3">Connect to unlock</h3>
+
+              <p className="font-apple text-[17px] leading-relaxed text-[var(--apple-gray)] mb-8 text-center max-w-md">
                 Link your Instagram account to view live analytics, recent activity, and start automating your growth.
               </p>
-              
+
               <Button
                 onClick={handleConnect}
                 disabled={isConnecting}
-                className="w-full max-w-sm relative z-10 bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] hover:opacity-90 text-white border-0 rounded-full h-14 text-base font-semibold transition-all duration-300 shadow-[0_6px_30px_rgba(220,39,67,0.40)] hover:shadow-[0_8px_40px_rgba(220,39,67,0.55)] hover:scale-[1.02] active:scale-[0.98]"
+                className="font-apple w-full max-w-sm relative z-10 bg-[var(--apple-blue)] hover:bg-[var(--apple-blue-hover)] text-white border-0 rounded-full h-14 text-[17px] font-medium transition-colors duration-[240ms] shadow-none"
               >
                 <InstagramIcon className="size-5 mr-3" />
                 {isConnecting ? "Connecting..." : "Connect Instagram"}

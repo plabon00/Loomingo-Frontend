@@ -1,89 +1,128 @@
-import { FocusIcon, MessageSquareDashed, Rocket } from "lucide-react";
+"use client";
 
-export default function AutomationSteps() {
-  const steps = [
-    {
-      id: 1,
-      title: "Select Post",
-      description: "Choose the specific Instagram post or Reel you want to automate.",
-      icon: <FocusIcon className="size-6 text-red-600" />,
+import { useRef } from "react";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { MessageCircle, ScanSearch, ShieldCheck, Send } from "lucide-react";
+
+gsap.registerPlugin(useGSAP, ScrollTrigger);
+
+const steps = [
+  {
+    id: 1,
+    tag: "Trigger",
+    title: "Someone comments",
+    description: "A follower drops your trigger word under any post or Reel.",
+    icon: MessageCircle,
+  },
+  {
+    id: 2,
+    tag: "Detect",
+    title: "Keyword matched",
+    description: "Loomingo spots the match the moment the comment lands.",
+    icon: ScanSearch,
+  },
+  {
+    id: 3,
+    tag: "Protect",
+    title: "Safety checks run",
+    description: "A human-like delay and throttle run before anything sends.",
+    icon: ShieldCheck,
+  },
+  {
+    id: 4,
+    tag: "Deliver",
+    title: "DM lands in inbox",
+    description: "Your message and link go straight to their DMs.",
+    icon: Send,
+  },
+];
+
+export default function HowItWorks() {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia();
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        gsap.from(".flow-line", {
+          scaleX: 0,
+          transformOrigin: "left center",
+          duration: 1.1,
+          ease: "power2.inOut",
+          scrollTrigger: { trigger: ref.current, start: "top 75%" },
+        });
+        gsap.from(".flow-line-v", {
+          scaleY: 0,
+          transformOrigin: "top center",
+          duration: 1.1,
+          ease: "power2.inOut",
+          scrollTrigger: { trigger: ref.current, start: "top 75%" },
+        });
+        gsap.from(".flow-node", {
+          scale: 0,
+          duration: 0.45,
+          ease: "back.out(2)",
+          stagger: 0.18,
+          scrollTrigger: { trigger: ref.current, start: "top 75%" },
+        });
+        gsap.from(".flow-step", {
+          opacity: 0,
+          y: 20,
+          duration: 0.55,
+          ease: "power3.out",
+          stagger: 0.18,
+          scrollTrigger: { trigger: ref.current, start: "top 72%" },
+        });
+      });
+      return () => mm.revert();
     },
-    {
-      id: 2,
-      title: "Set Keyword",
-      description: "Define the trigger word (e.g., 'LINK') users need to comment.",
-      icon: <MessageSquareDashed className="size-6 text-red-600" />,
-    },
-    {
-      id: 3,
-      title: "Auto-DM",
-      description: "Loomin instantly sends your custom message directly to their inbox.",
-      icon: <Rocket className="size-6 text-red-600" />,
-    },
-  ];
+    { scope: ref }
+  );
 
   return (
-    <section className="py-16 px-4 w-full flex justify-center relative overflow-hidden bg-white">
-      
-      {/* Signature Red Glow Background for the Section */}
-      <div 
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-red-400 rounded-full opacity-[0.12] blur-[140px] pointer-events-none z-0"
-        aria-hidden="true"
-      />
+    <section ref={ref} className="font-apple w-full max-w-5xl mx-auto px-6 text-center">
+      <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-[var(--apple-gray-2)] mb-3">
+        The flow
+      </p>
+      <h2 className="apple-display text-[34px] md:text-[48px]">
+        Comment in. DM out.
+      </h2>
+      <p className="text-[17px] md:text-[21px] leading-relaxed text-[var(--apple-gray)] mt-4 max-w-xl mx-auto">
+        Four things happen between a comment and a delivered DM.
+      </p>
 
-      {/* Glassmorphic Section Wrapper */}
-      <div className="max-w-6xl w-full border border-zinc-200 bg-white/60 backdrop-blur-md rounded-[2.5rem] p-8 md:p-16 relative z-10 shadow-sm">
-        
-        <div className="text-center mb-16 flex flex-col items-center">
-          {/* Brand Pill Badge */}
-          <div className="inline-flex items-center px-4 py-1.5 rounded-full border border-zinc-200 bg-white/80 text-red-950 text-sm font-medium mb-6 shadow-sm">
-            Simple Setup
-          </div>
-          
-          <h2 className="text-4xl md:text-5xl font-medium text-red-950 tracking-tight mb-4 leading-[1.1]">
-            How to automate a <br className="md:hidden" />
-            <span className="text-red-600 italic font-serif">post</span>
-          </h2>
-          <p className="text-red-950/70 text-lg max-w-md">
-            Set up your first automation in under 60 seconds.
-          </p>
-        </div>
+      <div className="relative mt-16 md:mt-20">
+        {/* connector lines */}
+        <div className="flow-line hidden md:block absolute left-[12.5%] right-[12.5%] top-6 h-px bg-[var(--apple-hairline)]" />
+        <div className="flow-line-v md:hidden absolute left-6 top-6 bottom-8 w-px bg-[var(--apple-hairline)]" />
 
-        <div className="relative flex flex-col md:flex-row gap-8 lg:gap-12 items-center md:items-stretch justify-center gsap-pill-row">
-          
-          {/* --- DOTTED LINES --- */}
-          <div className="hidden md:block absolute top-1/2 left-[10%] right-[10%] h-0 border-t-2 border-dashed border-red-900/15 -translate-y-1/2 -z-10" />
-          <div className="block md:hidden absolute left-1/2 top-[5%] bottom-[5%] w-0 border-l-2 border-dashed border-red-900/15 -translate-x-1/2 -z-10" />
-
-          {/* --- PILL-STYLE GLASS CARDS --- */}
+        <ol className="grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-6">
           {steps.map((step) => (
-            <div 
-              key={step.id} 
-              className="gsap-pill-item relative flex flex-col items-center bg-white/80 backdrop-blur-xl border border-zinc-200/60 rounded-[2rem] p-6 shadow-[0_2px_16px_rgba(0,0,0,0.06)] hover:shadow-[0_6px_28px_rgba(0,0,0,0.10)] transition-all duration-300 max-w-xs w-full"
+            <li
+              key={step.id}
+              className="flow-step relative flex md:flex-col items-start md:items-center gap-5 md:gap-0 text-left md:text-center"
             >
-              {/* Card Header */}
-              <div className="flex flex-row items-center justify-between w-full pb-4">
-                <div className="p-3 bg-zinc-50 border border-zinc-100 rounded-full shadow-inner">
-                  {step.icon}
-                </div>
-                <span className="flex items-center justify-center size-6 rounded-full bg-red-600 text-white text-[10px] font-bold">
-                  {step.id}
-                </span>
-              </div>
-              
-              {/* Card Content */}
-              <div className="pt-0 flex-1 w-full">
-                <h3 className="text-xl font-semibold text-red-950 tracking-tight mb-3">
+              {/* node */}
+              <span className="flow-node relative z-10 flex size-12 shrink-0 items-center justify-center rounded-full bg-[var(--apple-surface)] ring-1 ring-[var(--apple-hairline)] text-[var(--apple-blue)] md:mb-7">
+                <step.icon className="size-5" aria-hidden="true" />
+              </span>
+
+              <div className="flex-1 md:flex-none">
+                <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-[var(--apple-blue)] mb-2">
+                  {step.tag}
+                </p>
+                <h3 className="text-[21px] font-semibold tracking-tight text-[var(--apple-ink)]">
                   {step.title}
                 </h3>
-                <p className="text-zinc-500 leading-relaxed text-sm">
+                <p className="text-[17px] leading-relaxed text-[var(--apple-gray)] mt-2 md:max-w-[15rem] md:mx-auto">
                   {step.description}
                 </p>
               </div>
-            </div>
+            </li>
           ))}
-
-        </div>
+        </ol>
       </div>
     </section>
   );

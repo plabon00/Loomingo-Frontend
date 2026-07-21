@@ -32,9 +32,9 @@ import {
 import { Button } from "@/components/ui/button";
 
 // ————— Theme tokens —————
-const PRIMARY = "#5742f5";
-const INK = "#152436";
-const PAPER = "#f6f4ef";
+const PRIMARY = "#0066cc";
+const INK = "#1d1d1f";
+const PAPER = "#f5f5f7";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -254,7 +254,7 @@ export function InstagramSettingsModal({ isOpen, onClose }: InstagramSettingsMod
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent 
-        className="max-w-2xl p-0 overflow-hidden md:rounded-[2rem] border border-[#e6e1d6] bg-white shadow-2xl h-[100dvh] md:h-auto md:max-h-[85vh] flex flex-col gap-0 [&>button:last-child]:hidden outline-none"
+        className="max-w-2xl p-0 overflow-hidden md:rounded-[18px] border border-[var(--apple-hairline)] bg-white shadow-2xl h-[100dvh] md:h-auto md:max-h-[85vh] flex flex-col gap-0 [&>button:last-child]:hidden outline-none"
       >
         {/* Close Button */}
         <button 
@@ -265,9 +265,9 @@ export function InstagramSettingsModal({ isOpen, onClose }: InstagramSettingsMod
         </button>
 
         {/* ── Header ───────────────────────────────────────────────────────── */}
-        <DialogHeader className="p-6 pb-6 relative text-left rounded-t-[2rem] border-b border-[#e6e1d6]" style={{ backgroundColor: PAPER }}>
+        <DialogHeader className="p-6 pb-6 relative text-left rounded-t-[18px] border-b border-[var(--apple-hairline)]" style={{ backgroundColor: PAPER }}>
           <DialogTitle className="text-xl font-bold flex items-center gap-2" style={{ color: INK }}>
-            <div className="size-10 rounded-full flex items-center justify-center bg-white shadow-sm border border-[#e6e1d6]">
+            <div className="size-10 rounded-full flex items-center justify-center bg-white shadow-sm border border-[var(--apple-hairline)]">
               <Camera className="size-5" style={{ color: PRIMARY }} />
             </div>
             Connected Accounts
@@ -289,7 +289,7 @@ export function InstagramSettingsModal({ isOpen, onClose }: InstagramSettingsMod
               className={cn(
                 "flex items-center gap-2.5 px-6 py-3 text-sm font-medium",
                 alert.type === "success"
-                  ? "bg-[#f2f0ff] border-b border-[#5742f5]/20 text-[#5742f5]"
+                  ? "bg-[#eaf3fd] border-b border-[var(--apple-blue)]/25 text-[var(--apple-blue)]"
                   : "bg-red-50 border-b border-red-100 text-red-600"
               )}
             >
@@ -317,7 +317,7 @@ export function InstagramSettingsModal({ isOpen, onClose }: InstagramSettingsMod
               <p className="text-sm font-medium">Loading accounts...</p>
             </div>
           ) : accounts.length === 0 ? (
-            <div className="flex flex-col h-[200px] items-center justify-center text-zinc-400 bg-[#fbfbf9] rounded-3xl border-2 border-dashed border-[#e6e1d6] shadow-sm">
+            <div className="flex flex-col h-[200px] items-center justify-center text-zinc-400 bg-[var(--apple-surface-alt)] rounded-[14px] border-2 border-dashed border-[var(--apple-hairline)] shadow-sm">
               <Camera className="size-10 mb-3 opacity-20" />
               <p className="text-sm font-medium">No accounts connected.</p>
             </div>
@@ -331,10 +331,10 @@ export function InstagramSettingsModal({ isOpen, onClose }: InstagramSettingsMod
                   <div
                     key={acc.id}
                     className={cn(
-                      "flex flex-col sm:flex-row sm:items-center justify-between p-5 border rounded-3xl transition-all relative gap-4",
+                      "flex flex-col sm:flex-row sm:items-center justify-between p-5 border rounded-[14px] transition-all relative gap-4",
                       isActive
-                        ? "border-[#5742f5]/30 bg-[#f2f0ff] shadow-sm"
-                        : "border-[#e6e1d6] bg-white hover:border-[#5742f5]/20 hover:shadow-md",
+                        ? "border-[var(--apple-blue)]/35 bg-[#eaf3fd] shadow-sm"
+                        : "border-[var(--apple-hairline)] bg-white hover:border-[var(--apple-blue)]/25 hover:shadow-md",
                       isBusy && "opacity-60 pointer-events-none"
                     )}
                   >
@@ -347,7 +347,7 @@ export function InstagramSettingsModal({ isOpen, onClose }: InstagramSettingsMod
                             alt={acc.username}
                             className={cn(
                               "size-14 rounded-full object-cover border-2 shadow-sm transition-colors",
-                              isActive ? "border-[#5742f5]" : "border-[#e6e1d6]"
+                              isActive ? "border-[var(--apple-blue)]" : "border-[var(--apple-hairline)]"
                             )}
                           />
                           {isActive && (
@@ -360,13 +360,13 @@ export function InstagramSettingsModal({ isOpen, onClose }: InstagramSettingsMod
                         <div
                           className={cn(
                             "size-14 rounded-full flex items-center justify-center border-2",
-                            isActive ? "border-[#5742f5] bg-[#f2f0ff]" : "border-[#e6e1d6] bg-zinc-100"
+                            isActive ? "border-[var(--apple-blue)] bg-[#eaf3fd]" : "border-[var(--apple-hairline)] bg-zinc-100"
                           )}
                         >
                           <User
                             className={cn(
                               "size-6",
-                              isActive ? "text-[#5742f5]" : "text-zinc-400"
+                              isActive ? "text-[var(--apple-blue)]" : "text-zinc-400"
                             )}
                           />
                         </div>
@@ -385,7 +385,7 @@ export function InstagramSettingsModal({ isOpen, onClose }: InstagramSettingsMod
                     {/* Right: Active Badge & Menu */}
                     <div className="flex items-center gap-3 sm:gap-4 justify-between sm:justify-end w-full sm:w-auto mt-2 sm:mt-0 pt-3 sm:pt-0 border-t sm:border-0 border-zinc-100">
                       {isActive && (
-                        <span className="inline-flex text-[10px] uppercase tracking-wider font-bold bg-white px-3 py-1.5 rounded-full shadow-sm border border-[#5742f5]/20" style={{ color: PRIMARY }}>
+                        <span className="inline-flex text-[10px] uppercase tracking-wider font-bold bg-white px-3 py-1.5 rounded-full shadow-sm border border-[var(--apple-blue)]/25" style={{ color: PRIMARY }}>
                           Active
                         </span>
                       )}
@@ -397,23 +397,23 @@ export function InstagramSettingsModal({ isOpen, onClose }: InstagramSettingsMod
 
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" disabled={isBusy} className="rounded-full size-10 bg-white border border-[#e6e1d6] text-zinc-600 hover:bg-zinc-50 shadow-sm">
+                          <Button variant="ghost" size="icon" disabled={isBusy} className="rounded-full size-10 bg-white border border-[var(--apple-hairline)] text-zinc-600 hover:bg-zinc-50 shadow-sm">
                             <MoreVertical className="size-5" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-56 rounded-2xl p-1.5 shadow-xl border-[#e6e1d6] bg-white">
+                        <DropdownMenuContent align="end" className="w-56 rounded-2xl p-1.5 shadow-xl border-[var(--apple-hairline)] bg-white">
                           {acc.isSubscribed ? (
                             <DropdownMenuItem onClick={() => handleUnsubscribe(acc.id)} className="text-amber-600 focus:bg-amber-50 font-medium py-2.5 cursor-pointer rounded-xl">
                               <Unplug className="size-4 mr-2.5" />
                               Unsubscribe Automation
                             </DropdownMenuItem>
                           ) : (
-                            <DropdownMenuItem onClick={() => handleSubscribe(acc.id)} className="focus:bg-[#f2f0ff] font-medium py-2.5 cursor-pointer rounded-xl" style={{ color: PRIMARY }}>
+                            <DropdownMenuItem onClick={() => handleSubscribe(acc.id)} className="focus:bg-[#eaf3fd] font-medium py-2.5 cursor-pointer rounded-xl" style={{ color: PRIMARY }}>
                               <Zap className="size-4 mr-2.5 fill-current" />
                               Subscribe Automation
                             </DropdownMenuItem>
                           )}
-                          <DropdownMenuSeparator className="my-1.5 bg-[#e6e1d6]/50" />
+                          <DropdownMenuSeparator className="my-1.5 bg-[var(--apple-hairline)]" />
                           <DropdownMenuItem onClick={() => handleRemove(acc.id)} className="text-red-600 focus:bg-red-50 font-medium py-2.5 cursor-pointer rounded-xl">
                             <Trash2 className="size-4 mr-2.5" />
                             Remove Account

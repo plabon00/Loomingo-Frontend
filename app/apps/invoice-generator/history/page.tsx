@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { DesktopSidebar, MobileNavbar, BottomDock } from "@/components/layout/AppNavigation";
+import Footer from "@/components/layout/dashboard-footer";
 import { Button } from "@/components/ui/button";
 import { Loader2, ArrowLeft, FileDown, Search, X, Trash2, Edit3, Calendar, Save, Plus } from "lucide-react";
 import Link from "next/link";
@@ -196,15 +197,15 @@ export default function InvoiceHistory() {
   };
 
   if (isLoading || !user) {
-    return <div className="min-h-[100dvh] flex items-center justify-center bg-zinc-50"><Loader2 className="animate-spin text-indigo-600 size-8" /></div>;
+    return <div className="min-h-[100dvh] flex items-center justify-center bg-zinc-50"><Loader2 className="animate-spin text-[var(--apple-blue)] size-8" /></div>;
   }
 
   return (
-    <div className="min-h-[100dvh] bg-zinc-100 text-zinc-900 pb-24 md:pb-0">
+    <div className="font-apple min-h-[100dvh] bg-white text-[var(--apple-ink)] pb-24 md:pb-0">
       <DesktopSidebar />
       <MobileNavbar />
 
-      <main className="md:ml-20 lg:ml-64 pt-16 md:pt-8 min-h-[100dvh]">
+      <main className="pt-[calc(4rem+var(--promo-h,0px))] md:pt-[calc(4.5rem+var(--promo-h,0px))] min-h-[100dvh]">
         <div className="max-w-5xl mx-auto px-4 md:px-8 pb-12">
 
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mb-8 gap-4">
@@ -215,8 +216,8 @@ export default function InvoiceHistory() {
                 </Button>
               </Link>
               <div>
-                <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-zinc-900">Invoice History</h1>
-                <p className="text-zinc-600 mt-1 text-sm md:text-base">View, edit dates, and download your past invoices.</p>
+                <h1 className="apple-display text-[28px] md:text-[40px]">Invoice history</h1>
+                <p className="text-[15px] md:text-[17px] text-[var(--apple-gray)] mt-1">View, edit dates, and download your past invoices.</p>
               </div>
             </div>
 
@@ -225,38 +226,38 @@ export default function InvoiceHistory() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-500" />
                 <Input
                   placeholder="Search by brand or invoice #"
-                  className="pl-9 bg-white border-zinc-300 text-zinc-900 placeholder:text-zinc-400"
+                  className="pl-9 bg-white border-[var(--apple-hairline)] text-[var(--apple-ink)] placeholder:text-zinc-400 rounded-full focus-visible:ring-[var(--apple-blue)]/25"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
               <Link href="/apps/invoice-generator" className="shrink-0">
-                <Button className="rounded-full bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm">
+                <Button className="rounded-full bg-[var(--apple-blue)] hover:bg-[var(--apple-blue-hover)] text-white shadow-none transition-colors duration-[240ms]">
                   <Plus className="size-4 sm:mr-2" /><span className="hidden sm:inline">New Invoice</span>
                 </Button>
               </Link>
             </div>
           </div>
 
-          <div className="bg-white border border-zinc-200 rounded-2xl shadow-sm overflow-hidden">
+          <div className="border-t border-[var(--apple-hairline)] overflow-hidden">
             {filteredInvoices.length > 0 ? (
               <>
                 {/* Desktop table */}
                 <div className="hidden md:block overflow-x-auto">
                   <table className="w-full text-left border-collapse">
                     <thead>
-                      <tr className="bg-zinc-50 border-b border-zinc-200">
-                        <th className="px-6 py-4 text-xs font-semibold text-zinc-600 uppercase tracking-wider">Invoice No.</th>
-                        <th className="px-6 py-4 text-xs font-semibold text-zinc-600 uppercase tracking-wider">Brand Name</th>
-                        <th className="px-6 py-4 text-xs font-semibold text-zinc-600 uppercase tracking-wider">Date Created</th>
-                        <th className="px-6 py-4 text-xs font-semibold text-zinc-600 uppercase tracking-wider text-right">Actions</th>
+                      <tr className="border-b border-[var(--apple-hairline)]">
+                        <th className="px-6 py-4 text-[11px] font-semibold text-[var(--apple-gray-2)] uppercase tracking-[0.12em]">Invoice No.</th>
+                        <th className="px-6 py-4 text-[11px] font-semibold text-[var(--apple-gray-2)] uppercase tracking-[0.12em]">Brand Name</th>
+                        <th className="px-6 py-4 text-[11px] font-semibold text-[var(--apple-gray-2)] uppercase tracking-[0.12em]">Date Created</th>
+                        <th className="px-6 py-4 text-[11px] font-semibold text-[var(--apple-gray-2)] uppercase tracking-[0.12em] text-right">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-zinc-100">
                       {filteredInvoices.map((inv) => (
                         <tr
                           key={inv.id}
-                          className="hover:bg-zinc-50 transition-colors cursor-pointer"
+                          className="hover:bg-[var(--apple-surface-alt)] transition-colors duration-[240ms] cursor-pointer"
                           onClick={() => openPreview(inv)}
                         >
                           <td className="px-6 py-4 font-medium text-sm text-zinc-900">{inv.invoiceNumber}</td>
@@ -265,14 +266,14 @@ export default function InvoiceHistory() {
                           <td className="px-6 py-4 text-right whitespace-nowrap">
                             <button
                               onClick={(e) => { e.stopPropagation(); openEditDate(inv); }}
-                              className="inline-flex items-center justify-center p-2 text-zinc-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                              className="inline-flex items-center justify-center p-2 text-zinc-500 hover:text-[var(--apple-blue)] hover:bg-[#eaf3fd] rounded-lg transition-colors"
                               title="Edit invoice date"
                             >
                               <Edit3 className="size-4.5" />
                             </button>
                             <button
                               onClick={(e) => { e.stopPropagation(); openPreview(inv); }}
-                              className="inline-flex items-center justify-center p-2 text-zinc-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                              className="inline-flex items-center justify-center p-2 text-zinc-500 hover:text-[var(--apple-blue)] hover:bg-[#eaf3fd] rounded-lg transition-colors"
                               title="View & Download PDF"
                             >
                               <FileDown className="size-5" />
@@ -302,14 +303,14 @@ export default function InvoiceHistory() {
                       <div className="flex items-center gap-1 shrink-0">
                         <button
                           onClick={(e) => { e.stopPropagation(); openEditDate(inv); }}
-                          className="p-2 text-zinc-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                          className="p-2 text-zinc-500 hover:text-[var(--apple-blue)] hover:bg-[#eaf3fd] rounded-lg transition-colors"
                           title="Edit invoice date"
                         >
                           <Edit3 className="size-4" />
                         </button>
                         <button
                           onClick={(e) => { e.stopPropagation(); openPreview(inv); }}
-                          className="p-2 text-zinc-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          className="p-2 text-zinc-500 hover:text-[var(--apple-blue)] hover:bg-[#eaf3fd] rounded-lg transition-colors"
                           title="View & Download PDF"
                         >
                           <FileDown className="size-4" />
@@ -335,7 +336,7 @@ export default function InvoiceHistory() {
                 </p>
                 {!searchQuery && (
                   <Link href="/apps/invoice-generator">
-                    <Button className="mt-6 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white">Create your first invoice</Button>
+                    <Button className="mt-6 rounded-full bg-[var(--apple-blue)] hover:bg-[var(--apple-blue-hover)] text-white">Create your first invoice</Button>
                   </Link>
                 )}
               </div>
@@ -343,6 +344,7 @@ export default function InvoiceHistory() {
           </div>
 
         </div>
+        <Footer />
       </main>
 
       {/* Preview Modal */}
@@ -424,7 +426,7 @@ export default function InvoiceHistory() {
 
             <div className="flex gap-2 justify-end mt-6">
               <Button variant="ghost" className="rounded-full text-zinc-600 hover:bg-zinc-100" onClick={() => setEditingInvoice(null)}>Cancel</Button>
-              <Button onClick={handleUpdateInvoiceDate} disabled={isSavingDate || !editDate} className="rounded-full bg-indigo-600 hover:bg-indigo-700 text-white">
+              <Button onClick={handleUpdateInvoiceDate} disabled={isSavingDate || !editDate} className="rounded-full bg-[var(--apple-blue)] hover:bg-[var(--apple-blue-hover)] text-white">
                 {isSavingDate ? <Loader2 className="size-4 animate-spin mr-2" /> : <Save className="size-4 mr-2" />} Save Date
               </Button>
             </div>

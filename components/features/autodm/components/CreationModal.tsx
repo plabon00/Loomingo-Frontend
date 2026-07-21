@@ -28,15 +28,15 @@ import {
 import { FormData } from "../types";
 
 // ————— Theme tokens —————
-const INK = "#152436";
-const PRIMARY = "#5742f5";
-const PAPER = "#f6f4ef";
+const INK = "#1d1d1f";
+const PRIMARY = "#0066cc";
+const PAPER = "#f5f5f7";
 
 const uniformButtonInputClass =
-  "w-full h-11 px-4 text-sm bg-white border border-[#e6e1d6] rounded-[20px] font-semibold !text-[#152436] transition-all focus-visible:ring-1 focus-visible:ring-[#152436]/20 shadow-sm !placeholder-zinc-400 placeholder:font-normal text-center hover:border-[#152436]/30 cursor-pointer focus:bg-white";
+  "w-full h-11 px-4 text-sm bg-white border border-[var(--apple-hairline)] rounded-[20px] font-semibold !text-[var(--apple-ink)] transition-all focus-visible:ring-1 focus-visible:ring-[var(--apple-blue)]/30 shadow-sm !placeholder-zinc-400 placeholder:font-normal text-center hover:border-[var(--apple-blue)]/35 cursor-pointer focus:bg-white";
 
 const uniformTextAreaClass =
-  "w-full text-sm border border-[#e6e1d6] rounded-2xl p-4 bg-white focus:ring-1 focus:ring-[#152436]/20 outline-none min-h-[90px] !text-[#152436] !placeholder-zinc-400 shadow-sm transition-all";
+  "w-full text-sm border border-[var(--apple-hairline)] rounded-2xl p-4 bg-white focus:ring-1 focus:ring-[var(--apple-blue)]/30 outline-none min-h-[90px] !text-[var(--apple-ink)] !placeholder-zinc-400 shadow-sm transition-all";
 
 interface CreationModalProps {
   isOpen: boolean;
@@ -164,13 +164,13 @@ export function CreationModal({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent 
         aria-describedby={undefined}
-        className="w-[95%] max-w-[420px] p-0 border-[#e6e1d6] bg-white rounded-[2rem] overflow-hidden flex flex-col h-[90dvh] md:aspect-[9/16] md:h-auto md:max-h-[90vh] sm:rounded-[2rem] shadow-2xl [&>button:last-child]:hidden outline-none gap-0"
+        className="w-[95%] max-w-[420px] p-0 border-[var(--apple-hairline)] bg-white rounded-[18px] overflow-hidden flex flex-col h-[90dvh] md:aspect-[9/16] md:h-auto md:max-h-[90vh] sm:rounded-[18px] shadow-2xl [&>button:last-child]:hidden outline-none gap-0"
         style={{ backgroundColor: PAPER }}
       >
         <DialogTitle className="sr-only">Automation Setup</DialogTitle>
         
         {/* Modal Header */}
-            <div className="flex items-center justify-between p-5 border-b border-[#e6e1d6] shrink-0 bg-white">
+            <div className="flex items-center justify-between p-5 border-b border-[var(--apple-hairline)] shrink-0 bg-white">
               {modalStep > 0 && !isEditing ? (
                 <button
                   onClick={() => setModalStep((s) => s - 1)}
@@ -920,12 +920,12 @@ export function CreationModal({
 
             {/* Explicit Back & Next Footer Navigation */}
             {modalStep > 0 && (
-              <div className="p-4 border-t border-[#e6e1d6] bg-white shrink-0 flex gap-2 rounded-b-[2rem]">
+              <div className="p-4 border-t border-[var(--apple-hairline)] bg-white shrink-0 flex gap-2 rounded-b-[2rem]">
                 {(!isEditing || modalStep > 1) && (
                   <Button
                     variant="outline"
                     onClick={() => setModalStep((s) => s - 1)}
-                    className="w-1/4 h-11 rounded-xl text-sm font-semibold border-[#e6e1d6] text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 px-0 transition-colors"
+                    className="w-1/4 h-11 rounded-xl text-sm font-semibold border-[var(--apple-hairline)] text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 px-0 transition-colors"
                     disabled={isSubmitting}
                   >
                     Back
@@ -937,7 +937,7 @@ export function CreationModal({
                   <Button
                     variant="secondary"
                     onClick={() => setIsPreviewOpen(true)}
-                    className="w-1/3 h-11 rounded-xl text-sm font-semibold transition-colors px-0 bg-[#eef7f3] text-[#0b7a55] hover:bg-[#d8f0e4]"
+                    className="w-1/3 h-11 rounded-xl text-sm font-semibold transition-colors px-0 bg-zinc-100 text-zinc-700 hover:bg-zinc-200"
                     disabled={isSubmitting}
                   >
                     <Eye className="mr-1.5 size-4" /> Preview
@@ -950,8 +950,7 @@ export function CreationModal({
                       ? handleSubmit()
                       : setModalStep((s) => s + 1)
                   }
-                  className="flex-1 h-11 rounded-xl text-sm font-semibold flex items-center justify-center text-white transition-colors hover:opacity-90"
-                  style={{ backgroundColor: PRIMARY }}
+                  className="flex-1 h-11 rounded-xl text-sm font-semibold flex items-center justify-center bg-zinc-900 text-white transition-all hover:bg-zinc-800 shadow-sm hover:shadow-md active:scale-[0.98] disabled:opacity-70"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (

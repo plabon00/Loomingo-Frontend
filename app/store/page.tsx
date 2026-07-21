@@ -314,7 +314,7 @@ export default function StoreManagerPage() {
     : optimisticProducts.filter(p => p.category && p.category.split(",").map(s => s.trim()).includes(activeCategory));
 
   return (
-    <GridBackground themeColor={store.themeColor} className="pt-14 md:pt-0 pb-20 md:pb-0 md:pl-64 bg-zinc-200">
+    <GridBackground themeColor={store.themeColor} className="pt-[calc(3.5rem+var(--promo-h,0px))] md:pt-[calc(3rem+var(--promo-h,0px))] pb-20 md:pb-0 bg-zinc-200">
       <MobileNavbar />
       <DesktopSidebar />
       <BottomDock />

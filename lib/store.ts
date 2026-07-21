@@ -28,8 +28,21 @@ export type Store = {
   banner?: string; // fallback for old UI fields
   logoUrl?: string;
   themeColor?: string;
+  layoutStyle?: "card" | "flat";
+  bgTemplate?: string; // key into BG_TEMPLATES, used when layoutStyle === "flat"
   handle?: string; // store handle (= id), set by mapStoreFromDB
   products: Product[];
+};
+
+/* 6 distinctive gradient background templates for the flat storefront look.
+   `swatch` renders the circular picker; `page` paints the storefront. */
+export const BG_TEMPLATES: Record<string, { label: string; swatch: string; page: string }> = {
+  sunset:   { label: "Sunset",   swatch: "linear-gradient(135deg,#ff9a5a,#ff5e7d)",           page: "linear-gradient(160deg,#fff3ec 0%,#ffe3ea 60%,#ffd6e4 100%)" },
+  ocean:    { label: "Ocean",    swatch: "linear-gradient(135deg,#38bdf8,#4f46e5)",           page: "linear-gradient(160deg,#eaf6ff 0%,#e3ecff 60%,#e6e3ff 100%)" },
+  meadow:   { label: "Meadow",   swatch: "linear-gradient(135deg,#4ade80,#14b8a6)",           page: "linear-gradient(160deg,#effdf3 0%,#e2f8f1 60%,#dcf4ee 100%)" },
+  dune:     { label: "Dune",     swatch: "linear-gradient(135deg,#fbbf24,#d97706)",           page: "linear-gradient(160deg,#fffaec 0%,#fdf1d9 60%,#fae9c8 100%)" },
+  orchid:   { label: "Orchid",   swatch: "linear-gradient(135deg,#c084fc,#ec4899)",           page: "linear-gradient(160deg,#faf1ff 0%,#fbe9f7 60%,#fde2f0 100%)" },
+  charcoal: { label: "Charcoal", swatch: "linear-gradient(135deg,#3f3f46,#09090b)",           page: "linear-gradient(160deg,#f4f4f5 0%,#e4e4e7 60%,#d4d4d8 100%)" },
 };
 
 export async function loadStore(uid: string): Promise<Store> {
@@ -59,7 +72,9 @@ export async function saveStore(uid: string, store: Store): Promise<Store> {
       description: store.description, 
       bannerUrl: store.banner || store.bannerUrl,
       logoUrl: store.logoUrl,
-      themeColor: store.themeColor 
+      themeColor: store.themeColor,
+      layoutStyle: store.layoutStyle,
+      bgTemplate: store.bgTemplate
     }),
   });
   const data = await res.json();
@@ -122,6 +137,8 @@ export function emptyStore(uid: string): Store {
     banner: "",
     logoUrl: "",
     themeColor: "#dc2626",
+    layoutStyle: "card",
+    bgTemplate: "sunset",
     products: [],
   };
 }
