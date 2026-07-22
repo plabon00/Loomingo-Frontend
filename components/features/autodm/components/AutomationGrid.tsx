@@ -15,6 +15,7 @@ import {
   Reply,
   MousePointerClick,
   Send,
+  Info,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -47,45 +48,89 @@ interface AutomationGridProps {
   onToggleStatus: (id: string, currentStatus: boolean) => void;
 }
 
+// All media-level stats: label + explanation used by the legend and details modals.
+// First 3 are the essential ones shown on each row.
+const STAT_DEFS = [
+  {
+    key: "finalGoalDmsSent",
+    label: "Final goal DMs",
+    description: "Final goal DMs successfully delivered to commenters.",
+    icon: Send,
+  },
+  {
+    key: "commentsTriggered",
+    label: "Comments triggered",
+    description: "Comments that matched a trigger keyword and started this automation.",
+    icon: MessageCircle,
+  },
+  {
+    key: "followersGained",
+    label: "Followers gained",
+    description: "New followers earned through this automation's follow request.",
+    icon: UserPlus,
+  },
+  {
+    key: "dmsSent",
+    label: "Total DMs sent",
+    description: "Every DM this automation sent, including opening and follow-up messages.",
+    icon: Send,
+  },
+  {
+    key: "totalComments",
+    label: "Total comments",
+    description: "All comments received on this post.",
+    icon: MessagesSquare,
+  },
+  {
+    key: "commentRepliesSent",
+    label: "Comments replied",
+    description: "Public replies the bot posted under comments.",
+    icon: Reply,
+  },
+  {
+    key: "linkClicks",
+    label: "Link clicks",
+    description: "Clicks on links sent inside the DMs.",
+    icon: MousePointerClick,
+  },
+] as const;
+
+type StatKey = (typeof STAT_DEFS)[number]["key"];
+
 function AutomationRow({
   automation,
   onEdit,
   onDelete,
   onToggle,
+  onShowLegend,
 }: {
   automation: AutomationCardDTO;
   onEdit: () => void;
   onDelete: () => void;
   onToggle: () => void;
+  onShowLegend: () => void;
 }) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const {
-    thumbnailUrl,
-    caption,
-    isActive,
-    followersGained,
-    finalGoalDmsSent,
-    commentsTriggered,
-    totalComments,
-    commentRepliesSent,
-    linkClicks,
-  } = automation;
+  const [showDetails, setShowDetails] = useState(false);
+  const { thumbnailUrl, caption, isActive } = automation;
   const keywords = automation.triggerKeyword || [];
-
-  // Media-level stats rendered on the row (hidden on mobile; secondary ones only on lg+)
-  const rowStats = [
-    { label: "DMs", value: finalGoalDmsSent, icon: Send, lgOnly: false },
-    { label: "Follows", value: followersGained, icon: UserPlus, lgOnly: false },
-    { label: "Triggered", value: commentsTriggered, icon: MessageCircle, lgOnly: false },
-    { label: "Comments", value: totalComments, icon: MessagesSquare, lgOnly: true },
-    { label: "Replied", value: commentRepliesSent, icon: Reply, lgOnly: true },
-    { label: "Clicks", value: linkClicks, icon: MousePointerClick, lgOnly: true },
-  ];
+  const statValue = (key: StatKey) => automation[key] || 0;
 
   return (
     <>
       {/* Alt-surface band row — mirrors the dashboard's alternating #f5f5f7 sections */}
-      <div className="group flex items-center gap-4 md:gap-6 rounded-[18px] bg-[var(--apple-surface-alt)] p-4 md:p-5 transition-all duration-[240ms] hover:bg-[#efeff1]">
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={() => setShowDetails(true)}
+        onKeyDown={(e) => {
+          if (e.target === e.currentTarget && (e.key === "Enter" || e.key === " ")) {
+            e.preventDefault();
+            setShowDetails(true);
+          }
+        }}
+        className="group flex flex-wrap items-center gap-x-4 gap-y-3 md:gap-x-6 rounded-[18px] bg-[var(--apple-surface-alt)] p-4 md:p-5 transition-all duration-[240ms] hover:bg-[#efeff1] cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--apple-blue)]"
+      >
         {/* Thumbnail */}
         <div className="relative size-16 md:size-20 shrink-0 rounded-[12px] bg-white overflow-hidden">
           {thumbnailUrl ? (
@@ -134,21 +179,31 @@ function AutomationRow({
           </div>
         </div>
 
-        {/* Stats */}
-        <div className="hidden sm:flex items-center gap-4 md:gap-7 shrink-0">
-          {rowStats.map((stat) => (
+        {/* Essential stats — icon + value, always visible. Full width second line on mobile. */}
+        <div className="order-last sm:order-none w-full sm:w-auto flex items-center justify-around sm:justify-end gap-4 md:gap-6 shrink-0 border-t border-[var(--apple-hairline)] pt-3 sm:border-0 sm:pt-0">
+          {STAT_DEFS.slice(0, 3).map((stat) => (
             <div
-              key={stat.label}
-              className={`${stat.lgOnly ? "hidden lg:flex" : "flex"} flex-col items-end`}
+              key={stat.key}
+              title={stat.label}
+              aria-label={`${stat.label}: ${statValue(stat.key)}`}
+              className="flex items-center gap-2"
             >
-              <span className="flex items-center gap-1.5 text-[10px] md:text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--apple-gray-2)]">
-                <stat.icon className="size-3" aria-hidden="true" /> {stat.label}
-              </span>
-              <span className="text-[17px] md:text-[21px] font-semibold tracking-tight text-[var(--apple-ink)] tabular-nums">
-                {stat.value || 0}
+              <stat.icon className="size-4 text-[var(--apple-gray-2)]" aria-hidden="true" />
+              <span className="text-[17px] md:text-[19px] font-semibold tracking-tight text-[var(--apple-ink)] tabular-nums">
+                {statValue(stat.key)}
               </span>
             </div>
           ))}
+          <button
+            aria-label="What do these icons mean?"
+            onClick={(e) => {
+              e.stopPropagation();
+              onShowLegend();
+            }}
+            className="p-1 text-[var(--apple-gray-2)] hover:text-[var(--apple-blue)] transition-colors duration-200 outline-none"
+          >
+            <Info className="size-4" />
+          </button>
         </div>
 
         {/* Actions */}
@@ -156,6 +211,7 @@ function AutomationRow({
           <DropdownMenuTrigger asChild>
             <button
               aria-label="Automation options"
+              onClick={(e) => e.stopPropagation()}
               className="p-2 text-[var(--apple-gray-2)] hover:text-[var(--apple-ink)] transition-colors duration-200 outline-none shrink-0"
             >
               <MoreHorizontal className="size-5" />
@@ -163,6 +219,7 @@ function AutomationRow({
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="end"
+            onClick={(e) => e.stopPropagation()}
             className="w-48 rounded-xl p-1.5 shadow-xl border-[var(--apple-hairline)] bg-white"
           >
             <DropdownMenuItem
@@ -241,6 +298,85 @@ function AutomationRow({
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* DETAILS DIALOG — full media-level breakdown, mirrors header stats treatment */}
+      <Dialog open={showDetails} onOpenChange={setShowDetails}>
+        <DialogContent
+          aria-describedby={undefined}
+          className="font-apple w-[94%] max-w-[560px] max-h-[85dvh] overflow-y-auto gap-0 p-0 rounded-[20px] border border-[var(--apple-hairline)] bg-white shadow-2xl"
+        >
+          {/* Media header on alt surface */}
+          <div className="flex items-center gap-4 bg-[var(--apple-surface-alt)] p-5 md:p-6">
+            <div className="relative size-16 md:size-20 shrink-0 rounded-[12px] bg-white overflow-hidden">
+              {thumbnailUrl ? (
+                <img src={thumbnailUrl} alt="Automation media" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-[var(--apple-gray-2)] text-[9px] uppercase font-semibold">
+                  No image
+                </div>
+              )}
+              <span
+                className={`absolute top-1.5 left-1.5 size-2.5 rounded-full ring-2 ring-white ${
+                  isActive ? "bg-[var(--apple-blue)]" : "bg-[var(--apple-gray-2)]"
+                }`}
+                aria-hidden="true"
+              />
+            </div>
+            <DialogHeader className="min-w-0 flex-1 gap-1 text-left">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--apple-gray-2)]">
+                {isActive ? "Active automation" : "Paused automation"}
+              </p>
+              <DialogTitle className="text-[16px] md:text-[19px] font-semibold tracking-tight text-[var(--apple-ink)] leading-snug line-clamp-2 text-left">
+                {caption || "No caption provided"}
+              </DialogTitle>
+              {keywords.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mt-1.5">
+                  {keywords.map((kw, idx) => (
+                    <span
+                      key={idx}
+                      className="inline-flex rounded-full bg-white px-2.5 py-0.5 text-[11px] font-medium text-[var(--apple-ink)]"
+                    >
+                      {kw}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </DialogHeader>
+          </div>
+
+          {/* Stats — same divider-column treatment as the page-level stats section */}
+          <div className="p-5 md:p-6">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--apple-gray-2)] mb-4">
+              Performance
+            </p>
+            <div className="grid grid-cols-2 gap-y-6">
+              {STAT_DEFS.map((stat, i) => (
+                <div
+                  key={stat.key}
+                  className={`flex flex-col gap-1 py-1 ${
+                    i % 2 === 0
+                      ? "pr-4"
+                      : "pl-4 border-l border-[var(--apple-hairline)]"
+                  }`}
+                >
+                  <span className="flex items-center gap-1.5 text-[var(--apple-gray-2)]">
+                    <stat.icon className="size-3.5 shrink-0" aria-hidden="true" />
+                    <span className="text-[10px] md:text-[11px] font-semibold uppercase tracking-[0.12em] truncate">
+                      {stat.label}
+                    </span>
+                  </span>
+                  <span className="apple-display text-[26px] md:text-[32px] tabular-nums">
+                    {statValue(stat.key)}
+                  </span>
+                  <span className="text-[11px] leading-snug text-[var(--apple-gray)]">
+                    {stat.description}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
@@ -256,6 +392,7 @@ export function AutomationGrid({
   onToggleStatus,
 }: AutomationGridProps) {
   const tabs = ["all", "active", "inactive"] as const;
+  const [showLegend, setShowLegend] = useState(false);
 
   return (
     <section className="font-apple w-full max-w-5xl mx-auto px-6 mt-10 mb-8">
@@ -308,10 +445,40 @@ export function AutomationGrid({
               onEdit={() => onEdit(automation)}
               onDelete={() => onDelete(automation.id)}
               onToggle={() => onToggleStatus(automation.id, automation.isActive)}
+              onShowLegend={() => setShowLegend(true)}
             />
           ))}
         </div>
       )}
+
+      {/* STAT LEGEND DIALOG — explains what each icon means */}
+      <Dialog open={showLegend} onOpenChange={setShowLegend}>
+        <DialogContent
+          aria-describedby={undefined}
+          className="font-apple w-[92%] max-w-[400px] gap-0 p-0 overflow-hidden rounded-[20px] border border-[var(--apple-hairline)] bg-white shadow-2xl"
+        >
+          <DialogHeader className="p-6 pb-4 text-left">
+            <DialogTitle className="text-[19px] font-semibold tracking-tight text-[var(--apple-ink)]">
+              What these icons mean
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-1 px-4 pb-6">
+            {STAT_DEFS.map((stat) => (
+              <div key={stat.key} className="flex items-start gap-3.5 rounded-[14px] p-2.5">
+                <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[var(--apple-surface-alt)]">
+                  <stat.icon className="size-4 text-[var(--apple-ink)]" aria-hidden="true" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[14px] font-semibold text-[var(--apple-ink)]">{stat.label}</p>
+                  <p className="text-[12px] leading-relaxed text-[var(--apple-gray)]">
+                    {stat.description}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }
