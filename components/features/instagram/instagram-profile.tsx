@@ -63,6 +63,23 @@ export default function InstagramProfileCard() {
     return num.toString();
   };
 
+  const fetchImageWithToken = async (url: string) => {
+    if (!auth.currentUser) throw new Error("Not authenticated");
+    const token = await auth.currentUser.getIdToken();
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!res.ok) throw new Error("Fetch failed");
+    const blob = await res.blob();
+    return URL.createObjectURL(blob);
+  };
+
+  const { data: proxyPicUrl } = useSWR(
+    user && profileData && profileData.profilePictureUrl && !profileData.needsReauth ? `/api/v1/me/instagram/profile-picture` : null,
+    fetchImageWithToken,
+    { revalidateOnFocus: false }
+  );
+
   // 1. Loading Skeleton State (Styled to match new card)
   if (!mounted || (isLoading && !profileData)) {
     return (
@@ -150,7 +167,7 @@ export default function InstagramProfileCard() {
               <div className="w-20 h-20 lg:w-16 lg:h-16 rounded-full p-[3px] lg:p-[2px] bg-gradient-to-tr from-yellow-400 via-red-500 to-fuchsia-600">
                 <div className="w-full h-full rounded-full border-[3px] lg:border-[2px] border-white bg-zinc-50 overflow-hidden">
                   <img
-                    src={profilePic}
+                    src={proxyPicUrl || profilePic}
                     alt={`${username} profile photo`}
                     className="w-full h-full object-cover bg-white"
                     referrerPolicy="no-referrer"
