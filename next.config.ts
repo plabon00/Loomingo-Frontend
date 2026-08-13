@@ -11,6 +11,9 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'i.ibb.co', pathname: '/**' },
       { protocol: 'https', hostname: 'images.shadcnspace.com', pathname: '/**' },
       { protocol: 'https', hostname: 'images.unsplash.com', pathname: '/**' },
+      { protocol: 'https', hostname: 'scontent.cdninstagram.com', pathname: '/**' },
+      { protocol: 'https', hostname: '*.cdninstagram.com', pathname: '/**' },
+      { protocol: 'https', hostname: '*.fbcdn.net', pathname: '/**' },
     ],
   },
   typescript: {
