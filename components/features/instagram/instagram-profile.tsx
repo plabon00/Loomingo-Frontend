@@ -100,6 +100,18 @@ export default function InstagramProfileCard() {
   const followers = profileData.followersCount || 0;
   const following = profileData.followingCount || 0; 
   const bio = profileData.bio || profileData.biography || "Helping creators scale 🚀\nAutomate your DMs and grow faster.";
+  const needsReauth = profileData.needsReauth || false;
+
+  // 4. Session Expired State
+  if (needsReauth) {
+    return (
+      <div className="bg-white border border-red-200 rounded-3xl p-8 w-full max-w-sm shadow-sm text-center">
+        <AlertCircle className="size-8 text-red-500 mx-auto mb-3" />
+        <p className="text-sm font-semibold text-zinc-900 mb-2">Session Expired</p>
+        <p className="text-xs text-zinc-500 mb-4">Your Instagram connection has expired. Please reconnect your account to continue loading stats.</p>
+      </div>
+    );
+  }
 
   // Rough engagement proxy (posts-per-follower) — shown on the back face.
   const engagement = followers > 0 ? ((mediaCount / followers) * 100).toFixed(1) : "0.0";
@@ -142,6 +154,9 @@ export default function InstagramProfileCard() {
                     alt={`${username} profile photo`}
                     className="w-full h-full object-cover bg-white"
                     referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      e.currentTarget.src = "https://i.pravatar.cc/150?img=32";
+                    }}
                   />
                 </div>
               </div>
