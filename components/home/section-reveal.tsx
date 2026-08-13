@@ -1,41 +1,29 @@
 "use client";
 
-import { useRef, type ReactNode } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-
-gsap.registerPlugin(ScrollTrigger, useGSAP);
+import { ReactNode } from "react";
+import { m, LazyMotion, domAnimation } from "motion/react";
 
 /**
- * Wraps a below-the-fold section with a gentle GSAP scroll reveal:
- * a fade + rise as it enters, reversing when scrolled back out.
+ * Wraps a below-the-fold section with a gentle scroll reveal:
+ * a fade + rise as it enters.
  * Pinned/sticky sections (which manage their own scroll) should be
  * given `still` so we don't fight their transforms.
  */
 export function SectionReveal({ children, still = false }: { children: ReactNode; still?: boolean }) {
-  const ref = useRef<HTMLDivElement>(null);
+  if (still) {
+    return <div>{children}</div>;
+  }
 
-  useGSAP(
-    () => {
-      if (still) return;
-      const mm = gsap.matchMedia();
-      mm.add("(prefers-reduced-motion: no-preference)", () => {
-        gsap.from(ref.current, {
-          opacity: 0,
-          y: 48,
-          duration: 0.8,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: ref.current,
-            start: "top 95%",
-            toggleActions: "play none none none",
-          },
-        });
-      });
-    },
-    { scope: ref }
+  return (
+    <LazyMotion features={domAnimation}>
+      <m.div
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.05 }} // Triggers when exactly 5% of the top is visible
+        transition={{ duration: 0.8, ease: "easeOut" }}
+      >
+        {children}
+      </m.div>
+    </LazyMotion>
   );
-
-  return <div ref={ref}>{children}</div>;
 }

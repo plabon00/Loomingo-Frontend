@@ -1,54 +1,19 @@
-import dynamic from 'next/dynamic';
-
-// STATIC IMPORTS (Above the fold - Loads instantly)
 import Navbar from '@/components/shadcn-space/radix/blocks/navbar-01/navbar';
 import AgencyHeroSection from '@/components/shadcn-space/blocks/hero-01';
-
-// Scroll Indicator
 import ScrollIndicator from '@/components/ui/ScrollIndicator';
-
-// GSAP ScrollTrigger effects (client components)
 import { ScrollProgressBar, StatementDivider } from '@/components/home/home-scroll-fx';
 import { SectionReveal } from '@/components/home/section-reveal';
 
-// DYNAMIC IMPORTS (Below the fold)
-const SuperchargeSection = dynamic(() => import('@/components/sections/marketing/SuperchargeSection'), {
-  loading: () => <div className="min-h-[200vh] w-full bg-transparent" />
-});
-
-const PotentialSection = dynamic(() => import('@/components/sections/marketing/PotentialSection'), {
-  loading: () => <div className="min-h-screen w-full bg-transparent" />
-});
-
-const AutoDMFeatureSection = dynamic(() => import('@/components/sections/marketing/AutoDMFeatureSection'), {
-  loading: () => <div className="min-h-screen w-full bg-transparent" />
-});
-
-const StoreFrontFeatureSection = dynamic(() => import('@/components/sections/marketing/StoreFrontFeatureSection'), {
-  loading: () => <div className="min-h-screen w-full bg-transparent" />
-});
-
-const InvoiceGeneratorFeatureSection = dynamic(() => import('@/components/sections/marketing/InvoiceGeneratorFeatureSection'), {
-  loading: () => <div className="min-h-screen w-full bg-transparent" />
-});
-
-const ProcessSection = dynamic(() => import('@/components/sections/process/ProcessSection'), {
-  loading: () => <div className="min-h-screen w-full bg-transparent" />
-});
-
-const TestimonialSection = dynamic(() => import('@/components/sections/testimonial/TestimonialSection'), {
-  loading: () => <div className="min-h-screen w-full bg-transparent" />
-});
-
-const CallToActionSection = dynamic(() => import('@/components/sections/marketing/CallToActionSection'), {
-  loading: () => <div className="min-h-[50vh] w-full bg-transparent" />
-});
-
-const FAQs = dynamic(() => import('@/components/sections/help/faqs-section-two'), {
-  loading: () => <div className="min-h-screen w-full bg-transparent" />
-});
-
-const FooterSection = dynamic(() => import('@/components/layout/footer-one'));
+import SuperchargeSection from '@/components/sections/marketing/SuperchargeSection';
+import PotentialSection from '@/components/sections/marketing/PotentialSection';
+import AutoDMFeatureSection from '@/components/sections/marketing/AutoDMFeatureSection';
+import StoreFrontFeatureSection from '@/components/sections/marketing/StoreFrontFeatureSection';
+import InvoiceGeneratorFeatureSection from '@/components/sections/marketing/InvoiceGeneratorFeatureSection';
+import ProcessSection from '@/components/sections/process/ProcessSection';
+import TestimonialSection from '@/components/sections/testimonial/TestimonialSection';
+import CallToActionSection from '@/components/sections/marketing/CallToActionSection';
+import FAQs from '@/components/sections/help/faqs-section-two';
+import FooterSection from '@/components/layout/footer-one';
 
 export default function Page() {
   return (
