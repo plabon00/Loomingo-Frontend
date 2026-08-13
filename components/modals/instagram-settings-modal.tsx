@@ -44,6 +44,7 @@ interface InstagramAccount {
   username: string;
   profilePictureUrl: string;
   isSubscribed: boolean;
+  needsReauth?: boolean;
 }
 
 interface InstagramSettingsModalProps {
@@ -331,96 +332,119 @@ export function InstagramSettingsModal({ isOpen, onClose }: InstagramSettingsMod
                   <div
                     key={acc.id}
                     className={cn(
-                      "flex flex-col sm:flex-row sm:items-center justify-between p-5 border rounded-[14px] transition-all relative gap-4",
+                      "flex flex-col p-5 border rounded-[14px] transition-all relative gap-4",
                       isActive
                         ? "border-[var(--apple-blue)]/35 bg-[#eaf3fd] shadow-sm"
                         : "border-[var(--apple-hairline)] bg-white hover:border-[var(--apple-blue)]/25 hover:shadow-md",
                       isBusy && "opacity-60 pointer-events-none"
                     )}
                   >
-                    {/* Left: Avatar & Info */}
-                    <div className="flex items-center gap-4">
-                      {acc.profilePictureUrl ? (
-                        <div className="relative">
-                          <img
-                            src={acc.profilePictureUrl}
-                            alt={acc.username}
-                            className={cn(
-                              "size-14 rounded-full object-cover border-2 shadow-sm transition-colors",
-                              isActive ? "border-[var(--apple-blue)]" : "border-[var(--apple-hairline)]"
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 w-full">
+                      {/* Left: Avatar & Info */}
+                      <div className="flex items-center gap-4">
+                        {acc.profilePictureUrl ? (
+                          <div className="relative">
+                            <img
+                              src={acc.profilePictureUrl}
+                              alt={acc.username}
+                              className={cn(
+                                "size-14 rounded-full object-cover border-2 shadow-sm transition-colors",
+                                isActive ? "border-[var(--apple-blue)]" : "border-[var(--apple-hairline)]"
+                              )}
+                            />
+                            {isActive && (
+                              <div className="absolute -bottom-1 -right-1 text-white rounded-full p-0.5 border-2 border-white" style={{ backgroundColor: PRIMARY }}>
+                                <CheckCircle2 className="size-4" />
+                              </div>
                             )}
-                          />
-                          {isActive && (
-                            <div className="absolute -bottom-1 -right-1 text-white rounded-full p-0.5 border-2 border-white" style={{ backgroundColor: PRIMARY }}>
-                              <CheckCircle2 className="size-4" />
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <div
-                          className={cn(
-                            "size-14 rounded-full flex items-center justify-center border-2",
-                            isActive ? "border-[var(--apple-blue)] bg-[#eaf3fd]" : "border-[var(--apple-hairline)] bg-zinc-100"
-                          )}
-                        >
-                          <User
+                          </div>
+                        ) : (
+                          <div
                             className={cn(
-                              "size-6",
-                              isActive ? "text-[var(--apple-blue)]" : "text-zinc-400"
+                              "size-14 rounded-full flex items-center justify-center border-2",
+                              isActive ? "border-[var(--apple-blue)] bg-[#eaf3fd]" : "border-[var(--apple-hairline)] bg-zinc-100"
                             )}
-                          />
-                        </div>
-                      )}
+                          >
+                            <User
+                              className={cn(
+                                "size-6",
+                                isActive ? "text-[var(--apple-blue)]" : "text-zinc-400"
+                              )}
+                            />
+                          </div>
+                        )}
 
-                      <div className="flex flex-col">
-                        <span className="font-bold text-[16px] flex items-center gap-1.5 leading-none mb-2" style={{ color: INK }}>
-                          {acc.name || acc.username}
-                        </span>
-                        <span className="text-sm leading-none font-medium text-zinc-500">
-                          @{acc.username}
-                        </span>
+                        <div className="flex flex-col">
+                          <span className="font-bold text-[16px] flex items-center gap-1.5 leading-none mb-2" style={{ color: INK }}>
+                            {acc.name || acc.username}
+                          </span>
+                          <span className="text-sm leading-none font-medium text-zinc-500">
+                            @{acc.username}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Right: Active Badge & Menu */}
+                      <div className="flex items-center gap-3 sm:gap-4 justify-between sm:justify-end w-full sm:w-auto mt-2 sm:mt-0 pt-3 sm:pt-0 border-t sm:border-0 border-zinc-100">
+                        {isActive && (
+                          <span className="inline-flex text-[10px] uppercase tracking-wider font-bold bg-white px-3 py-1.5 rounded-full shadow-sm border border-[var(--apple-blue)]/25" style={{ color: PRIMARY }}>
+                            Active
+                          </span>
+                        )}
+
+                        {/* Busy spinner */}
+                        {isBusy && (
+                          <Loader2 className="size-5 animate-spin text-zinc-400" />
+                        )}
+
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" disabled={isBusy} className="rounded-full size-10 bg-white border border-[var(--apple-hairline)] text-zinc-600 hover:bg-zinc-50 shadow-sm">
+                              <MoreVertical className="size-5" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-56 rounded-2xl p-1.5 shadow-xl border-[var(--apple-hairline)] bg-white">
+                            {acc.isSubscribed ? (
+                              <DropdownMenuItem onClick={() => handleUnsubscribe(acc.id)} className="text-amber-600 focus:bg-amber-50 font-medium py-2.5 cursor-pointer rounded-xl">
+                                <Unplug className="size-4 mr-2.5" />
+                                Unsubscribe Automation
+                              </DropdownMenuItem>
+                            ) : (
+                              <DropdownMenuItem onClick={() => handleSubscribe(acc.id)} className="focus:bg-[#eaf3fd] font-medium py-2.5 cursor-pointer rounded-xl" style={{ color: PRIMARY }}>
+                                <Zap className="size-4 mr-2.5 fill-current" />
+                                Subscribe Automation
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuSeparator className="my-1.5 bg-[var(--apple-hairline)]" />
+                            <DropdownMenuItem onClick={() => handleRemove(acc.id)} className="text-red-600 focus:bg-red-50 font-medium py-2.5 cursor-pointer rounded-xl">
+                              <Trash2 className="size-4 mr-2.5" />
+                              Remove Account
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </div>
 
-                    {/* Right: Active Badge & Menu */}
-                    <div className="flex items-center gap-3 sm:gap-4 justify-between sm:justify-end w-full sm:w-auto mt-2 sm:mt-0 pt-3 sm:pt-0 border-t sm:border-0 border-zinc-100">
-                      {isActive && (
-                        <span className="inline-flex text-[10px] uppercase tracking-wider font-bold bg-white px-3 py-1.5 rounded-full shadow-sm border border-[var(--apple-blue)]/25" style={{ color: PRIMARY }}>
-                          Active
-                        </span>
-                      )}
-
-                      {/* Busy spinner */}
-                      {isBusy && (
-                        <Loader2 className="size-5 animate-spin text-zinc-400" />
-                      )}
-
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" disabled={isBusy} className="rounded-full size-10 bg-white border border-[var(--apple-hairline)] text-zinc-600 hover:bg-zinc-50 shadow-sm">
-                            <MoreVertical className="size-5" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-56 rounded-2xl p-1.5 shadow-xl border-[var(--apple-hairline)] bg-white">
-                          {acc.isSubscribed ? (
-                            <DropdownMenuItem onClick={() => handleUnsubscribe(acc.id)} className="text-amber-600 focus:bg-amber-50 font-medium py-2.5 cursor-pointer rounded-xl">
-                              <Unplug className="size-4 mr-2.5" />
-                              Unsubscribe Automation
-                            </DropdownMenuItem>
-                          ) : (
-                            <DropdownMenuItem onClick={() => handleSubscribe(acc.id)} className="focus:bg-[#eaf3fd] font-medium py-2.5 cursor-pointer rounded-xl" style={{ color: PRIMARY }}>
-                              <Zap className="size-4 mr-2.5 fill-current" />
-                              Subscribe Automation
-                            </DropdownMenuItem>
-                          )}
-                          <DropdownMenuSeparator className="my-1.5 bg-[var(--apple-hairline)]" />
-                          <DropdownMenuItem onClick={() => handleRemove(acc.id)} className="text-red-600 focus:bg-red-50 font-medium py-2.5 cursor-pointer rounded-xl">
-                            <Trash2 className="size-4 mr-2.5" />
-                            Remove Account
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
+                    {/* Needs Reauth Warning Banner within the account card */}
+                    {acc.needsReauth && (
+                      <div className="w-full p-3 bg-red-50 border border-red-200 rounded-lg flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-red-700">
+                          <AlertCircle className="size-4 shrink-0" />
+                          <span className="text-sm font-medium">Disconnected: Password or permission changed</span>
+                        </div>
+                        <Button 
+                          onClick={() => {
+                            const backendUrl = process.env.NEXT_PUBLIC_API_URL || "https://loomingo-backend-1.onrender.com";
+                            window.open(`${backendUrl}/api/instagram/connect_account?uid=${auth.currentUser?.uid}`, "Instagram Auth", "width=500,height=600");
+                          }}
+                          size="sm" 
+                          variant="destructive"
+                          className="h-8 shadow-sm"
+                        >
+                          Reconnect
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 );
               })}

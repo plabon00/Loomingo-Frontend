@@ -1,10 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { auth } from "@/lib/firebase";
 import useSWR from "swr";
 import { useAuthUser } from "@/hooks/use-auth-user";
-import { RotateCw, Heart, Grid3x3, TrendingUp } from "lucide-react";
+import { RotateCw, Heart, Grid3x3, TrendingUp, AlertCircle } from "lucide-react";
 
 const fetchWithToken = async (url: string) => {
   if (!auth.currentUser) throw new Error("Not authenticated");
@@ -21,8 +21,14 @@ const fetchWithToken = async (url: string) => {
 
 export default function InstagramProfileCard() {
   const { user } = useAuthUser();
-  const activeIgId = typeof window !== "undefined" ? localStorage.getItem("activeInstagramId") : null;
+  const [mounted, setMounted] = useState(false);
   const [flipped, setFlipped] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const activeIgId = typeof window !== "undefined" ? localStorage.getItem("activeInstagramId") : null;
 
   const cachedProfile = useMemo(() => {
     if (typeof window !== "undefined") {
@@ -58,7 +64,7 @@ export default function InstagramProfileCard() {
   };
 
   // 1. Loading Skeleton State (Styled to match new card)
-  if (isLoading && !profileData) {
+  if (!mounted || (isLoading && !profileData)) {
     return (
       <div className="bg-white border border-zinc-200/70 rounded-3xl p-6 sm:p-8 w-full max-w-sm shadow-[0_1px_2px_rgba(24,24,27,0.04),0_18px_40px_-30px_rgba(24,24,27,0.25)] animate-pulse">
         <div className="h-4 bg-zinc-100 rounded-md w-1/3 mb-6" />
@@ -99,7 +105,8 @@ export default function InstagramProfileCard() {
   const engagement = followers > 0 ? ((mediaCount / followers) * 100).toFixed(1) : "0.0";
 
   return (
-    <div className="flip-scene relative w-full max-w-sm">
+    <div className="flex flex-col gap-4 w-full max-w-sm">
+      <div className="flip-scene relative w-full">
       {/* Orbiting decorative ring — tinted glow behind the card */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-0 flex items-center justify-center">
         <div className="animate-orbit h-[115%] w-[115%] rounded-full border border-dashed border-fuchsia-300/40 [mask-image:radial-gradient(circle,black,transparent_72%)]" />
@@ -208,6 +215,7 @@ export default function InstagramProfileCard() {
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

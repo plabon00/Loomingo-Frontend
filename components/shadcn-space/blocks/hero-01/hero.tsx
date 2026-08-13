@@ -43,7 +43,9 @@ function HeroSection({ avatarList }: HeroSectionProps) {
 
   return (
     <LazyMotion features={domAnimation}>
-      <section className="relative w-full min-h-[100dvh] lg:h-[100dvh] flex flex-col overflow-hidden bg-red-950 pt-20 lg:pt-0">
+      <section 
+        className="relative w-[98%] max-w-[1800px] mx-auto mt-0 min-h-[105dvh] lg:h-[105dvh] flex flex-col overflow-hidden bg-red-950 rounded-b-[40px] pt-20 lg:pt-0 border border-white/10"
+      >
         {/* Deep Red Radial Gradient Background */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-red-600 via-red-900 to-[#1a0000] z-0"></div>
         
@@ -187,6 +189,9 @@ function HeroSection({ avatarList }: HeroSectionProps) {
             </DialogPrimitive.Content>
           </DialogPrimitive.Portal>
         </DialogPrimitive.Root>
+
+        {/* Solid color gradient to seamlessly blend the bottom with the #0A0C10 main background */}
+        <div className="absolute bottom-0 left-0 right-0 h-48 lg:h-64 bg-gradient-to-t from-[#0A0C10] to-transparent z-40 pointer-events-none rounded-b-[40px]"></div>
       </section>
     </LazyMotion>
   );

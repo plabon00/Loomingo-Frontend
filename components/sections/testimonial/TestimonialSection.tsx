@@ -1,514 +1,168 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 
-/* ─── Testimonial data ──────────────────────────────────────── */
-const testimonials = [
-  {
-    id: 1,
-    name: "Fiza Kazim",
-    location: "Dubai, UAE",
-    handle: "@fizaakazim",
-    followers: "49.5K",
-    rating: 5,
-    avatar:
-      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=500&auto=format&fit=crop",
-    heading: "Effortless automation, real results.",
-    text: "Loomin is honestly the most easy to use AND affordable automation tool that I've used so far. I recommend it to all my social media clients.",
-  },
-  {
-    id: 2,
-    name: "Marcus Chen",
-    location: "San Francisco, USA",
-    handle: "@thegrowthguy",
-    followers: "120K",
-    rating: 5,
-    avatar:
-      "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=500&auto=format&fit=crop",
-    heading: "Engagement doubled in a week.",
-    text: "The DM automation saved me literally hours every day. My engagement rate doubled in a week, and my audience loves the quick replies!",
-  },
-  {
-    id: 3,
-    name: "Sarah Mitchell",
-    location: "London, UK",
-    handle: "@sarahcreates",
-    followers: "85K",
-    rating: 5,
-    avatar:
-      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=500&auto=format&fit=crop",
-    heading: "Intuitive and incredibly fast.",
-    text: "I was skeptical at first, but Loomin's interface is so intuitive. Setting up campaigns takes 2 minutes and the analytics are crystal clear.",
-  },
-  {
-    id: 4,
-    name: "James Rodriguez",
-    location: "Madrid, Spain",
-    handle: "@marketing.ninja",
-    followers: "210K",
-    rating: 5,
-    avatar:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=500&auto=format&fit=crop",
-    heading: "Best ROI on any tool we use.",
-    text: "We set up an auto-DM for a product launch and saw a 40% increase in click-through rates. Absolutely game-changing for our brand.",
-  },
-  {
-    id: 5,
-    name: "Anya Petrova",
-    location: "Berlin, Germany",
-    handle: "@creators_hub",
-    followers: "34K",
-    rating: 5,
-    avatar:
-      "https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=500&auto=format&fit=crop",
-    heading: "Feels personal, not like a bot.",
-    text: "Finally an automation tool that doesn't feel like a bot. The personalization tags make every conversation feel completely natural.",
-  },
-  {
-    id: 6,
-    name: "Lily Park",
-    location: "Seoul, Korea",
-    handle: "@lilydigital",
-    followers: "67K",
-    rating: 5,
-    avatar:
-      "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=500&auto=format&fit=crop",
-    heading: "Scaled my business 3x in a month.",
-    text: "I went from manually DMing 50 people a day to reaching thousands automatically. The keyword triggers are genius — set it and forget it.",
-  },
-  {
-    id: 7,
-    name: "David Okafor",
-    location: "Lagos, Nigeria",
-    handle: "@davidgrows",
-    followers: "92K",
-    rating: 5,
-    avatar:
-      "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=500&auto=format&fit=crop",
-    heading: "My secret weapon for launches.",
-    text: "Every product launch, Loomin handles thousands of DMs flawlessly. My audience gets instant responses while I focus on creating content.",
-  },
+const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1511367461989-f85a21fda167?q=80&w=400&auto=format&fit=crop";
+
+const reviews = [
+  { id: 1, handle: "@fizaakazim", name: "Fizaa Kazim", role: "Creator", avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&q=80", text: "Loomingo is honestly the most easy to use AND affordable automation tool that I've used so far. I recommend it to all my social media clients." },
+  { id: 2, handle: "@thegrowthguy", name: "Alex Hormozi", role: "CEO, Growth Co", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&q=80", text: "The DM automation saved me literally hours every day. My engagement rate doubled in a week, and my audience loves the quick replies!" },
+  { id: 3, handle: "@sarahcreates", name: "Sarah Jenkins", role: "Designer", avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&q=80", text: "I was skeptical at first, but Loomingo's interface is so intuitive. Setting up campaigns takes 2 minutes and the analytics are crystal clear." },
+  { id: 4, handle: "@marketing.ninja", name: "David Chen", role: "Marketing Director", avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&q=80", text: "Best ROI on any SaaS tool we use. We set up an auto-DM for a product launch and saw a 40% increase in click-through rates." },
+  { id: 5, handle: "@creators_hub", name: "Emma Watson", role: "Content Strategist", avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&q=80", text: "Finally an automation tool that doesn't feel like a bot. The personalization tags make every conversation feel completely natural." },
+  { id: 6, handle: "@fitness_empire", name: "Marcus Thorne", role: "Fitness Coach", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&q=80", text: "We went from answering 500 DMs manually to zero. Loomingo handles our entire sales funnel directly in the DMs now." },
+  { id: 7, handle: "@stylebyjess", name: "Jessica Lin", role: "Fashion Blogger", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&q=80", text: "The follow-gate feature is a game changer. I've gained 15,000 targeted followers this month alone just by offering a free guide." },
+  { id: 8, handle: "@tech_reviews", name: "Marcus B.", role: "Tech Reviewer", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&q=80", text: "As a creator, time is money. This tool gives me back 3 hours a day. The analytics dashboard is absolutely gorgeous too." },
+  { id: 9, handle: "@daily_motivation", name: "Chris E.", role: "Motivator", avatar: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150&q=80", text: "I've tried many tools, but the 99.9% uptime and zero-lag responses make Loomingo the undisputed king of IG automation." },
+  { id: 10, handle: "@baking_magic", name: "Chloe Smith", role: "Chef", avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&q=80", text: "My recipe links are finally getting clicks! By telling people to comment 'RECIPE', my reach has skyrocketed by literally 10x." },
+  { id: 11, handle: "@travel_diaries", name: "Ryan R.", role: "Photographer", avatar: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=150&q=80", text: "Being able to capture emails directly inside Instagram DMs means I never have to send people to a clunky Linktree again." },
+  { id: 12, handle: "@startup_hustle", name: "Evan M.", role: "Founder", avatar: "https://images.unsplash.com/photo-1517365830460-955ce3ccd263?w=150&q=80", text: "The AI sales assistant actually closes deals for us while we sleep. It's like having a full-time employee that costs pennies." },
 ];
 
-const AUTO_ROTATE_MS = 2000;
-
-/* ─── Card positions for the fan spread ─────────────────────── */
-const fanPositions = [
-  { x: "-135%", rotate: -16, scale: 0.68, opacity: 1, zIndex: 1, y: "14%", blur: "6px", mask: "linear-gradient(to right, rgba(0,0,0,0) -20%, rgba(0,0,0,1) 50%, rgba(0,0,0,1) 100%)" },
-  { x: "-70%", rotate: -8, scale: 0.84, opacity: 1, zIndex: 2, y: "5%", blur: "2px", mask: "linear-gradient(to right, rgba(0,0,0,1) -20%, rgba(0,0,0,1) 50%, rgba(0,0,0,1) 100%)" },
-  { x: "0%", rotate: 0, scale: 1, opacity: 1, zIndex: 5, y: "0%", blur: "0px", mask: "linear-gradient(to right, rgba(0,0,0,1) -20%, rgba(0,0,0,1) 50%, rgba(0,0,0,1) 100%)" },
-  { x: "70%", rotate: 8, scale: 0.84, opacity: 1, zIndex: 2, y: "5%", blur: "2px", mask: "linear-gradient(to right, rgba(0,0,0,1) -20%, rgba(0,0,0,1) 50%, rgba(0,0,0,1) 100%)" },
-  { x: "135%", rotate: 16, scale: 0.68, opacity: 1, zIndex: 1, y: "14%", blur: "6px", mask: "linear-gradient(to right, rgba(0,0,0,1) -20%, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 120%)" },
-];
-
-/* ─── Single Fan Card ───────────────────────────────────────── */
-const FanCard = ({
-  testimonial,
-  position,
-  isCenter,
-  onClick,
-  onMouseEnter,
-  onMouseLeave,
-}: {
-  testimonial: (typeof testimonials)[0];
-  position: (typeof fanPositions)[0];
-  isCenter: boolean;
-  onClick?: () => void;
-  onMouseEnter?: () => void;
-  onMouseLeave?: () => void;
-}) => {
-  return (
-    <motion.div
-      animate={{
-        x: position.x,
-        rotate: position.rotate,
-        scale: position.scale,
-        opacity: position.opacity,
-        y: position.y,
-        filter: `blur(${position.blur})`,
-        webkitMaskImage: position.mask,
-        maskImage: position.mask,
-      } as any}
-      transition={{
-        type: "spring",
-        stiffness: 140,
-        damping: 22,
-        mass: 1,
-      }}
-      onClick={onClick}
-      className={`absolute left-1/2 -translate-x-1/2 origin-bottom ${
-        !isCenter ? "cursor-pointer" : ""
-      }`}
-      style={{ zIndex: position.zIndex }}
-    >
-      <motion.div
-        onMouseEnter={onMouseEnter}
-        onMouseLeave={onMouseLeave}
-        whileHover={
-          isCenter
-            ? { scale: 1.04, y: -6 }
-            : { scale: 1.06, opacity: 1 }
-        }
-        transition={{ type: "spring", stiffness: 280, damping: 18 }}
-        style={{ 
-          transform: "translateZ(0)",
-          WebkitMaskImage: "-webkit-radial-gradient(white, black)"
-        }}
-        className={`group relative w-[170px] sm:w-[195px] md:w-[215px] lg:w-[235px] aspect-[3/4] rounded-2xl md:rounded-3xl overflow-hidden isolation-isolate ${
-          isCenter
-            ? "shadow-2xl shadow-red-950/25"
-            : "shadow-lg shadow-red-950/10"
-        }`}
-      >
-        {/* Image */}
-        <img
-          src={testimonial.avatar}
-          alt={testimonial.name}
-          className="absolute inset-0 w-full h-full object-cover rounded-2xl md:rounded-3xl"
-        />
-
-        {/* Gradient overlay */}
-        <div
-          className={`absolute inset-0 transition-opacity duration-700 rounded-2xl md:rounded-3xl ${
-            isCenter
-              ? "bg-gradient-to-t from-red-950/80 via-red-950/15 to-transparent"
-              : "bg-gradient-to-t from-red-950/50 via-red-950/5 to-transparent"
-          }`}
-        />
-
-        {/* Center card — name & location */}
-        {isCenter && (
-          <>
-            {/* Bottom info */}
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.25, duration: 0.5, ease: "easeOut" }}
-              className="absolute bottom-0 left-0 right-0 px-4 pb-4 pt-12 bg-gradient-to-t from-red-950/90 to-transparent"
-            >
-              <h4 className="text-white font-semibold text-sm md:text-base tracking-tight leading-tight">
-                {testimonial.name}
-              </h4>
-              <p className="text-white/60 text-[11px] md:text-xs mt-0.5 font-medium">
-                {testimonial.location}
-              </p>
-            </motion.div>
-
-            {/* Shine sweep on hover */}
-            <div
-              className="absolute inset-y-0 -left-full w-full -skew-x-12 bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-[1.2s] ease-out group-hover:translate-x-[250%] pointer-events-none"
-              aria-hidden="true"
-            />
-          </>
-        )}
-      </motion.div>
-    </motion.div>
-  );
-};
-
-/* ─── Star Rating Animation ─────────────────────────────────── */
-const AnimatedStars = ({ rating, isVisible }: { rating: number; isVisible: boolean }) => {
-  return (
-    <div className="flex items-center gap-0.5 justify-center">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <motion.span
-          key={i}
-          initial={{ opacity: 0, scale: 0, rotate: -90 }}
-          animate={
-            isVisible
-              ? { opacity: 1, scale: 1, rotate: 0 }
-              : { opacity: 0, scale: 0, rotate: -90 }
-          }
-          transition={{
-            delay: i * 0.08,
-            type: "spring",
-            stiffness: 300,
-            damping: 15,
-          }}
-          className={`text-sm md:text-base ${
-            i < rating ? "text-amber-400" : "text-zinc-200"
-          }`}
-        >
-          ★
-        </motion.span>
-      ))}
-    </div>
-  );
-};
-
-/* ─── Main Section ──────────────────────────────────────────── */
 export default function TestimonialSection() {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const progressRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [[page, direction], setPage] = useState([0, 0]);
+  const [itemsPerPage, setItemsPerPage] = useState(5); // Default to 5 for SSR
+  const [isMounted, setIsMounted] = useState(false);
 
-  const totalCount = testimonials.length;
-
-  // Get the 5 visible testimonials centered around activeIndex
-  const getVisibleIndices = useCallback(() => {
-    const indices: number[] = [];
-    for (let offset = -2; offset <= 2; offset++) {
-      const idx = (activeIndex + offset + totalCount) % totalCount;
-      indices.push(idx);
-    }
-    return indices;
-  }, [activeIndex, totalCount]);
-
-  const visibleIndices = getVisibleIndices();
-
-  const goNext = useCallback(() => {
-    setActiveIndex((prev) => (prev + 1) % totalCount);
-    setProgress(0);
-  }, [totalCount]);
-
-  const goPrev = useCallback(() => {
-    setActiveIndex((prev) => (prev - 1 + totalCount) % totalCount);
-    setProgress(0);
-  }, [totalCount]);
-
-  const goTo = useCallback((index: number) => {
-    setActiveIndex(index);
-    setProgress(0);
+  useEffect(() => {
+    const handleResize = () => {
+      // 5 on desktop, 3 on mobile
+      setItemsPerPage(window.innerWidth < 1024 ? 3 : 5);
+    };
+    handleResize();
+    setIsMounted(true);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Auto-rotation with smooth progress
-  useEffect(() => {
-    // Clear existing timers
-    if (intervalRef.current) clearInterval(intervalRef.current);
-    if (progressRef.current) clearInterval(progressRef.current);
+  // Ensure pagination doesn't break if page is out of bounds after resize
+  const totalPages = Math.ceil(reviews.length / itemsPerPage);
+  const safePage = page >= totalPages ? 0 : page;
 
-    if (isPaused) {
-      return;
-    }
-
-    const progressTick = 50; // Update progress every 50ms
-    const totalTicks = AUTO_ROTATE_MS / progressTick;
-    let tickCount = 0;
-
-    progressRef.current = setInterval(() => {
-      tickCount++;
-      setProgress(tickCount / totalTicks);
-
-      if (tickCount >= totalTicks) {
-        tickCount = 0;
-        setProgress(0);
-        setActiveIndex((prev) => (prev + 1) % totalCount);
-      }
-    }, progressTick);
-
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      if (progressRef.current) clearInterval(progressRef.current);
-    };
-  }, [isPaused, totalCount, activeIndex]);
-
-  // Keyboard navigation
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft") goPrev();
-      if (e.key === "ArrowRight") goNext();
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [goNext, goPrev]);
-
-  // Click side cards to navigate
-  const handleCardClick = (posIndex: number) => {
-    if (posIndex < 2) goPrev();
-    if (posIndex > 2) goNext();
+  const paginate = (newDirection: number) => {
+    let newPage = safePage + newDirection;
+    if (newPage < 0) newPage = totalPages - 1;
+    if (newPage >= totalPages) newPage = 0;
+    setPage([newPage, newDirection]);
   };
 
-  const activeTestimonial = testimonials[activeIndex];
+  const currentReviews = reviews.slice(safePage * itemsPerPage, (safePage + 1) * itemsPerPage);
+
+  const variants = {
+    enter: (direction: number) => ({
+      x: direction > 0 ? 1000 : -1000,
+      opacity: 0,
+    }),
+    center: {
+      zIndex: 1,
+      x: 0,
+      opacity: 1,
+    },
+    exit: (direction: number) => ({
+      zIndex: 0,
+      x: direction < 0 ? 1000 : -1000,
+      opacity: 0,
+    }),
+  };
 
   return (
-    <section className="relative py-16 md:py-24 bg-transparent w-full overflow-hidden flex flex-col items-center justify-center min-h-[100dvh]">
-      {/* ── Ambient Glows ── */}
-      <motion.div
-        animate={{
-          x: ["-8%", "8%", "-8%"],
-          y: ["-4%", "4%", "-4%"],
-        }}
-        transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] md:w-[700px] h-[300px] md:h-[400px] bg-red-400 rounded-full opacity-[0.12] blur-[150px] pointer-events-none z-0"
-        aria-hidden="true"
-      />
-      <motion.div
-        animate={{
-          x: ["6%", "-6%", "6%"],
-          y: ["3%", "-3%", "3%"],
-        }}
-        transition={{ duration: 26, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute bottom-1/4 right-1/3 w-[300px] h-[200px] bg-orange-300 rounded-full opacity-[0.06] blur-[120px] pointer-events-none z-0"
-        aria-hidden="true"
-      />
+    <section className="relative w-full py-6 lg:py-12 px-4 md:px-8 max-w-[1400px] mx-auto font-sans">
+      <div className="relative w-full">
+        {/* Blocks grid behind section & casts a feathered shadow to smoothly fade the grid OUTSIDE the section */}
+        <div className="absolute inset-0 bg-[#0A0C10] shadow-[0_0_100px_80px_#0A0C10] rounded-[40px] z-0" />
 
-      {/* ── Section Badge ── */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        viewport={{ once: true }}
-        className="relative z-10 inline-flex items-center px-4 py-1.5 rounded-full border border-zinc-200 bg-white/60 text-red-950 text-sm font-medium mb-6 md:mb-8 backdrop-blur-sm shadow-sm"
-      >
-        <span className="relative flex h-1.5 w-1.5 mr-2">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-60" />
-          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-red-500" />
-        </span>
-        Loved by creators worldwide
-      </motion.div>
-
-      {/* ── Heading ── */}
-      <motion.h2
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.1 }}
-        viewport={{ once: true }}
-        className="relative z-10 text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-medium text-red-950 tracking-tight text-center mb-10 md:mb-14 px-4"
-      >
-        Used by 60K+{" "}
-        <br className="hidden sm:block" />
-        <span className="font-editorial text-red-600">
-          creators & brands
-        </span>
-      </motion.h2>
-
-      {/* ── Fan Card Carousel ── */}
-      <motion.div
-        className="relative z-10 w-full max-w-4xl mx-auto px-4 select-none"
-        style={{ perspective: "1200px" }}
-      >
-        {/* Fan card area — hover here pauses auto-rotation */}
-        <div
-          className="relative w-full h-[260px] sm:h-[300px] md:h-[340px] lg:h-[370px]"
-        >
-          {visibleIndices.map((testimonialIndex, posIndex) => (
-            <FanCard
-              key={testimonials[testimonialIndex].id}
-              testimonial={testimonials[testimonialIndex]}
-              position={fanPositions[posIndex]}
-              isCenter={posIndex === 2}
-              onClick={posIndex !== 2 ? () => handleCardClick(posIndex) : undefined}
-              onMouseEnter={() => setIsPaused(true)}
-              onMouseLeave={() => setIsPaused(false)}
-            />
-          ))}
-        </div>
-
-        {/* ── Quote Circle ── */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.5 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          transition={{
-            delay: 0.3,
-            type: "spring",
-            stiffness: 200,
-            damping: 15,
-          }}
-          viewport={{ once: true }}
-          className="relative z-20 mx-auto -mt-5 w-12 h-12 md:w-14 md:h-14 rounded-full bg-white shadow-lg shadow-red-950/10 flex items-center justify-center"
-        >
-          <svg
-            className="w-5 h-5 md:w-6 md:h-6 text-red-950/70"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-          >
-            <path d="M4.583 17.321C3.553 16.227 3 15 3 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311 1.804.167 3.226 1.648 3.226 3.489a3.5 3.5 0 01-3.5 3.5c-1.073 0-2.099-.49-2.748-1.179zm10 0C13.553 16.227 13 15 13 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311 1.804.167 3.226 1.648 3.226 3.489a3.5 3.5 0 01-3.5 3.5c-1.073 0-2.099-.49-2.748-1.179z" />
-          </svg>
-        </motion.div>
-
-        {/* ── Testimonial Text ── */}
-        <div className="relative z-10 text-center mt-6 md:mt-8 max-w-2xl mx-auto px-4">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeIndex}
-              initial={{ opacity: 0, y: 24, filter: "blur(8px)" }}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              exit={{ opacity: 0, y: -18, filter: "blur(8px)" }}
-              transition={{ duration: 0.55, ease: [0.25, 0.46, 0.45, 0.94] }}
-            >
-              {/* Star rating */}
-              <div className="mb-3 md:mb-4">
-                <AnimatedStars rating={activeTestimonial.rating} isVisible={true} />
-              </div>
-
-              {/* Heading */}
-              <h3 className="text-xl sm:text-2xl md:text-3xl lg:text-[2.5rem] lg:leading-[1.15] font-semibold text-red-950 tracking-tight mb-3 md:mb-4">
-                {activeTestimonial.heading}
-              </h3>
-
-              {/* Quote text */}
-              <p className="text-sm sm:text-base md:text-lg text-zinc-500 leading-relaxed font-normal italic max-w-xl mx-auto">
-                &ldquo;{activeTestimonial.text}&rdquo;
-              </p>
-
-              {/* Author pill */}
-              <motion.div
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3, duration: 0.4 }}
-                className="inline-flex items-center gap-3 mt-5 md:mt-7 px-4 py-2 rounded-full bg-white/70 backdrop-blur-sm border border-zinc-200/60 shadow-sm"
-              >
-                <img
-                  src={activeTestimonial.avatar}
-                  alt={activeTestimonial.name}
-                  className="w-7 h-7 rounded-full object-cover"
-                />
-                <div className="flex items-center gap-2 text-sm">
-                  <span className="font-semibold text-red-950">
-                    {activeTestimonial.handle}
-                  </span>
-                  <span className="text-zinc-300">·</span>
-                  <span className="text-xs text-zinc-400 font-medium">
-                    {activeTestimonial.followers} followers
-                  </span>
-                </div>
-              </motion.div>
-            </motion.div>
-          </AnimatePresence>
-        </div>
-
-        {/* ── Progress Dots Only ── */}
-        <div className="relative z-10 flex items-center justify-center mt-8 md:mt-10">
-          <div className="flex items-center gap-1.5">
-            {testimonials.map((_, index) => {
-              const isActive = activeIndex === index;
-              return (
-                <motion.button
-                  key={index}
-                  onClick={() => goTo(index)}
-                  className="relative h-2 rounded-full overflow-hidden"
-                  animate={{
-                    width: isActive ? 32 : 8,
-                  }}
-                  transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
-                  aria-label={`Go to testimonial ${index + 1}`}
-                >
-                  {/* Track bg */}
-                  <div
-                    className={`absolute inset-0 rounded-full transition-colors duration-400 ${
-                      isActive
-                        ? "bg-red-200"
-                        : index < activeIndex
-                        ? "bg-red-950/18 hover:bg-red-950/30"
-                        : "bg-red-950/8 hover:bg-red-950/18"
-                    }`}
-                  />
-                  {/* Active fill with progress */}
-                  {isActive && (
-                    <motion.div
-                      className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-red-500 to-red-600"
-                      style={{ width: `${progress * 100}%` }}
-                    />
-                  )}
-                </motion.button>
-              );
-            })}
+        <div className="relative z-10 w-full bg-gradient-to-br from-white/[0.08] to-white/[0.02] backdrop-blur-[40px] text-white py-12 lg:py-16 rounded-[40px] overflow-hidden border border-white/20 flex flex-col">
+          <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 flex flex-col items-center">
+          
+          {/* Header */}
+          <div className="text-center max-w-2xl mx-auto mb-10">
+            <h2 className="text-3xl md:text-5xl font-semibold tracking-tight text-white mb-6 leading-[1.1]">
+              What our customers are saying about Loomingo
+            </h2>
+            <p className="text-zinc-400 text-sm md:text-base leading-relaxed max-w-lg mx-auto">
+              Join the increasing number of creators and brands who rely on Loomingo for seamless and effective DM automation.
+            </p>
           </div>
+
+          {/* Grid Slider Container */}
+          <div className="w-full relative min-h-[500px] md:min-h-[400px] lg:min-h-[320px] overflow-hidden flex flex-col">
+            <AnimatePresence initial={false} custom={direction} mode="wait">
+              <motion.div
+                key={page}
+                custom={direction}
+                variants={variants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{
+                  x: { type: "spring", stiffness: 300, damping: 30 },
+                  opacity: { duration: 0.2 },
+                }}
+                // This creates the seamless internal borders (masonry grid look)
+                className="grid grid-cols-1 lg:grid-cols-5 w-full border-t border-l border-white/10 rounded-tl-2xl rounded-bl-none md:rounded-bl-2xl bg-transparent"
+              >
+                {currentReviews.map((review) => (
+                  <div 
+                    key={review.id} 
+                    className="flex flex-col p-6 border-b border-r border-white/10 min-h-[220px] lg:min-h-[280px] group hover:bg-white/[0.02] transition-colors"
+                  >
+                    <p className="text-zinc-300 text-sm md:text-base leading-relaxed mb-8 flex-1">
+                      &quot;{review.text}&quot;
+                    </p>
+                    
+                    <div className="flex items-center gap-4 mt-auto">
+                      <img 
+                        src={review.avatar} 
+                        className="w-10 h-10 rounded-full object-cover bg-white/5"
+                        alt={review.name}
+                        onError={(e) => { e.currentTarget.src = FALLBACK_IMAGE; }}
+                      />
+                      <div className="flex flex-col">
+                        <span className="text-white text-sm font-medium">{review.name}</span>
+                        <span className="text-zinc-500 text-xs">{review.role}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* Pagination Controls */}
+          <div className="flex items-center gap-4 mt-12">
+            <button 
+              onClick={() => paginate(-1)}
+              className="flex items-center justify-center w-12 h-12 rounded-full border border-white/10 hover:bg-white/10 transition-colors"
+              aria-label="Previous Reviews"
+            >
+              <ArrowLeft className="w-5 h-5 text-zinc-400" />
+            </button>
+            
+            <div className="flex gap-2">
+              {isMounted && Array.from({ length: totalPages }).map((_, i) => (
+                <div 
+                  key={i} 
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    i === safePage ? 'w-6 bg-red-500' : 'w-2 bg-white/20'
+                  }`}
+                />
+              ))}
+            </div>
+
+            <button 
+              onClick={() => paginate(1)}
+              className="flex items-center justify-center w-12 h-12 rounded-full border border-white/10 hover:bg-white/10 transition-colors"
+              aria-label="Next Reviews"
+            >
+              <ArrowRight className="w-5 h-5 text-zinc-400" />
+            </button>
+          </div>
+
         </div>
-      </motion.div>
+      </div>
+      </div>
     </section>
   );
 }

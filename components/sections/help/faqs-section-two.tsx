@@ -1,117 +1,156 @@
-'use client'
+"use client";
 
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
-import Link from 'next/link'
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { 
+  Clock, ShieldCheck, Settings, 
+  Bot, Zap, Users, 
+  ShoppingBag, CreditCard, Box, ChevronDown
+} from 'lucide-react';
 
 export default function FAQs() {
-    const faqItems = [
+    const [activeCategory, setActiveCategory] = useState<number>(0);
+
+    const faqCategories = [
         {
-            id: 'item-1',
-            question: 'How does the Instagram DM automation work?',
-            answer: 'Loomin connects to your Instagram account via official APIs. Once set up, you can define specific triggers—like a user commenting a keyword on your post—and our system will automatically send a pre-configured DM to that user.',
+            title: "General",
+            items: [
+                {
+                    icon: Clock,
+                    question: "How long does setup take?",
+                    answer: "You can connect your Instagram account and launch your first automation in under 5 minutes. No coding required."
+                },
+                {
+                    icon: ShieldCheck,
+                    question: "Is this safe for my account?",
+                    answer: "Absolutely. Loomingo operates entirely within Instagram’s official API guidelines. Your account security is our top priority."
+                },
+                {
+                    icon: Settings,
+                    question: "Can I customize the responses?",
+                    answer: "Yes! You have full control. Create unlimited response templates and use dynamic placeholders to personalize every message."
+                }
+            ]
         },
         {
-            id: 'item-2',
-            question: 'Is this safe for my Instagram account?',
-            answer: 'Absolutely. Loomin operates entirely within Instagram’s official guidelines. We prioritize your account safety by adhering to rate limits and ensuring all automated interactions mimic natural behavior.',
+            title: "Automation Engine",
+            items: [
+                {
+                    icon: Bot,
+                    question: "How do the triggers work?",
+                    answer: "You define specific keywords. When a user comments that keyword on your post or Reel, Loomingo instantly sends them a pre-configured DM."
+                },
+                {
+                    icon: Zap,
+                    question: "Does it run 24/7?",
+                    answer: "Yes. Once configured, our cloud infrastructure handles your automations around the clock, even while you sleep."
+                },
+                {
+                    icon: Users,
+                    question: "Can I manage multiple accounts?",
+                    answer: "Yes, our platform is built for creators and agencies. You can easily manage multiple Instagram accounts from a single dashboard."
+                }
+            ]
         },
         {
-            id: 'item-3',
-            question: 'Can I customize the automated DM responses?',
-            answer: 'Yes! You have full control over your messaging. You can create multiple response templates, use dynamic placeholders for personalization, and A/B test your messages to see what converts best.',
-        },
-        {
-            id: 'item-4',
-            question: 'Will it work if I have multiple Instagram accounts?',
-            answer: "Loomin is built for creators and agencies. You can easily manage and switch between multiple connected Instagram accounts from a single dashboard to automate growth across your entire portfolio.",
-        },
-        {
-            id: 'item-5',
-            question: 'Do I need to keep the app open to run automations?',
-            answer: 'Not at all. Once you have configured your automation rules in the Loomin dashboard, our cloud-based infrastructure handles the rest 24/7, even when you are offline or sleeping.',
-        },
-    ]
+            title: "Store Front & Invoicing",
+            items: [
+                {
+                    icon: ShoppingBag,
+                    question: "How do users make a purchase?",
+                    answer: "Your followers can browse your digital storefront and complete purchases directly through the link sent in their DMs."
+                },
+                {
+                    icon: CreditCard,
+                    question: "What payment methods are supported?",
+                    answer: "We support all major payment gateways including Stripe and PayPal, allowing you to accept Credit Cards, Apple Pay, and Google Pay."
+                },
+                {
+                    icon: Box,
+                    question: "Are invoices generated automatically?",
+                    answer: "Yes. The moment a transaction is completed, a professional, branded invoice is generated and sent directly to your customer."
+                }
+            ]
+        }
+    ];
 
     return (
-        <section className="relative py-16 md:py-32 bg-transparent overflow-hidden w-full flex justify-center">
-            
-            {/* Background Glow Effect */}
-            <div 
-                className="absolute top-1/2 left-1/2 md:left-2/3 -translate-x-1/2 -translate-y-1/2 w-[400px] md:w-[800px] h-[400px] bg-red-400 rounded-full opacity-30 md:opacity-20 blur-[120px] md:blur-[160px] pointer-events-none z-0"
-                aria-hidden="true"
-            />
+        <section className="relative w-full py-12 lg:py-24 px-4 md:px-8 max-w-[1400px] mx-auto font-sans">
+            <div className="relative w-full">
+                {/* Blocks grid behind section & casts a feathered shadow to smoothly fade the grid OUTSIDE the section */}
+                <div className="absolute inset-0 bg-[#0A0C10] shadow-[0_0_100px_80px_#0A0C10] rounded-[40px] z-0" />
 
-            <div className="w-full max-w-6xl px-4 relative z-10">
-                <div className="grid gap-10 md:grid-cols-12 md:gap-12 items-start">
-                    
-                    {/* LEFT SIDE: Header & Support Link */}
-                    <div className="md:col-span-5 flex flex-col items-center md:items-start text-center md:text-left md:sticky md:top-32">
+                <div className="relative z-10 w-full bg-gradient-to-br from-white/[0.08] to-white/[0.02] backdrop-blur-[40px] text-white py-16 lg:py-24 px-6 md:px-12 rounded-[40px] overflow-hidden border border-white/20">
+                
+                {/* Header */}
+                <div className="max-w-4xl mb-16">
+                    <h2 className="text-4xl md:text-5xl font-semibold tracking-tight text-white mb-4">
+                        FAQs
+                    </h2>
+                    <p className="text-zinc-400 text-base md:text-lg">
+                        Discover quick and comprehensive answers to common questions about our platform, automations, and features.
+                    </p>
+                </div>
+
+                {/* Categories */}
+                <div className="flex flex-col gap-4">
+                    {faqCategories.map((category, idx) => {
+                        const isActive = activeCategory === idx;
                         
-                        <div className="inline-flex items-center px-3 py-1 md:px-4 md:py-1.5 rounded-full border border-zinc-200 bg-white/50 text-red-950 text-xs md:text-sm font-medium mb-4 md:mb-6 backdrop-blur-sm shadow-sm">
-                            Support
-                        </div>
-                        
-                        <h2 className="text-4xl sm:text-5xl md:text-6xl font-medium text-red-950 leading-[1.1] tracking-tight">
-                            Common <br className="hidden md:block" />
-                            <span className="font-editorial text-red-600">questions</span>
-                        </h2>
-                        
-                        <p className="text-sm md:text-lg text-red-950/70 mt-4 md:mt-6 max-w-xs md:max-w-sm">
-                            Everything you need to know about Loomin, how it works, and how it keeps your account safe.
-                        </p>
+                        return (
+                        <div key={idx} className="w-full bg-white/[0.02] border border-white/5 rounded-2xl overflow-hidden transition-all duration-300">
+                            {/* Category Title & Dropdown Toggle */}
+                            <button 
+                                onClick={() => setActiveCategory(isActive ? -1 : idx)}
+                                className="w-full flex items-center justify-between p-6 md:px-8 md:py-6 cursor-pointer hover:bg-white/[0.02] transition-colors text-left"
+                            >
+                                <h3 className={`text-xl font-semibold transition-colors ${isActive ? 'text-white' : 'text-zinc-400'}`}>
+                                    {category.title}
+                                </h3>
+                                <div className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all duration-300 ${isActive ? 'bg-red-500/10 border-red-500/20 text-red-500 rotate-180' : 'border-white/10 text-zinc-500'}`}>
+                                    <ChevronDown className="w-4 h-4" />
+                                </div>
+                            </button>
 
-                        <div className="hidden md:flex items-center gap-2 mt-8 px-5 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl w-full max-w-sm">
-                            <div className="text-2xl">👋</div>
-                            <div>
-                                <p className="text-sm font-medium text-red-950">Still have questions?</p>
-                                <p className="text-xs text-zinc-500 mt-0.5">
-                                    Reach out to our{' '}
-                                    <Link href="/help" className="text-red-600 font-medium hover:underline">
-                                        support team
-                                    </Link>
-                                </p>
-                            </div>
+                            <AnimatePresence initial={false}>
+                                {isActive && (
+                                    <motion.div
+                                        initial={{ height: 0, opacity: 0 }}
+                                        animate={{ height: 'auto', opacity: 1 }}
+                                        exit={{ height: 0, opacity: 0 }}
+                                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                                    >
+                                        <div className="px-6 pb-8 md:px-8 pt-2">
+                                            {/* 3-Column Grid */}
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-10 border-t border-white/5 pt-8">
+                                                {category.items.map((item, itemIdx) => {
+                                                    const Icon = item.icon;
+                                                    return (
+                                                        <div key={itemIdx} className="flex flex-col">
+                                                            <div className="size-10 rounded-xl border border-white/10 bg-white/5 flex items-center justify-center mb-5">
+                                                                <Icon className="w-5 h-5 text-zinc-300" />
+                                                            </div>
+                                                            <h4 className="text-base font-semibold text-white mb-3">
+                                                                {item.question}
+                                                            </h4>
+                                                            <p className="text-sm text-zinc-400 leading-relaxed">
+                                                                {item.answer}
+                                                            </p>
+                                                        </div>
+                                                    )
+                                                })}
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </div>
-                    </div>
-
-                    {/* RIGHT SIDE: Separated Accordion Cards */}
-                    <div className="md:col-span-7">
-                        {/* Adding gap-4 separates the items into individual cards */}
-                        <Accordion type="single" collapsible className="w-full flex flex-col gap-3 md:gap-4">
-                            {faqItems.map((item) => (
-                                <AccordionItem 
-                                    key={item.id} 
-                                    value={item.id} 
-                                    // Removes the default bottom border and creates a solid white card
-                                    className="bg-white/80 backdrop-blur-sm border border-zinc-200 rounded-2xl px-5 md:px-6 shadow-sm data-[state=open]:bg-white data-[state=open]:shadow-md transition-all duration-300"
-                                >
-                                    <AccordionTrigger className="cursor-pointer text-left text-red-950 text-sm md:text-base font-semibold hover:no-underline py-5 md:py-6">
-                                        {item.question}
-                                    </AccordionTrigger>
-                                    <AccordionContent className="text-zinc-600 text-sm md:text-base leading-relaxed pb-6 md:pb-8 pr-4 md:pr-8">
-                                        {item.answer}
-                                    </AccordionContent>
-                                </AccordionItem>
-                            ))}
-                        </Accordion>
-                    </div>
-
-                    {/* Mobile Support Link */}
-                    <div className="md:hidden flex items-center justify-center gap-2 mt-2 px-5 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl w-full">
-                        <div className="text-2xl">👋</div>
-                        <div className="text-left">
-                            <p className="text-sm font-medium text-red-950">Still have questions?</p>
-                            <p className="text-xs text-zinc-500 mt-0.5">
-                                Reach out to our{' '}
-                                <Link href="/help" className="text-red-600 font-medium hover:underline">
-                                    support team
-                                </Link>
-                            </p>
-                        </div>
-                    </div>
+                        )
+                    })}
+                </div>
 
                 </div>
             </div>
         </section>
-    )
+    );
 }

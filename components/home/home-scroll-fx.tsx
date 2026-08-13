@@ -129,17 +129,17 @@ export function StatementDivider() {
         // Word-by-word ink reveal, scrubbed to scroll
         gsap.fromTo(
           ".st-word",
-          { opacity: 0.14, y: 8 },
+          { opacity: 0.14, y: 15 },
           {
             opacity: 1,
             y: 0,
-            stagger: 0.12,
-            ease: "none",
+            stagger: 0.15,
+            duration: 0.6,
+            ease: "power2.out",
             scrollTrigger: {
               trigger: ".st-sentence",
-              start: "top 85%",
-              end: "top 35%",
-              scrub: 0.8,
+              start: "top 50%",
+              toggleActions: "play none none reverse",
             },
           }
         );
@@ -190,13 +190,18 @@ export function StatementDivider() {
   );
 
   return (
-    <section ref={sectionRef} className="relative w-full py-24 sm:py-36 px-4 overflow-hidden">
-      <div className="max-w-4xl mx-auto">
+    <section ref={sectionRef} className="relative w-full py-12 lg:py-24 px-4 md:px-8 max-w-[1400px] mx-auto font-sans">
+      <div className="relative w-full">
+        {/* Blocks grid behind section & casts a feathered shadow to smoothly fade the grid OUTSIDE the section */}
+        <div className="absolute inset-0 bg-[#0A0C10] shadow-[0_0_100px_80px_#0A0C10] rounded-[40px] z-0" />
+
+        <div className="relative z-10 w-full bg-gradient-to-br from-white/[0.08] to-white/[0.02] backdrop-blur-[40px] text-white py-16 lg:py-24 rounded-[40px] overflow-hidden border border-white/20">
+          <div className="relative z-10 max-w-4xl mx-auto px-6">
         <p className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.25em] text-red-600 mb-6 sm:mb-8 text-center">
           Why creators switch
         </p>
 
-        <h2 className="st-sentence text-3xl sm:text-5xl md:text-6xl font-medium leading-[1.15] tracking-tight text-red-950 text-center flex flex-wrap justify-center gap-x-[0.3em] gap-y-1">
+        <h2 className="st-sentence text-3xl sm:text-5xl md:text-6xl font-medium leading-[1.15] tracking-tight text-white text-center flex flex-wrap justify-center gap-x-[0.3em] gap-y-1">
           {STATEMENT.map((w, i) => (
             <span
               key={i}
@@ -210,13 +215,15 @@ export function StatementDivider() {
         <div className="st-stats grid grid-cols-3 gap-3 sm:gap-8 mt-14 sm:mt-20 max-w-2xl mx-auto">
           {STATS.map((s, i) => (
             <div key={i} className="st-stat text-center">
-              <p className="text-3xl sm:text-5xl font-bold text-red-950 tabular-nums tracking-tight">
+              <p className="text-3xl sm:text-5xl font-bold text-white tabular-nums tracking-tight">
                 <span className="st-num" data-value={s.value}>0</span>
                 <span className="text-red-600">{s.suffix}</span>
               </p>
               <p className="text-[10px] sm:text-sm text-zinc-500 font-medium mt-1.5">{s.label}</p>
             </div>
           ))}
+        </div>
+          </div>
         </div>
       </div>
     </section>

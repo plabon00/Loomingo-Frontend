@@ -8,7 +8,7 @@ import AgencyHeroSection from '@/components/shadcn-space/blocks/hero-01';
 import ScrollIndicator from '@/components/ui/ScrollIndicator';
 
 // GSAP ScrollTrigger effects (client components)
-import { ScrollProgressBar, MarqueeBand, StatementDivider } from '@/components/home/home-scroll-fx';
+import { ScrollProgressBar, StatementDivider } from '@/components/home/home-scroll-fx';
 import { SectionReveal } from '@/components/home/section-reveal';
 
 // DYNAMIC IMPORTS (Below the fold)
@@ -20,12 +20,28 @@ const PotentialSection = dynamic(() => import('@/components/sections/marketing/P
   loading: () => <div className="min-h-screen w-full bg-transparent" />
 });
 
+const AutoDMFeatureSection = dynamic(() => import('@/components/sections/marketing/AutoDMFeatureSection'), {
+  loading: () => <div className="min-h-screen w-full bg-transparent" />
+});
+
+const StoreFrontFeatureSection = dynamic(() => import('@/components/sections/marketing/StoreFrontFeatureSection'), {
+  loading: () => <div className="min-h-screen w-full bg-transparent" />
+});
+
+const InvoiceGeneratorFeatureSection = dynamic(() => import('@/components/sections/marketing/InvoiceGeneratorFeatureSection'), {
+  loading: () => <div className="min-h-screen w-full bg-transparent" />
+});
+
 const ProcessSection = dynamic(() => import('@/components/sections/process/ProcessSection'), {
   loading: () => <div className="min-h-screen w-full bg-transparent" />
 });
 
 const TestimonialSection = dynamic(() => import('@/components/sections/testimonial/TestimonialSection'), {
   loading: () => <div className="min-h-screen w-full bg-transparent" />
+});
+
+const CallToActionSection = dynamic(() => import('@/components/sections/marketing/CallToActionSection'), {
+  loading: () => <div className="min-h-[50vh] w-full bg-transparent" />
 });
 
 const FAQs = dynamic(() => import('@/components/sections/help/faqs-section-two'), {
@@ -36,21 +52,23 @@ const FooterSection = dynamic(() => import('@/components/layout/footer-one'));
 
 export default function Page() {
   return (
-    <main className="relative flex flex-col min-h-screen w-full bg-[#faf7f2]">
-      {/* Warm graph-paper grid — crimson-tinted lines on ivory, faded corners */}
-      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+    <main className="relative flex flex-col min-h-screen w-full bg-[#0A0C10] overflow-x-hidden">
+
+      {/* Dark theme graph-paper grid globally visible */}
+      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
         <div
           className="absolute inset-0"
           style={{
             backgroundImage: `
-              linear-gradient(to right, rgba(153, 27, 27, 0.10) 1px, transparent 1px),
-              linear-gradient(to bottom, rgba(153, 27, 27, 0.10) 1px, transparent 1px),
-              linear-gradient(to right, rgba(153, 27, 27, 0.05) 1px, transparent 1px),
-              linear-gradient(to bottom, rgba(153, 27, 27, 0.05) 1px, transparent 1px)
+              linear-gradient(to right, rgba(255, 255, 255, 0.12) 1px, transparent 1px),
+              linear-gradient(to bottom, rgba(255, 255, 255, 0.12) 1px, transparent 1px),
+              linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+              linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px)
             `,
             backgroundSize: '100px 100px, 100px 100px, 20px 20px, 20px 20px',
-            maskImage: 'radial-gradient(ellipse 75% 75% at 50% 50%, black 10%, transparent 90%)',
-            WebkitMaskImage: 'radial-gradient(ellipse 75% 75% at 50% 50%, black 10%, transparent 90%)'
+            /* Mask just to slightly soften the extreme edges, but mostly fully visible everywhere */
+            maskImage: 'radial-gradient(circle at center, black 60%, transparent 100%)',
+            WebkitMaskImage: 'radial-gradient(circle at center, black 60%, transparent 100%)'
           }}
         ></div>
       </div>
@@ -66,31 +84,54 @@ export default function Page() {
         <AgencyHeroSection />
       </div>
 
-      {/* Tilted counter-scrolling marquee — bridges hero into the page */}
-      <MarqueeBand />
 
-      {/* Sticky-pinned section: manages its own scroll, don't transform it */}
+
+      {/* 1. High-Level Benefits - Why you need this */}
       <SectionReveal still>
         <SuperchargeSection />
       </SectionReveal>
 
-      {/* Editorial statement with word-by-word ink reveal + count-up stats */}
-      <StatementDivider />
-
-      <SectionReveal still>
-        <PotentialSection />
-      </SectionReveal>
-
-      <SectionReveal still>
+      {/* 2. How It Works - Show them it's easy */}
+      <SectionReveal>
         <ProcessSection />
       </SectionReveal>
 
+      {/* 3. Editorial statement & Stats - Build authority before features */}
+      <StatementDivider />
+
+      {/* 4. Features Overview - 4 Pillars */}
+      <SectionReveal>
+        <PotentialSection />
+      </SectionReveal>
+
+      {/* 5. Deep Dive 1: Auto DM */}
+      <SectionReveal>
+        <AutoDMFeatureSection />
+      </SectionReveal>
+
+      {/* 6. Deep Dive 2: Storefront */}
+      <SectionReveal>
+        <StoreFrontFeatureSection />
+      </SectionReveal>
+
+      {/* 7. Deep Dive 3: Invoicing */}
+      <SectionReveal>
+        <InvoiceGeneratorFeatureSection />
+      </SectionReveal>
+
+      {/* 8. Social Proof / Testimonials */}
       <SectionReveal>
         <TestimonialSection />
       </SectionReveal>
 
+      {/* 9. Objection Handling (FAQs) */}
       <SectionReveal>
         <FAQs />
+      </SectionReveal>
+
+      {/* 10. Final Push (CTA) */}
+      <SectionReveal>
+        <CallToActionSection />
       </SectionReveal>
 
       <footer>

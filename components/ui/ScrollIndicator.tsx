@@ -26,7 +26,7 @@ export default function ScrollIndicator() {
           y: { repeat: Infinity, duration: 1.5, ease: "easeInOut" },
           opacity: { duration: 0.3 } 
         }}
-        className="fixed bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center z-50 pointer-events-none text-red-950/40"
+        className="fixed bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center z-50 pointer-events-none text-zinc-400/80"
       >
         <span className="text-[10px] font-medium uppercase tracking-widest mb-1">Scroll</span>
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

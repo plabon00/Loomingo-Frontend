@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import InstagramPortfolio from "@/components/features/instagram/instagram-profile";
 import InstagramIcon from "@/components/ui/icon/instagram-icon";
 import UserGreeting from "@/components/layout/user-greeting";
-import { ChevronRight, Lock } from "lucide-react";
+import { ChevronRight, Lock, AlertCircle } from "lucide-react";
 
 import QuickActionCTA from "@/components/sections/dashboard/QuickActionCTA";
 import MiniAnalytics from "@/components/sections/dashboard/MiniAnalytics";
@@ -68,6 +68,11 @@ export default function DashboardContent() {
         }
       }
     }
+  );
+
+  const { data: profileData } = useSWR(
+    user ? `/api/v1/me/instagram/portfolio` : null,
+    fetchWithToken
   );
 
   // Derived State
@@ -139,8 +144,26 @@ export default function DashboardContent() {
       <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} message={authMessage} showForm={showForm} />
       <TopAlert message={topAlert} onClose={() => setTopAlert("")} />
 
+      {profileData?.needsReauth && (
+        <div className="w-full bg-red-600 text-white px-4 py-3 mt-4 md:mt-8 rounded-[20px] flex flex-row items-center justify-center gap-3 shadow-md animate-in fade-in">
+          <AlertCircle className="size-5 shrink-0 hidden sm:block" />
+          <p className="text-xs sm:text-sm font-medium leading-tight text-center">
+            Your Instagram account disconnected from our service due to a password or permission change.
+          </p>
+          <button 
+            onClick={() => {
+              const backendUrl = process.env.NEXT_PUBLIC_API_URL || "https://loomingo-backend-1.onrender.com";
+              window.open(`${backendUrl}/api/instagram/connect_account?uid=${auth.currentUser?.uid}`, "Instagram Auth", "width=500,height=600");
+            }}
+            className="bg-white text-red-700 text-xs font-bold px-3 py-1.5 sm:px-4 sm:py-2 rounded-full shadow-sm hover:bg-red-50 transition whitespace-nowrap shrink-0 ml-auto sm:ml-0"
+          >
+            Reconnect
+          </button>
+        </div>
+      )}
+
       {/* DASHBOARD HEADER */}
-      <div className="font-apple w-full flex flex-col items-start text-left mt-10 md:mt-16 mb-10 gap-3">
+      <div className="font-apple w-full flex flex-col items-start text-left mt-8 md:mt-12 mb-10 gap-3">
         <span className="text-[12px] font-semibold uppercase tracking-[0.14em] text-[var(--apple-gray-2)]">
           {planName} plan
         </span>

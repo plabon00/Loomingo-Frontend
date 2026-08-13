@@ -28,8 +28,8 @@ export function SectionReveal({ children, still = false }: { children: ReactNode
           ease: "power2.out",
           scrollTrigger: {
             trigger: ref.current,
-            start: "top 85%",
-            toggleActions: "play none none reverse",
+            start: "top 95%",
+            toggleActions: "play none none none",
           },
         });
       });
