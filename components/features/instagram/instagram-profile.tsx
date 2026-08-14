@@ -24,6 +24,7 @@ export default function InstagramProfileCard() {
   const { user } = useAuthUser();
   const [mounted, setMounted] = useState(false);
   const [flipped, setFlipped] = useState(false);
+  const [imgError, setImgError] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -31,26 +32,37 @@ export default function InstagramProfileCard() {
 
   const activeIgId = typeof window !== "undefined" ? localStorage.getItem("activeInstagramId") : null;
 
+  const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
   const cachedProfile = useMemo(() => {
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem("dashboard_portfolio");
-      if (stored) {
-        try { return JSON.parse(stored); } catch (e) { }
+      const ts = localStorage.getItem("dashboard_portfolio_ts");
+      if (stored && ts) {
+        const age = Date.now() - Number(ts);
+        if (age < CACHE_TTL_MS) {
+          try { return JSON.parse(stored); } catch (e) { }
+        }
       }
     }
     return null;
   }, []);
 
+  const isCacheFresh = cachedProfile !== null;
+
   const { data: profileData, isLoading } = useSWR(
     user ? `/api/v1/me/instagram/portfolio` : null,
-    fetchWithToken,
+    isCacheFresh ? null : fetchWithToken,   // skip fetch if cache is fresh
     {
       fallbackData: cachedProfile,
       errorRetryCount: 3,
       dedupingInterval: 30000,
+      refreshInterval: CACHE_TTL_MS,        // auto-refresh after 5 min
+      revalidateOnFocus: false,
       onSuccess: (data) => {
         if (typeof window !== "undefined" && data) {
           localStorage.setItem("dashboard_portfolio", JSON.stringify(data));
+          localStorage.setItem("dashboard_portfolio_ts", String(Date.now()));
           if (data?.businessAccountId) {
             localStorage.setItem("activeInstagramId", data.businessAccountId);
           }
@@ -153,29 +165,21 @@ export default function InstagramProfileCard() {
               <div className="relative shrink-0">
                 <div className="w-20 h-20 lg:w-16 lg:h-16 rounded-full p-[3px] lg:p-[2px] bg-gradient-to-tr from-yellow-400 via-red-500 to-fuchsia-600">
                   <div className="w-full h-full rounded-full border-[3px] lg:border-[2px] border-white bg-zinc-50 overflow-hidden">
-                    {profilePic ? (
+                    {profilePic && !imgError ? (
                       <img
                         src={profilePic}
                         alt={`${username} profile photo`}
                         className="w-full h-full object-cover bg-white"
-                        referrerPolicy="no-referrer"
-                        onError={(e) => {
-                          // Hide the broken image and show the silhouette
-                          e.currentTarget.style.display = "none";
-                          const sibling = e.currentTarget.nextElementSibling;
-                          if (sibling) (sibling as HTMLElement).style.display = "flex";
-                        }}
+                        onError={() => setImgError(true)}
                       />
-                    ) : null}
-                    <div
-                      className="w-full h-full items-center justify-center bg-zinc-100"
-                      style={{ display: profilePic ? "none" : "flex" }}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8 text-zinc-300">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                        <circle cx="12" cy="7" r="4" />
-                      </svg>
-                    </div>
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-zinc-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8 text-zinc-300">
+                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                          <circle cx="12" cy="7" r="4" />
+                        </svg>
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="absolute bottom-0 right-0 lg:-bottom-1 lg:-right-1 bg-white rounded-full p-[2px] shadow-sm border border-zinc-200 flex items-center justify-center overflow-hidden">

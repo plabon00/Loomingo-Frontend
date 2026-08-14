@@ -120,6 +120,60 @@ export default function AutoDMManager() {
           setIsConnected(true);
           loadAutomations(token, activeInstagramId);
         } else {
+          // Check 15-min cache for negative connection state to prevent spamming backend
+          const cachedConnStatus = localStorage.getItem("instagram_connection_status");
+          const cachedConnTs = localStorage.getItem("instagram_connection_status_ts");
+          if (cachedConnStatus === "false" && cachedConnTs) {
+            const age = Date.now() - Number(cachedConnTs);
+            if (age < 15 * 60 * 1000) { // 15 mins
+              setIsConnected(false);
+              setIsLoadingAutomations(false);
+              return;
+            }
+          }
+
+          // Fallback: check backend if Instagram is actually connected
+          try {
+            const res = await fetch(`/api/v1/me/me`, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "ngrok-skip-browser-warning": "true",
+              },
+            });
+            if (res.ok) {
+              const data = await res.json();
+              if (data.instagramConnected || data.isInstagramConnected) {
+                localStorage.setItem("instagram_connection_status", "true");
+                localStorage.setItem("instagram_connection_status_ts", String(Date.now()));
+                
+                // Instagram is connected but localStorage is missing the ID — fetch portfolio to recover it
+                const portfolioRes = await fetch(`/api/v1/me/instagram/portfolio`, {
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                    "ngrok-skip-browser-warning": "true",
+                  },
+                });
+                if (portfolioRes.ok && portfolioRes.status !== 204) {
+                  const portfolioData = await portfolioRes.json();
+                  if (portfolioData?.businessAccountId) {
+                    localStorage.setItem("activeInstagramId", portfolioData.businessAccountId);
+                    setIsConnected(true);
+                    loadAutomations(token, portfolioData.businessAccountId);
+                    return;
+                  }
+                }
+                // Portfolio didn't return an ID but backend confirms connected
+                setIsConnected(true);
+                setIsLoadingAutomations(false);
+                return;
+              } else {
+                localStorage.setItem("instagram_connection_status", "false");
+                localStorage.setItem("instagram_connection_status_ts", String(Date.now()));
+              }
+            }
+          } catch (e) {
+            console.error("Failed to check Instagram connection status:", e);
+          }
           setIsConnected(false);
           setIsLoadingAutomations(false);
         }
