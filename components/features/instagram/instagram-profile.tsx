@@ -153,15 +153,29 @@ export default function InstagramProfileCard() {
               <div className="relative shrink-0">
                 <div className="w-20 h-20 lg:w-16 lg:h-16 rounded-full p-[3px] lg:p-[2px] bg-gradient-to-tr from-yellow-400 via-red-500 to-fuchsia-600">
                   <div className="w-full h-full rounded-full border-[3px] lg:border-[2px] border-white bg-zinc-50 overflow-hidden">
-                    <img
-                      src={profilePic}
-                      alt={`${username} profile photo`}
-                      className="w-full h-full object-cover bg-white"
-                      referrerPolicy="no-referrer"
-                      onError={(e) => {
-                        e.currentTarget.src = "https://i.pravatar.cc/150?img=32";
-                      }}
-                    />
+                    {profilePic ? (
+                      <img
+                        src={profilePic}
+                        alt={`${username} profile photo`}
+                        className="w-full h-full object-cover bg-white"
+                        referrerPolicy="no-referrer"
+                        onError={(e) => {
+                          // Hide the broken image and show the silhouette
+                          e.currentTarget.style.display = "none";
+                          const sibling = e.currentTarget.nextElementSibling;
+                          if (sibling) (sibling as HTMLElement).style.display = "flex";
+                        }}
+                      />
+                    ) : null}
+                    <div
+                      className="w-full h-full items-center justify-center bg-zinc-100"
+                      style={{ display: profilePic ? "none" : "flex" }}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8 text-zinc-300">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
+                      </svg>
+                    </div>
                   </div>
                 </div>
                 <div className="absolute bottom-0 right-0 lg:-bottom-1 lg:-right-1 bg-white rounded-full p-[2px] shadow-sm border border-zinc-200 flex items-center justify-center overflow-hidden">
